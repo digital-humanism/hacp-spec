@@ -1,0 +1,25 @@
+{
+  "test_id": "CORE-INV1-002",
+  "type": "negative",
+  "draft_mode": true,
+  "description": "System principal attempts human-required action (delete). Must CHECKPOINT.",
+  "inputs": {
+    "intent_envelope": {
+      "hacp_version": "0.9", "envelope_id": "11111111-1111-1111-1111-111111111111",
+      "principal": "system_agent", "principal_kind": "system",
+      "intent_statement": "Auto-cleanup",
+      "scope": { "verbs": ["delete"], "resource_classes": ["logs"], "audiences": ["internal"], "reversibility": ["irreversible"], "externality": ["internal"], "data_classes": ["internal"] },
+      "issued_at": 1700000000, "expires_at": 1700003600,
+      "signer_key_id": "key-001", "signature": "dummy"
+    },
+    "proposed_action": {
+      "hacp_version": "0.9", "action_id": "22222222-2222-2222-2222-222222222222",
+      "envelope_id": "11111111-1111-1111-1111-111111111111",
+      "verb": "delete", "resource_class": "logs", "resource_id": "log/99",
+      "audience": "internal", "reversibility": "irreversible", "externality": "internal", "data_class": "internal",
+      "proposed_at": 1700000000
+    }
+  },
+  "policy_context": { "human_required_verbs": ["delete"], "current_action_count": 0 },
+  "expected": { "outcome": "CHECKPOINT" }
+}
