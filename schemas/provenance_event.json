@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hacp.standard/schemas/provenance_event.json",
+  "title": "HACP Provenance Event",
+  "description": "Append-only, hash-chained, signed record of protocol-relevant events.",
+  "type": "object",
+  "required": [
+    "event_id",
+    "type",
+    "envelope_id",
+    "actor",
+    "payload_hash",
+    "timestamp",
+    "signer_key_id",
+    "signature"
+  ],
+  "properties": {
+    "event_id": { "$ref": "#/definitions/uuid", "description": "Unique event identifier." },
+    "prev_event_hash": { "$ref": "#/definitions/hex256", "description": "SHA-256 of the previous event's canonical form. Absent only for genesis." },
+    "type": { "type": "string", "enum": ["EVALUATED", "ISSUED", "DENIED", "CHECKPOINT_OPENED", "CHECKPOINT_RESOLVED", "REVOKED", "EXECUTED"], "description": "Event type." },
+    "envelope_id": { "$ref": "#/definitions/uuid", "description": "Envelope this event belongs to." },
+    "token_id": { "$ref": "#/definitions/uuid", "description": "Optional token reference." },
+    "actor": { "type": "string", "minLength": 1, "description": "Component or principal causing the event." },
+    "payload_hash": { "$ref": "#/definitions/hex256", "description": "SHA-256 of the canonicalized event payload." },
+    "timestamp": { "$ref": "#/definitions/unix_ts", "description": "Event time. Integer Unix seconds (UTC)." },
+    "signer_key_id": { "type": "string", "minLength": 1, "description": "Key identifier (kid) of the Ed25519 signing key." },
+    "signature": { "$ref": "#/definitions/b64url", "description": "Ed25519 signature over the canonicalized payload excluding this field." }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "unix_ts": { "type": "integer", "minimum": 0 },
+    "hex256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "b64url": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" }
+  }
+}
