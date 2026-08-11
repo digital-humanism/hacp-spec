@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hacp.standard/schemas/decision_token.json",
+  "title": "HACP Decision Token",
+  "description": "Cryptographically signed token authorizing a specific proposed action.",
+  "type": "object",
+  "required": [
+    "hacp_version",
+    "token_id",
+    "envelope_id",
+    "action_hash",
+    "policy_digest",
+    "principal",
+    "signer_key_id",
+    "issued_at",
+    "expires_at",
+    "decision",
+    "signature"
+  ],
+  "properties": {
+    "hacp_version": { "type": "string", "const": "0.9", "description": "HACP protocol version this token conforms to." },
+    "token_id": { "type": "string", "format": "uuid", "description": "Unique token identifier (jti). Used for revocation." },
+    "envelope_id": { "type": "string", "format": "uuid", "description": "Identifier of the parent IntentEnvelope." },
+    "action_hash": { "type": "string", "description": "SHA-256 (lowercase hex) of the canonicalized ProposedAction." },
+    "policy_digest": { "type": "string", "description": "SHA-256 (lowercase hex) of the policy definition in effect at decision time." },
+    "principal": { "type": "string", "description": "Identifier of the decision subject (human or system authority)." },
+    "signer_key_id": { "type": "string", "description": "Key identifier (kid) of the Ed25519 signing key." },
+    "issued_at": { "type": "integer", "description": "Issuance time. Integer Unix seconds (UTC)." },
+    "expires_at": { "type": "integer", "description": "Expiration time. Integer Unix seconds (UTC)." },
+    "decision": { "type": "string", "enum": ["ALLOW", "DENY", "CHECKPOINT"], "description": "Authorization outcome for the bound action." },
+    "constraints": { "type": "object", "description": "Optional execution constraints (e.g., tool binding, retry limits).", "additionalProperties": true },
+    "signature": { "type": "string", "description": "Ed25519 signature (base64url, no padding) over the canonicalized token payload excluding this field." }
+  },
+  "additionalProperties": false
+}
