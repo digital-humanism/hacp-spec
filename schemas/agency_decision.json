@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hacp.standard/schemas/agency_decision.json",
+  "title": "HACP Agency Decision",
+  "description": "Deterministic output of evaluate(): ALLOW, DENY, or CHECKPOINT, with traceability references.",
+  "type": "object",
+  "required": [
+    "decision_id",
+    "envelope_id",
+    "action_id",
+    "decision",
+    "reason_codes",
+    "policy_digest",
+    "evaluated_at",
+    "provenance_event_id"
+  ],
+  "properties": {
+    "decision_id": { "$ref": "#/definitions/uuid", "description": "Unique decision identifier." },
+    "envelope_id": { "$ref": "#/definitions/uuid", "description": "Reference to the evaluated IntentEnvelope." },
+    "action_id": { "$ref": "#/definitions/uuid", "description": "Reference to the evaluated ProposedAction." },
+    "decision": { "type": "string", "enum": ["ALLOW", "DENY", "CHECKPOINT"], "description": "Authorization outcome." },
+    "reason_codes": { "type": "array", "items": { "type": "string" }, "description": "Deterministic reason codes. MUST be non-empty for DENY and CHECKPOINT." },
+    "token": { "$ref": "decision_token.json#", "description": "Present iff decision == ALLOW." },
+    "checkpoint_id": { "$ref": "#/definitions/uuid", "description": "Present iff decision == CHECKPOINT." },
+    "policy_digest": { "$ref": "#/definitions/hex256", "description": "SHA-256 of the policy definition in effect at decision time." },
+    "evaluated_at": { "$ref": "#/definitions/unix_ts", "description": "Evaluation time. Integer Unix seconds (UTC)." },
+    "provenance_event_id": { "$ref": "#/definitions/uuid", "description": "Reference to the signed provenance event for this evaluation." }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": { "properties": { "decision": { "const": "ALLOW" } }, "required": ["decision"] },
+      "then": { "required": ["token"] }
+    },
+    {
+      "if": { "properties": { "decision": { "const": "CHECKPOINT" } }, "required": ["decision"] },
+      "then": { "required": ["checkpoint_id"] }
+    },
+    {
+      "if": { "properties": { "decision": { "enum": ["DENY", "CHECKPOINT"] } }, "required": ["decision"] },
+      "then": { "properties": { "reason_codes": { "minItems": 1 } } }
+    }
+  ],
+  "definitions": {
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "unix_ts": { "type": "integer", "minimum": 0 },
+    "hex256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}
