@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hacp.standard/schemas/revocation_record.json",
+  "title": "HACP Revocation Record",
+  "description": "Signed invalidation of an envelope, token, or signing key. Revocation is idempotent and inheritable per HACP-SPEC Section 5.3.",
+  "type": "object",
+  "required": [
+    "revocation_id",
+    "target_kind",
+    "target_id",
+    "revoked_at",
+    "signer_key_id",
+    "signature"
+  ],
+  "properties": {
+    "revocation_id": { "$ref": "#/definitions/uuid", "description": "Unique revocation identifier." },
+    "target_kind": { "type": "string", "enum": ["envelope", "token", "key"], "description": "Kind of revoked target." },
+    "target_id": { "type": "string", "minLength": 1, "description": "Identifier of the revoked envelope, token, or key." },
+    "reason": { "type": "string", "description": "Revocation reason. SHOULD be present." },
+    "revoked_at": { "$ref": "#/definitions/unix_ts", "description": "Revocation time. Integer Unix seconds (UTC)." },
+    "signer_key_id": { "type": "string", "minLength": 1, "description": "Key identifier (kid) of the Ed25519 signing key." },
+    "signature": { "$ref": "#/definitions/b64url", "description": "Ed25519 signature over the canonicalized payload excluding this field." }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "unix_ts": { "type": "integer", "minimum": 0 },
+    "b64url": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" }
+  }
+}
