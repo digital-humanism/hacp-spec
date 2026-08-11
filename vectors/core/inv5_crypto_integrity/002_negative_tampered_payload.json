@@ -1,0 +1,43 @@
+{
+  "test_id": "CORE-INV5-002",
+  "type": "negative",
+  "description": "Flip one byte in signed payload. Verification must fail and result in DENY.",
+  "inputs": {
+    "proposed_action": {
+      "hacp_version": "0.9",
+      "action_id": "11111111-1111-1111-1111-111111111111",
+      "envelope_id": "22222222-2222-2222-2222-222222222222",
+      "verb": "delete",
+      "resource_class": "system_config",
+      "resource_id": "cfg://global/001",
+      "audience": "internal",
+      "reversibility": "irreversible",
+      "externality": "internal",
+      "data_class": "restricted",
+      "proposed_at": 1786000000
+    },
+    "decision_token": {
+      "hacp_version": "0.9",
+      "token_id": "44444444-4444-4444-4444-444444444444",
+      "envelope_id": "22222222-2222-2222-2222-222222222222",
+      "action_hash": "b5d4045c3f466fa91fe2cc6abe79232a1a57cdf104f7a26e716e0a1e2789df78",
+      "policy_digest": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+      "principal": "system_agent_01",
+      "signer_key_id": "key-ed25519-prod-001",
+      "issued_at": 1786000000,
+      "expires_at": 1786003600,
+      "decision": "ALLOW",
+      "signature": "TAMPERED_SIGNATURE_1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    },
+    "revocation_state": {
+      "revoked_envelopes": [],
+      "revoked_tokens": [],
+      "revoked_keys": []
+    }
+  },
+  "expected": {
+    "outcome": "DENY",
+    "reason_codes": ["SIGNATURE_FAILURE"],
+    "verification_passed": false
+  }
+}
