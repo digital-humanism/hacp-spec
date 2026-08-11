@@ -1,0 +1,13 @@
+# License
+
+The HACP Specification (including normative documents, JSON schemas, conformance suites, and architectural texts within this repository) is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+
+To view a copy of this license, visit https://creativecommons.org/licenses/by/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+
+## Reference Implementation
+
+The reference implementation of this protocol (`humanist-core`) is NOT part of this specification repository. 
+
+The reference implementation is licensed separately under the GNU Affero General Public License v3.0 (AGPLv3), with Commercial Dual Licensing available for enterprise deployments and closed-source embedding.
+
+This deliberate separation ensures the protocol remains a vendor-neutral open standard, while the reference tooling, support, and enterprise integrations maintain a sustainable commercial model.
