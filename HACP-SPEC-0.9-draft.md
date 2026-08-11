@@ -11,7 +11,7 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 
 ## 1. Purpose
 
-HACP (Human Agent Control Protocol) defines how proposed actions of AI-assisted or autonomous systems are represented, evaluated, authorized, revoked, and recorded **before execution**.
+HACP (Human Agency Continuity Protocol) defines how proposed actions of AI-assisted or autonomous systems are represented, evaluated, authorized, revoked, and recorded **before execution**.
 
 HACP-Core guarantees the following properties for compliant deployments:
 

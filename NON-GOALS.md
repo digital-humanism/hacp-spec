@@ -4,7 +4,7 @@
 **Status:** Draft for public review  
 **License:** CC BY 4.0  
 
-This document enumerates what the Human Agent Control Protocol (HACP) deliberately does not attempt. Its purpose is to keep the standard focused, strictly testable, and implementable without reliance on any specific SDK or external infrastructure.
+This document enumerates what the Human Agency Continuity Protocol (HACP) deliberately does not attempt. Its purpose is to keep the standard focused, strictly testable, and implementable without reliance on any specific SDK or external infrastructure.
 
 ---
 

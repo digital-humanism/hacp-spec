@@ -9,7 +9,7 @@
 
 ## 1. What is HACP?
 
-**HACP** — **Human Agent Control Protocol** — is an open protocol for preserving human agency in AI-assisted and autonomous agent systems.
+**HACP** — **Human Agency Continuity Protocol** — is an open protocol for preserving human agency in AI-assisted and autonomous agent systems.
 
 HACP defines how a proposed action is represented, evaluated, authorized, revoked, and cryptographically recorded **before execution**.
 
