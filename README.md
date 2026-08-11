@@ -155,27 +155,52 @@ HACP does not replace watermarking. It addresses a different problem: preventing
 
 ## 6. Repository Structure
 
-```text
-hacp-spec/
-├── LICENSE                     # CC BY 4.0
-├── README.md                   # This file
-├── HACP-SPEC-0.9-draft.md      # Normative specification
-├── INVARIANTS.md               # Testable invariants
-├── PROFILES.md                 # Core / Runtime / Enforcement profiles
-├── NON-GOALS.md                # Explicit out-of-scope items
-├── canonicalization.md         # Deterministic serialization rules
-├── threat-model.md             # Deployment assumptions and threat model
-├── versioning.md               # Compatibility and versioning policy
-├── error-model.md              # Error codes and reason codes
-└── schemas/
-    ├── intent_envelope.json
-    ├── proposed_action.json
-    ├── decision_token.json
-    ├── agency_decision.json
-    └── provenance_event.json
 ```
-
----
+hacp-spec/
+├── LICENSE                          # CC BY 4.0
+├── README.md                        # This file
+├── requirements.txt                 # Python dependencies for conformance suite
+│
+├── HACP-SPEC-0.9-draft.md          # Normative specification
+├── INVARIANTS.md                    # Testable invariants (INV-1 through INV-7)
+├── PROFILES.md                      # Core / Runtime / Enforcement profiles
+├── NON-GOALS.md                     # Explicit out-of-scope items
+├── canonicalization.md              # Deterministic serialization rules (JCS)
+├── threat-model.md                  # Deployment assumptions and threat model
+├── versioning.md                    # Compatibility and versioning policy
+├── error-model.md                   # Error codes and reason codes
+│
+├── schemas/                         # JSON Schema definitions
+│   ├── intent_envelope.json
+│   ├── proposed_action.json
+│   ├── decision_token.json
+│   ├── agency_decision.json
+│   ├── provenance_event.json
+│   └── revocation_record.json
+│
+├── api/                             # Programmatic interface contracts
+│   └── decision-api.md              # evaluate, issue_token, revoke, explain
+│                                    # + Section 3: Conformance Testing Interface
+│
+├── wire/                            # Transport and encoding specifications
+│   ├── encoding.md                  # JSON serialization, HTTP bindings
+│   └── crypto-profile.md            # Ed25519, SHA-256, Base64url
+│
+├── vectors/                         # Language-independent conformance vectors
+│   ├── core_inv1_*.json             # INV-1: Human Final Decision
+│   ├── core_inv2_*.json             # INV-2: Boundary Re-Authorization
+│   ├── core_inv3_*.json             # INV-3: Token Binding
+│   ├── core_inv4_*.json             # INV-4: Traceability
+│   ├── core_inv5_*.json             # INV-5: Cryptographic Integrity
+│   └── core_inv7_*.json             # INV-7: Bounded Autonomy
+│
+├── harness/                         # Cross-language conformance testing harness
+│   ├── harness.py                   # Test runner (local / http / cli modes)
+│   ├── requirements.txt             # Harness dependencies
+│   └── README.md                    # Harness usage documentation
+│
+└── runner.py                        # Legacy runner (deprecated, use harness/)
+```
 
 ## 7. Normative Language
 
