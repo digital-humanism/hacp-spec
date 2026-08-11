@@ -1,21 +1,21 @@
 {
-  "test_id": "CORE-INV1-001",
+  "test_id": "CORE-INV5-005",
   "type": "golden",
-  "description": "Human principal with human-required consequence class - should ALLOW",
+  "description": "Same logical payload with reordered keys per JCS - identical action_hash",
   "inputs": {
     "intent_envelope": {
       "hacp_version": "0.9",
       "envelope_id": "22222222-2222-2222-2222-222222222222",
       "principal": "human_admin_01",
       "principal_kind": "human",
-      "intent_statement": "Human principal for human-required action",
+      "intent_statement": "Test JCS canonicalization - reordered keys",
       "scope": {
-        "verbs": ["delete"],
-        "resource_classes": ["production_database"],
+        "verbs": ["read"],
+        "resource_classes": ["customer_record"],
         "audiences": ["internal"],
-        "reversibility": ["irreversible"],
+        "reversibility": ["reversible"],
         "externality": ["internal"],
-        "data_classes": ["restricted"]
+        "data_classes": ["internal"]
       },
       "issued_at": 1786000000,
       "expires_at": 1786003600,
@@ -24,15 +24,15 @@
     },
     "proposed_action": {
       "hacp_version": "0.9",
+      "verb": "read",
+      "resource_id": "crm://acct/4411",
+      "resource_class": "customer_record",
       "action_id": "11111111-1111-1111-1111-111111111111",
       "envelope_id": "22222222-2222-2222-2222-222222222222",
-      "verb": "delete",
-      "resource_class": "production_database",
-      "resource_id": "db://prod/main",
       "audience": "internal",
-      "reversibility": "irreversible",
+      "reversibility": "reversible",
       "externality": "internal",
-      "data_class": "restricted",
+      "data_class": "internal",
       "proposed_at": 1786000100
     },
     "decision_token": {
@@ -49,9 +49,6 @@
       "signature": "PLACEHOLDER"
     }
   },
-  "policy_context": {
-    "current_action_count": 0,
-    "human_required_verbs": ["delete"]
-  },
+  "policy_context": {"current_action_count": 0},
   "expected": {"outcome": "ALLOW"}
 }

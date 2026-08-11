@@ -44,5 +44,5 @@
     }
   },
   "policy_context": { "current_action_count": 0 },
-  "expected": { "outcome": "ALLOW" }
+  "expected": { "outcome": "DENY", "reason_codes": ["SIGNATURE_FAILURE"] }
 }

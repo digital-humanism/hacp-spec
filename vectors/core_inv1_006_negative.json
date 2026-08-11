@@ -1,14 +1,14 @@
 {
-  "test_id": "CORE-INV1-001",
-  "type": "golden",
-  "description": "Human principal with human-required consequence class - should ALLOW",
+  "test_id": "CORE-INV1-006",
+  "type": "negative",
+  "description": "Checkpoint timeout - action waiting for human approval exceeds timeout",
   "inputs": {
     "intent_envelope": {
       "hacp_version": "0.9",
       "envelope_id": "22222222-2222-2222-2222-222222222222",
-      "principal": "human_admin_01",
-      "principal_kind": "human",
-      "intent_statement": "Human principal for human-required action",
+      "principal": "system_agent_01",
+      "principal_kind": "system",
+      "intent_statement": "Checkpoint timeout test",
       "scope": {
         "verbs": ["delete"],
         "resource_classes": ["production_database"],
@@ -17,6 +17,7 @@
         "externality": ["internal"],
         "data_classes": ["restricted"]
       },
+      "autonomy_budget": {"max_actions": 100},
       "issued_at": 1786000000,
       "expires_at": 1786003600,
       "signer_key_id": "key-ed25519-prod-001",
@@ -35,23 +36,20 @@
       "data_class": "restricted",
       "proposed_at": 1786000100
     },
-    "decision_token": {
-      "hacp_version": "0.9",
-      "token_id": "33333333-3333-3333-3333-333333333333",
-      "envelope_id": "22222222-2222-2222-2222-222222222222",
-      "action_hash": "PLACEHOLDER",
-      "policy_digest": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
-      "principal": "human_admin_01",
-      "signer_key_id": "key-ed25519-prod-001",
-      "issued_at": 1786000000,
-      "expires_at": 1786003600,
-      "decision": "ALLOW",
-      "signature": "PLACEHOLDER"
+    "checkpoint_state": {
+      "checkpoint_id": "66666666-6666-6666-6666-666666666666",
+      "created_at": 1786000100,
+      "timeout_seconds": 3600
     }
   },
   "policy_context": {
     "current_action_count": 0,
-    "human_required_verbs": ["delete"]
+    "current_time": 1786010000,
+    "human_required_verbs": ["delete"],
+    "checkpoint_timeout_seconds": 3600
   },
-  "expected": {"outcome": "ALLOW"}
+  "expected": {
+    "outcome": "DENY",
+    "reason_codes": ["CHECKPOINT_TIMEOUT"]
+  }
 }

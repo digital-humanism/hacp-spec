@@ -1,0 +1,10 @@
+# HACP Conformance Harness Dependencies
+
+# Required for HTTP target mode
+requests>=2.31.0
+
+# Required for cryptographic operations
+cryptography>=41.0.0
+
+# Required for schema validation
+jsonschema>=4.19.0
