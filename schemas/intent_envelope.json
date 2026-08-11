@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hacp.standard/schemas/intent_envelope.json",
+  "title": "HACP Intent Envelope",
+  "description": "Signed declaration of intent, scope, and autonomy budget within which actions may be proposed.",
+  "type": "object",
+  "required": [
+    "hacp_version",
+    "envelope_id",
+    "principal",
+    "principal_kind",
+    "intent_statement",
+    "scope",
+    "issued_at",
+    "expires_at",
+    "signer_key_id",
+    "signature"
+  ],
+  "properties": {
+    "hacp_version": { "type": "string", "const": "0.9", "description": "HACP protocol version this envelope conforms to." },
+    "envelope_id": { "$ref": "#/definitions/uuid", "description": "Unique envelope identifier." },
+    "principal": { "type": "string", "minLength": 1, "description": "Identifier of the principal on whose behalf actions are proposed." },
+    "principal_kind": { "type": "string", "enum": ["human", "system"], "description": "Kind of principal. Human-required consequence classes require 'human' or explicit delegation." },
+    "intent_statement": { "type": "string", "minLength": 1, "description": "Human-readable intent. Informational, not authoritative." },
+    "scope": { "$ref": "#/definitions/ScopeGrant", "description": "Granted attribute bounds for proposed actions." },
+    "issued_at": { "$ref": "#/definitions/unix_ts", "description": "Issuance time. Integer Unix seconds (UTC)." },
+    "expires_at": { "$ref": "#/definitions/unix_ts", "description": "Expiration time. Integer Unix seconds (UTC)." },
+    "autonomy_budget": { "$ref": "#/definitions/AutonomyBudget", "description": "Optional bounds for system principals." },
+    "parent_envelope_id": { "$ref": "#/definitions/uuid", "description": "Optional delegation chain reference." },
+    "signer_key_id": { "type": "string", "minLength": 1, "description": "Key identifier (kid) of the Ed25519 signing key." },
+    "signature": { "$ref": "#/definitions/b64url", "description": "Ed25519 signature over the canonicalized payload excluding this field." }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "unix_ts": { "type": "integer", "minimum": 0, "description": "Integer Unix seconds (UTC). Floats and ISO-8601 strings are prohibited in signed payloads." },
+    "b64url": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$", "description": "Base64url without padding." },
+    "ScopeGrant": {
+      "type": "object",
+      "description": "Granted bounds per security-relevant attribute. Absent optional attributes are treated as ungranted unless policy explicitly defaults them.",
+      "required": ["verbs", "resource_classes", "audiences", "reversibility", "externality", "data_classes"],
+      "properties": {
+        "verbs": { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Allowed verbs (e.g., read, create, update, delete, execute, export, notify, transfer)." },
+        "resource_classes": { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Allowed taxonomy-defined resource classes." },
+        "audiences": { "type": "array", "items": { "type": "string", "enum": ["internal", "external", "public"] }, "minItems": 1 },
+        "reversibility": { "type": "array", "items": { "type": "string", "enum": ["reversible", "irreversible"] }, "minItems": 1 },
+        "externality": { "type": "array", "items": { "type": "string", "enum": ["internal", "external"] }, "minItems": 1 },
+        "data_classes": { "type": "array", "items": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] }, "minItems": 1 },
+        "max_quantity": { "type": "integer", "minimum": 1, "description": "Ceiling for the quantity attribute." },
+        "destinations": { "type": "array", "items": { "type": "string" }, "description": "Allowlist of egress destinations." },
+        "tool_names": { "type": "array", "items": { "type": "string" }, "description": "Allowlist of mediated tool identifiers." }
+      },
+      "additionalProperties": false
+    },
+    "AutonomyBudget": {
+      "type": "object",
+      "description": "Bounds for autonomous action of system principals. Consumption is monotonically non-decreasing per envelope.",
+      "required": ["max_actions"],
+      "properties": {
+        "max_actions": { "type": "integer", "minimum": 0, "description": "Maximum number of ALLOW decisions for system principals under this envelope." },
+        "max_risk_class": { "type": "string", "description": "Highest risk class permitted for autonomous action." }
+      },
+      "additionalProperties": false
+    }
+  }
+}
