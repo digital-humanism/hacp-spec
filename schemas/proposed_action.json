@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hacp.standard/schemas/proposed_action.json",
+  "title": "HACP Proposed Action",
+  "description": "Structured, schema-constrained description of a single action an agent intends to perform.",
+  "type": "object",
+  "required": [
+    "hacp_version",
+    "action_id",
+    "envelope_id",
+    "verb",
+    "resource_class",
+    "resource_id",
+    "audience",
+    "reversibility",
+    "externality",
+    "data_class",
+    "proposed_at"
+  ],
+  "properties": {
+    "hacp_version": { "type": "string", "const": "0.9", "description": "HACP protocol version this action conforms to." },
+    "action_id": { "$ref": "#/definitions/uuid", "description": "Unique action identifier." },
+    "envelope_id": { "$ref": "#/definitions/uuid", "description": "Reference to the governing IntentEnvelope." },
+    "verb": { "type": "string", "minLength": 1, "description": "Operation verb (e.g., read, create, update, delete, execute, export, notify, transfer)." },
+    "resource_class": { "type": "string", "minLength": 1, "description": "Taxonomy-defined class of the target resource." },
+    "resource_id": { "type": "string", "minLength": 1, "description": "Target resource identifier." },
+    "audience": { "type": "string", "enum": ["internal", "external", "public"], "description": "Intended audience of the action's effect." },
+    "reversibility": { "type": "string", "enum": ["reversible", "irreversible"], "description": "Whether the action can be undone." },
+    "externality": { "type": "string", "enum": ["internal", "external"], "description": "Whether the action produces external side effects." },
+    "data_class": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"], "description": "Highest sensitivity class of data touched by the action." },
+    "quantity": { "type": "integer", "minimum": 1, "description": "Optional volume/count of the operation." },
+    "destination": { "type": "string", "description": "Optional egress target." },
+    "tool_name": { "type": "string", "description": "Optional mediated tool identifier." },
+    "args_hash": { "$ref": "#/definitions/hex256", "description": "Optional SHA-256 (lowercase hex) of canonicalized tool arguments." },
+    "proposed_at": { "$ref": "#/definitions/unix_ts", "description": "Proposal time. Integer Unix seconds (UTC)." }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
+    "unix_ts": { "type": "integer", "minimum": 0 },
+    "hex256": { "type": "string", "pattern": "^[0-9a-f]{64}$", "description": "SHA-256 digest, lowercase hexadecimal." }
+  }
+}
