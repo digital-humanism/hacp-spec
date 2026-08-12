@@ -96,10 +96,28 @@ func runEvaluate(vectorPath, pubKeyPath string) int {
 		}
 	}
 
+	// Provenance verification (INV-4)
+	provenance, _ := inputs["provenance_event"].(map[string]interface{})
+	prior, _ := inputs["prior_provenance_event"].(map[string]interface{})
+	omit, _ := inputs["omit_provenance"].(bool)
+
+	if decision == "ALLOW" {
+		if omit {
+			decision = "DENY"
+		} else if provenance != nil {
+			if !verifyProvenance(provenance, prior, pub) {
+				decision = "DENY"
+			}
+		}
+	}
+
 	// Build AgencyDecision response
 	resp := map[string]interface{}{"decision": decision}
 	if decision == "ALLOW" && token != nil {
 		resp["decision_token"] = token
+	}
+	if decision == "ALLOW" && provenance != nil && !omit {
+		resp["provenance_event_id"] = provenance["event_id"]
 	}
 
 	out, _ := json.Marshal(resp)

@@ -36,6 +36,7 @@ KEYS_DIR = SPEC_ROOT / "harness" / "keys"
 SEED_FILE = KEYS_DIR / "test-ed25519-001.seed"
 
 SIGNER_KEY_ID = "key-ed25519-test-001"
+GENESIS_HASH = "0" * 64
 
 # Signatures that indicate "not yet baked" and should be replaced
 PLACEHOLDER_SIGNATURES = (
@@ -161,6 +162,16 @@ def bake_vector(vector: Dict, private_key: Ed25519PrivateKey) -> Dict:
                 canonicalize(token_for_signing), private_key
             )
 
+     # Step 3b: sign provenance_event if present
+    event = vector["inputs"].get("provenance_event")
+    prior = vector["inputs"].get("prior_provenance_event")
+    if event:
+        event["payload_hash"] = compute_sha256(canonicalize(event.get("payload")))
+        event["prev_event_hash"] = compute_sha256(canonicalize(prior)) if prior else GENESIS_HASH
+        event["signer_key_id"] = SIGNER_KEY_ID
+        ev_no_sig = {k: v for k, v in event.items() if k != "signature"}
+        event["signature"] = sign_payload(canonicalize(ev_no_sig), private_key)   
+
     # Step 4: Ensure policy_context.clock is set
     context = vector.get("policy_context", {})
     if "clock" not in context:
@@ -212,6 +223,21 @@ def verify_vector(vector: Dict, private_key: Ed25519PrivateKey) -> bool:
             public_key.verify(sig_bytes, canonicalize(token_for_verify))
         except Exception as e:
             print(f"  [FAIL] signature verification: {e}")
+            return False
+
+    # Check provenance_event (payload_hash + signature)
+    event = vector["inputs"].get("provenance_event")
+    if event:
+        if compute_sha256(canonicalize(event.get("payload"))) != event.get("payload_hash"):
+            print(f"  [FAIL] provenance payload_hash mismatch")
+            return False
+        ev_no_sig = {k: v for k, v in event.items() if k != "signature"}
+        import base64
+        try:
+            sig = base64.urlsafe_b64decode(event["signature"] + "=" * (-len(event["signature"]) % 4))
+            private_key.public_key().verify(sig, canonicalize(ev_no_sig))
+        except Exception as e:
+            print(f"  [FAIL] provenance signature: {e}")
             return False
 
     return True

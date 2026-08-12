@@ -39,6 +39,16 @@ const crypto_1 = require("./crypto");
 const evaluate_1 = require("./evaluate");
 // Published conformance test public key (harness/keys/KEYS.md). TEST ONLY.
 const TEST_PUB_HEX = "9d17f1bbcc0845865e670f526413fb7a510380798fe300b6c98e28f3a3b0fdb3";
+const GENESIS = "0".repeat(64);
+function verifyProvenance(event, prior, pub) {
+    if ((0, crypto_1.sha256Hex)((0, canonical_1.canonicalBytes)(event.payload)) !== event.payload_hash)
+        return false;
+    const expectedPrev = prior ? (0, crypto_1.sha256Hex)((0, canonical_1.canonicalBytes)(prior)) : GENESIS;
+    if (event.prev_event_hash !== expectedPrev)
+        return false;
+    const { signature, ...evNoSig } = event;
+    return (0, crypto_1.verifySignature)(pub, (0, canonical_1.canonicalBytes)(evNoSig), signature);
+}
 function main() {
     const args = process.argv.slice(2);
     if (args[0] !== "evaluate") {
@@ -109,9 +119,23 @@ function runEvaluate(vectorPath, pubKeyPath) {
             }
         }
     }
+    const provenance = inputs.provenance_event ?? null;
+    const prior = inputs.prior_provenance_event ?? null;
+    const omit = inputs.omit_provenance === true;
+    if (decision === "ALLOW") {
+        if (omit) {
+            decision = "DENY";
+        }
+        else if (provenance && !verifyProvenance(provenance, prior, pub)) {
+            decision = "DENY";
+        }
+    }
     const resp = { decision };
     if (decision === "ALLOW" && token) {
         resp.decision_token = token;
+    }
+    if (decision === "ALLOW" && provenance && !omit) {
+        resp.provenance_event_id = provenance.event_id;
     }
     console.log(JSON.stringify(resp));
     return 0;

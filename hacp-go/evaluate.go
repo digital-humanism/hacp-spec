@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/ed25519"
 	"encoding/json"
 	"strings"
 )
@@ -163,4 +164,40 @@ func Evaluate(action, envelope, context map[string]interface{}, token map[string
 	}
 
 	return "ALLOW"
+}
+
+const genesisHash = "0000000000000000000000000000000000000000000000000000000000000000"
+
+// verifyProvenance checks payload hash, linkage, and signature.
+func verifyProvenance(event, prior map[string]interface{}, pub ed25519.PublicKey) bool {
+	payload, ok := event["payload"]
+	if !ok {
+		return false
+	}
+	pb, err := Canonicalize(payload)
+	if err != nil {
+		return false
+	}
+	if SHA256Hex(pb) != getStr(event, "payload_hash") {
+		return false
+	}
+
+	expectedPrev := genesisHash
+	if prior != nil {
+		prb, err := Canonicalize(prior)
+		if err != nil {
+			return false
+		}
+		expectedPrev = SHA256Hex(prb)
+	}
+	if getStr(event, "prev_event_hash") != expectedPrev {
+		return false
+	}
+
+	evNoSig := copyWithout(event, "signature")
+	evb, err := Canonicalize(evNoSig)
+	if err != nil {
+		return false
+	}
+	return VerifySignature(pub, evb, getStr(event, "signature"))
 }

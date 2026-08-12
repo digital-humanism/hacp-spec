@@ -9,6 +9,16 @@ import { evaluate } from "./evaluate";
 const TEST_PUB_HEX =
   "9d17f1bbcc0845865e670f526413fb7a510380798fe300b6c98e28f3a3b0fdb3";
 
+const GENESIS = "0".repeat(64);
+
+function verifyProvenance(event: any, prior: any, pub: KeyObject): boolean {
+  if (sha256Hex(canonicalBytes(event.payload)) !== event.payload_hash) return false;
+  const expectedPrev = prior ? sha256Hex(canonicalBytes(prior)) : GENESIS;
+  if (event.prev_event_hash !== expectedPrev) return false;
+  const { signature, ...evNoSig } = event;
+  return verifySignature(pub, canonicalBytes(evNoSig), signature);
+}
+
 function main(): void {
   const args = process.argv.slice(2);
   if (args[0] !== "evaluate") {
@@ -91,10 +101,25 @@ function runEvaluate(vectorPath: string, pubKeyPath: string): number {
       }
     }
   }
+ 
+  const provenance = inputs.provenance_event ?? null;
+  const prior = inputs.prior_provenance_event ?? null;
+  const omit = inputs.omit_provenance === true;
 
+  if (decision === "ALLOW") {
+    if (omit) {
+      decision = "DENY";
+    } else if (provenance && !verifyProvenance(provenance, prior, pub)) {
+      decision = "DENY";
+    }
+  }
+ 
   const resp: any = { decision };
   if (decision === "ALLOW" && token) {
     resp.decision_token = token;
+  }
+  if (decision === "ALLOW" && provenance && !omit) {
+  resp.provenance_event_id = provenance.event_id;
   }
   console.log(JSON.stringify(resp));
   return 0;

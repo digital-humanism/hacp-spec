@@ -102,6 +102,32 @@ def compute_sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+GENESIS_HASH = "0" * 64
+
+
+class DuplicateKeyError(ValueError):
+    pass
+
+
+def _reject_duplicates(pairs):
+    keys = [k for k, _ in pairs]
+    dups = sorted({k for k in keys if keys.count(k) > 1})
+    if dups:
+        raise DuplicateKeyError(f"duplicate keys: {dups}")
+    return dict(pairs)
+
+
+def verify_provenance(event, prior, public_key) -> bool:
+    """Verify provenance event: payload hash, linkage, signature."""
+    if compute_sha256(canonicalize(event.get("payload"))) != event.get("payload_hash"):
+        return False
+    expected_prev = compute_sha256(canonicalize(prior)) if prior is not None else GENESIS_HASH
+    if event.get("prev_event_hash") != expected_prev:
+        return False
+    ev_no_sig = {k: v for k, v in event.items() if k != "signature"}
+    return verify_signature(canonicalize(ev_no_sig), event.get("signature", ""), public_key)
+
+
 # --- Crypto ---
 def sign_payload(payload_bytes: bytes, private_key) -> str:
     """Sign payload and return Base64url encoded signature."""
@@ -212,6 +238,11 @@ class ResponseVerifier:
             }
         else:
             details["outcome_correct"] = True
+
+        if actual_outcome == "ALLOW" and vector["inputs"].get("provenance_event") is not None:
+            if response.get("provenance_event_id") != vector["expected"].get("provenance_event_id"):
+                passed = False
+                details["provenance_id_mismatch"] = True
 
         # If ALLOW, verify token binding
         if actual_outcome == "ALLOW" and "decision_token" in response:
@@ -386,7 +417,6 @@ class LocalTarget:
 
     def evaluate(self, vector: Dict) -> Dict:
         """Evaluate vector using local emulation."""
-        # Vectors are already baked — no signing in runtime
         action = vector["inputs"]["proposed_action"]
         envelope = vector["inputs"]["intent_envelope"]
         context = vector.get("policy_context", {})
@@ -397,29 +427,41 @@ class LocalTarget:
 
         # Step 2: Crypto verification (INV-3, INV-5)
         if decision == "ALLOW" and token:
-            # INV-3: Token Binding - verify action_hash
             canonical_action = canonicalize(action)
             computed_hash = compute_sha256(canonical_action)
-
             if token.get("action_hash") != computed_hash:
                 decision = "DENY"
             else:
-                # INV-5: Signature verification
                 token_for_verify = {
                     k: v for k, v in token.items() if k != "signature"
                 }
-                sig_valid = verify_signature(
+                if not verify_signature(
                     canonicalize(token_for_verify),
                     token["signature"],
                     self.key_loader.public_key
-                )
-                if not sig_valid:
+                ):
                     decision = "DENY"
 
-        response = {"decision": decision}
+        # Step 3: Provenance verification (INV-4)
+        provenance = vector["inputs"].get("provenance_event")
+        prior = vector["inputs"].get("prior_provenance_event")
+        omit = vector["inputs"].get("omit_provenance", False)
 
+        if decision == "ALLOW":
+            if omit:
+                decision = "DENY"  # TRACEABILITY_MISSING
+            elif provenance is not None:
+                if not verify_provenance(
+                    provenance, prior, self.key_loader.public_key
+                ):
+                    decision = "DENY"  # TRACEABILITY_FAILURE
+
+        # Build response
+        response = {"decision": decision}
         if decision == "ALLOW" and token:
             response["decision_token"] = token
+        if decision == "ALLOW" and provenance is not None and not omit:
+            response["provenance_event_id"] = provenance["event_id"]
 
         return response
 
@@ -543,31 +585,40 @@ class HACPHarness:
         results = []
 
         for vector_file in sorted(vectors_dir.glob("*.json")):
+            # Strict load to detect duplicate keys
             try:
                 with open(vector_file, "r", encoding="utf-8") as f:
-                    vector = json.load(f)
-
-                result = self.run_test(vector)
-                results.append(result)
-
-                # Print result
-                status = "PASS" if result.passed else "FAIL"
-                print(f"[{status}] {result.test_id}: {result.description}")
-
-                if not result.passed:
-                    print(f"       Details: {result.details}")
-
+                    vector = json.load(f, object_pairs_hook=_reject_duplicates)
+            except DuplicateKeyError:
+                # Duplicate-key vector: pass iff negative expecting DENY
+                with open(vector_file, "r", encoding="utf-8") as f:
+                    loose = json.load(f)
+                ok = (loose.get("type") == "negative"
+                      and loose.get("expected", {}).get("outcome") == "DENY")
+                results.append(TestResult(
+                    loose.get("test_id", vector_file.stem),
+                    "negative",
+                    loose.get("description", ""),
+                    ok,
+                    {"duplicate_keys_rejected": True}
+                ))
+                print(f"[{'PASS' if ok else 'FAIL'}] {loose.get('test_id')}: {loose.get('description')} (duplicate keys rejected)")
+                continue
             except Exception as e:
                 print(f"[ERROR] {vector_file.name}: {e}")
                 results.append(TestResult(
-                    test_id=vector_file.stem,
-                    test_type="unknown",
-                    description=str(e),
-                    passed=False,
-                    details={"error": str(e)}
+                    vector_file.stem, "unknown", str(e), False, {"error": str(e)}
                 ))
+                continue
 
-        # Generate summary
+            result = self.run_test(vector)
+            results.append(result)
+
+            status = "PASS" if result.passed else "FAIL"
+            print(f"[{status}] {result.test_id}: {result.description}")
+            if not result.passed:
+                print(f"       Details: {result.details}")
+
         passed = sum(1 for r in results if r.passed)
         failed = sum(1 for r in results if not r.passed)
 
