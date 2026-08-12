@@ -39,13 +39,13 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 | `HUMAN_REQUIRED` | Action consequence class requires a human principal, but `principal_kind` is `system` without valid delegation. |
 | `POLICY_DENIED` | Action explicitly denied by a deterministic policy rule not covered by the above codes. |
 | `CHECKPOINT_TIMEOUT` | A CHECKPOINT decision was not resolved before the checkpoint expiry deadline. |
-| `TRACEABILITY_FAILURE` | Required provenance event missing, signature verification fails in audit chain, or provenance chain integrity is broken. |
+| `TRACEABILITY_FAILURE` | Required provenance event missing, signature verification fails, or audit chain is broken. |
 
 ## 4. System Errors
 
 | Code | Condition |
 |---|---|
-| `INTERNAL_ERROR` | Unexpected exception, missing dependency, or unclassified implementation failure. MUST result in `DENY`. MUST NOT be used for policy outcomes. |
+| `INTERNAL_ERROR` | Unexpected exception, missing dependency, or unclassified failure. MUST result in `DENY`. MUST NOT be used for policy outcomes. |
 | `OK` | Action authorized (`ALLOW`). Used in telemetry and logs, not in `DENY`/`CHECKPOINT` reason codes. |
 
 ## 5. Extensibility
