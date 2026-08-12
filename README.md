@@ -115,8 +115,8 @@ Same logical payload → same canonical bytes → same hash on any platform.
 
 The following implementations have passed the full conformance suite and are listed as reference clean-room proofs:
 
-- **Go** (`hacp-go/`) — stdlib only, 20/20
-- **TypeScript** (`hacp-ts/`) — Node.js stdlib, 20/20
+- **Go** (`hacp-go/`) — stdlib only, 33/33
+- **TypeScript** (`hacp-ts/`) — Node.js stdlib, 33/33
 
 Any new implementation can be verified the same way by exposing the HTTP or CLI interface and running the harness against it.
 
@@ -153,7 +153,7 @@ Any new implementation can be verified the same way by exposing the HTTP or CLI 
 5. **Verify results:**
    - Golden vectors → `ALLOW` with valid token
    - Negative vectors → `DENY` or `CHECKPOINT` with correct reason codes
-   - All 20/20 passed = clean-room verification complete
+   - All 33/33 passed = clean-room verification complete
 
 ### Alternative: CLI Mode
 
@@ -335,7 +335,7 @@ Content-Type: application/json
 
 ### Clean-Room Implementations — Phase 2 Complete ✅
 
-Two independent clean-room implementations pass the full conformance suite (20/20), proving the specification is implementable without reading the reference code.
+Two independent clean-room implementations pass the full conformance suite (33/33), proving the specification is implementable without reading the reference code.
 
 | Language | Directory | Dependencies | Conformance |
 |----------|-----------|--------------|-------------|
@@ -367,8 +367,8 @@ HACP enforces transparency through:
 
 ### Phase 2: Clean-Room Verification ✅ (Complete)
 
-- [x] Go implementation (20/20)
-- [x] TypeScript implementation (20/20)
+- [x] Go implementation (33/33)
+- [x] TypeScript implementation (33/33)
 - [x] Independent verification reports
 - [ ] Rust implementation (optional, future)
 
