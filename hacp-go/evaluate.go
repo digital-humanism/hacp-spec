@@ -212,3 +212,29 @@ func verifyProvenance(event, prior map[string]interface{}, pub ed25519.PublicKey
 	}
 	return VerifySignature(pub, evb, getStr(event, "signature"))
 }
+
+// checkpointDecision returns terminal decision or nil to continue.
+func checkpointDecision(cp, ctx map[string]interface{}) *string {
+	clock, _ := getInt(ctx, "clock")
+	if clock == 0 {
+		clock, _ = getInt(ctx, "current_time")
+	}
+	state := getStr(cp, "state")
+	if exp, ok := getInt(cp, "expires_at"); ok && state == "OPEN" && clock > exp {
+		state = "EXPIRED"
+	}
+	deny := "DENY"
+	checkpoint := "CHECKPOINT"
+	switch state {
+	case "EXPIRED", "RESOLVED_DENY":
+		return &deny
+	case "OPEN":
+		return &checkpoint
+	case "RESOLVED_ALLOW":
+		if getStr(cp, "resolver_principal_kind") != "human" {
+			return &deny
+		}
+		return nil
+	}
+	return &deny
+}

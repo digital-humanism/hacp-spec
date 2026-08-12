@@ -419,6 +419,24 @@ def evaluate_logic(action: Dict, envelope: Dict, context: Dict,
 
     return "ALLOW"
 
+def checkpoint_decision(cp: Dict, context: Dict) -> Optional[str]:
+    """Runtime checkpoint pre-step. Returns terminal decision or None to continue."""
+    clock = context.get("clock", context.get("current_time", 0))
+    state = cp.get("state")
+    expires = cp.get("expires_at")
+    if state == "OPEN" and expires and clock > expires:
+        state = "EXPIRED"
+    if state == "EXPIRED":
+        return "DENY"
+    if state == "RESOLVED_DENY":
+        return "DENY"
+    if state == "OPEN":
+        return "CHECKPOINT"
+    if state == "RESOLVED_ALLOW":
+        if cp.get("resolver_principal_kind") != "human":
+            return "DENY"
+        return None  # continue to policy + crypto
+    return "DENY"
 
 # --- Target Interfaces ---
 class LocalTarget:
@@ -436,6 +454,13 @@ class LocalTarget:
         envelope = vector["inputs"]["intent_envelope"]
         context = vector.get("policy_context", {})
         token = vector["inputs"].get("decision_token")
+
+        # Runtime checkpoint pre-step
+        checkpoint = vector["inputs"].get("checkpoint")
+        if checkpoint:
+            cd = checkpoint_decision(checkpoint, context)
+            if cd is not None:
+                return {"decision": cd}
 
         # Step 1: Policy evaluation
         decision = evaluate_logic(action, envelope, context, token)

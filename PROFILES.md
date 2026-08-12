@@ -31,18 +31,25 @@ Scope:
 ## 3. HACP-Runtime
 
 **Requires:** HACP-Core.
-**Normative document:** `profiles/runtime.md` (pending, Phase 3 artifact).
+**Normative document:** `checkpoint-protocol.md`.
 
-Adds asynchronous human interaction:
+Adds asynchronous human interaction via the checkpoint state machine
+`OPEN → RESOLVED_ALLOW / RESOLVED_DENY / EXPIRED`.
 
-- Checkpoint state machine (`PENDING`, `APPROVED`, `DENIED`, `EXPIRED`, `REVOKED`, `RESUMED`, `FAILED`).
-- Timeouts and state expiration.
-- Resume only with a valid, unrevoked `DecisionToken`.
-- Notification payload schema (action summary, risk, remaining budget).
+Runtime = Core + the following MUST:
+
+- Implement the checkpoint state machine per `checkpoint-protocol.md`.
+- Fail-closed expiry: `EXPIRED → DENY(CHECKPOINT_TIMEOUT)`.
+- Human-only resolution with a valid signature.
+- Resume only via a valid, unrevoked `DecisionToken` bound to the pending
+  `action_hash`.
+- Timeouts and state expiration per `checkpoint-protocol.md` §4.
+- No cleartext action/payload in checkpoint storage (data minimization).
+- Notification payload schema (action summary, risk, remaining budget);
+  `summary` MUST NOT contain cleartext confidential payload.
 - Human signer assurance (minimal authentication of the approving subject).
-- Checkpoint data minimization and encryption-at-rest rules.
 
-**Conformance:** `RUNTIME-*` vectors (pending).
+**Conformance:** `RUNTIME-*` vectors (Phase 3, in progress).
 **Claim format:** `HACP 0.9-Runtime`.
 
 ## 4. HACP-Enforcement

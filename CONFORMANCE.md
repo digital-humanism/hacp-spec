@@ -112,10 +112,20 @@ Status legend:
 | CORE-INV7-005 | negative | ✅ | core_inv7_005_negative.json | |
 | CORE-INV7-006 | negative | ✅ | core_inv7_006_negative.json | parent-envelope inheritance |
 
+### Runtime Profile (Phase 3)
+
+| Test ID | Type | Status | Vector | Note |
+|---------|------|--------|--------|------|
+| CORE-RUNTIME-001 | golden | ✅ | runtime_001_golden.json | resume after human approval |
+| CORE-RUNTIME-002 | negative | ✅ | runtime_002_negative.json | timeout → EXPIRED |
+| CORE-RUNTIME-003 | negative | ✅ | runtime_003_negative.json | token bound to wrong action_hash |
+| CORE-RUNTIME-004 | negative | ✅ | runtime_004_negative.json | unresolved OPEN → CHECKPOINT |
+| CORE-RUNTIME-005 | negative | ✅ | runtime_005_negative.json | system self-resolution |
+
 ## 4. Summary
 
-- **In suite now:** 33 executed (32 Core-mapped + 1 Runtime preview)
-- **Critical to add:** 0 — Gate A + Gate B reached
+- **In suite now:** 38 executed (32 Core-mapped + 6 Runtime profile)
+- **Critical to add:** 0 — Gate A + B + C reached
 - **Deferred (post-0.9):** 5 → INV-1-003/004, INV-3-005, INV-7-003/004
 
 Gate A is reached when all ⚠️ rows become ✅ and the harness reports green

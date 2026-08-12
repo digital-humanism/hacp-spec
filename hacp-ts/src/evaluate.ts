@@ -120,3 +120,18 @@ export function evaluate(
 
   return "ALLOW";
 }
+
+export function checkpointDecision(cp: any, ctx: any): string | null {
+  const clock = getInt(ctx, "clock") ?? getInt(ctx, "current_time") ?? 0;
+  let state = cp.state;
+  const exp = getInt(cp, "expires_at");
+  if (state === "OPEN" && exp !== null && clock > exp) state = "EXPIRED";
+  if (state === "EXPIRED") return "DENY";
+  if (state === "RESOLVED_DENY") return "DENY";
+  if (state === "OPEN") return "CHECKPOINT";
+  if (state === "RESOLVED_ALLOW") {
+    if (cp.resolver_principal_kind !== "human") return "DENY";
+    return null;
+  }
+  return "DENY";
+}

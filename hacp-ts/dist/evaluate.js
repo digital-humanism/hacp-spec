@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.evaluate = evaluate;
+exports.checkpointDecision = checkpointDecision;
 const getStr = (m, k) => typeof m?.[k] === "string" ? m[k] : "";
 const getMap = (m, k) => m?.[k] && typeof m[k] === "object" && !Array.isArray(m[k]) ? m[k] : null;
 const getInt = (m, k) => typeof m?.[k] === "number" && Number.isInteger(m[k]) ? m[k] : null;
@@ -98,4 +99,23 @@ function evaluate(action, envelope, context, token) {
             return "DENY";
     }
     return "ALLOW";
+}
+function checkpointDecision(cp, ctx) {
+    const clock = getInt(ctx, "clock") ?? getInt(ctx, "current_time") ?? 0;
+    let state = cp.state;
+    const exp = getInt(cp, "expires_at");
+    if (state === "OPEN" && exp !== null && clock > exp)
+        state = "EXPIRED";
+    if (state === "EXPIRED")
+        return "DENY";
+    if (state === "RESOLVED_DENY")
+        return "DENY";
+    if (state === "OPEN")
+        return "CHECKPOINT";
+    if (state === "RESOLVED_ALLOW") {
+        if (cp.resolver_principal_kind !== "human")
+            return "DENY";
+        return null;
+    }
+    return "DENY";
 }

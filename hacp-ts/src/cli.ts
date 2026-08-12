@@ -3,7 +3,7 @@ import type { KeyObject } from "crypto";
 import * as crypto from "crypto";
 import { canonicalBytes } from "./canonical";
 import { sha256Hex, loadPublicKey, verifySignature } from "./crypto";
-import { evaluate } from "./evaluate";
+import { evaluate, checkpointDecision } from "./evaluate";
 
 // Published conformance test public key (harness/keys/KEYS.md). TEST ONLY.
 const TEST_PUB_HEX =
@@ -85,6 +85,15 @@ function runEvaluate(vectorPath: string, pubKeyPath: string): number {
       JSON.stringify({ error: "KEY_ERROR", message: e.message })
     );
     return 1;
+  }
+
+  const checkpoint = inputs.checkpoint ?? null;
+  if (checkpoint) {
+    const cd = checkpointDecision(checkpoint, context);
+    if (cd !== null) {
+      console.log(JSON.stringify({ decision: cd }));
+      return 0;
+    }
   }
 
   let decision = evaluate(action, envelope, context, token);

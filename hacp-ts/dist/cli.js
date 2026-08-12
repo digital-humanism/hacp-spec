@@ -105,6 +105,14 @@ function runEvaluate(vectorPath, pubKeyPath) {
         console.error(JSON.stringify({ error: "KEY_ERROR", message: e.message }));
         return 1;
     }
+    const checkpoint = inputs.checkpoint ?? null;
+    if (checkpoint) {
+        const cd = (0, evaluate_1.checkpointDecision)(checkpoint, context);
+        if (cd !== null) {
+            console.log(JSON.stringify({ decision: cd }));
+            return 0;
+        }
+    }
     let decision = (0, evaluate_1.evaluate)(action, envelope, context, token);
     // Crypto verification (INV-3, INV-5)
     if (decision === "ALLOW" && token) {

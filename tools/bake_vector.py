@@ -137,6 +137,11 @@ def bake_vector(vector: Dict, private_key: Ed25519PrivateKey) -> Dict:
     canonical_action = canonicalize(action)
     action_hash = compute_sha256(canonical_action)
 
+    # Bind checkpoint to action_hash (runtime vectors)
+    checkpoint = vector["inputs"].get("checkpoint")
+    if checkpoint:
+        checkpoint["action_hash"] = action_hash
+
     # Step 2: Sign intent_envelope
     envelope = vector["inputs"].get("intent_envelope")
     if envelope:

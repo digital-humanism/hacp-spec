@@ -74,6 +74,15 @@ func runEvaluate(vectorPath, pubKeyPath string) int {
 		return 1
 	}
 
+	// Runtime checkpoint pre-step
+	if cp, ok := inputs["checkpoint"].(map[string]interface{}); ok {
+		if d := checkpointDecision(cp, context); d != nil {
+			out, _ := json.Marshal(map[string]interface{}{"decision": *d})
+			fmt.Println(string(out))
+			return 0
+		}
+	}
+
 	// Policy evaluation
 	decision := Evaluate(action, envelope, context, token)
 
