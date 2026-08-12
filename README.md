@@ -1,5 +1,7 @@
 # HACP — Human Agency Continuity Protocol
 
+![tests](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml/badge.svg)
+
 **Version:** 0.9.0-draft  
 **Status:** Phase 1 Complete  
 **License:** CC BY 4.0
