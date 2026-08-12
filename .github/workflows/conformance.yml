@@ -18,16 +18,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r harness/requirements.txt
-
-      - name: Verify vector integrity (CI check)
-        run: python tools/bake_vector.py --check
-
-      - name: Run conformance suite (local mode)
-        run: python harness/harness.py --mode local
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -39,5 +33,25 @@ jobs:
           cd hacp-go
           go build -o hacp-go .
 
-      - name: Run conformance (Go clean-room, CLI mode)
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build TypeScript clean-room implementation
+        run: |
+          cd hacp-ts
+          npm install
+          npm run build
+
+      - name: Verify vector integrity (CI check)
+        run: python tools/bake_vector.py --check
+
+      - name: Run conformance (local mode)
+        run: python harness/harness.py --mode local
+
+      - name: Run conformance (Go clean-room, CLI)
         run: python harness/harness.py --mode cli --binary-path hacp-go/hacp-go
+
+      - name: Run conformance (TypeScript clean-room, CLI)
+        run: python harness/harness.py --mode cli --binary-path hacp-ts/dist/cli.js
