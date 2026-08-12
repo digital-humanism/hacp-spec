@@ -307,9 +307,18 @@ def evaluate_logic(action: Dict, envelope: Dict, context: Dict,
     if envelope_expires and current_time > envelope_expires:
         return "DENY"
 
-    # Check envelope revocation
+    # Check envelope revocation (incl. parent inheritance)
     revoked_envelopes = context.get("revoked_envelopes", [])
     if envelope.get("envelope_id") in revoked_envelopes:
+        return "DENY"
+    if envelope.get("parent_envelope_id") in revoked_envelopes:
+        return "DENY"
+
+    # Check key revocation
+    revoked_keys = context.get("revoked_keys", [])
+    if envelope.get("signer_key_id") in revoked_keys:
+        return "DENY"
+    if token and token.get("signer_key_id") in revoked_keys:
         return "DENY"
 
     # Check token revocation from inputs or context
@@ -392,14 +401,20 @@ def evaluate_logic(action: Dict, envelope: Dict, context: Dict,
         if max_quantity is not None and action["quantity"] > max_quantity:
             return "DENY"
 
-    if "destination" in action:
-        allowed_destinations = scope.get("destinations", [])
-        if allowed_destinations and action["destination"] not in allowed_destinations:
+    # Destination allowlist (absent optional => UNKNOWN_ATTRIBUTE)
+    allowed_destinations = scope.get("destinations", [])
+    if allowed_destinations:
+        if "destination" not in action:
+            return "DENY"
+        if action["destination"] not in allowed_destinations:
             return "DENY"
 
-    if "tool_name" in action:
-        allowed_tools = scope.get("tool_names", [])
-        if allowed_tools and action["tool_name"] not in allowed_tools:
+    # Tool allowlist (absent optional => UNKNOWN_ATTRIBUTE)
+    allowed_tools = scope.get("tool_names", [])
+    if allowed_tools:
+        if "tool_name" not in action:
+            return "DENY"
+        if action["tool_name"] not in allowed_tools:
             return "DENY"
 
     return "ALLOW"

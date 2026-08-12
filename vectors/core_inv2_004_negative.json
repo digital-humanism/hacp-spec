@@ -1,0 +1,24 @@
+{
+  "test_id": "CORE-INV2-004",
+  "type": "negative",
+  "description": "Externality boundary crossing - granted internal, proposed external",
+  "inputs": {
+    "intent_envelope": {
+      "hacp_version": "0.9", "envelope_id": "22222222-2222-2222-2222-222222222222",
+      "principal": "human_admin_01", "principal_kind": "human",
+      "intent_statement": "Externality boundary",
+      "scope": { "verbs": ["notify"], "resource_classes": ["report"], "audiences": ["internal"], "reversibility": ["reversible"], "externality": ["internal"], "data_classes": ["internal"] },
+      "issued_at": 1786000000, "expires_at": 1786003600,
+      "signer_key_id": "key-ed25519-test-001", "signature": "PLACEHOLDER"
+    },
+    "proposed_action": {
+      "hacp_version": "0.9", "action_id": "11111111-1111-1111-1111-111111111111",
+      "envelope_id": "22222222-2222-2222-2222-222222222222",
+      "verb": "notify", "resource_class": "report", "resource_id": "rpt://q3",
+      "audience": "internal", "reversibility": "reversible", "externality": "external",
+      "data_class": "internal", "proposed_at": 1786000100
+    }
+  },
+  "policy_context": { "clock": 1786000100, "current_action_count": 0 },
+  "expected": { "outcome": "DENY", "reason_codes": ["BOUNDARY_CROSSING"] }
+}

@@ -55,9 +55,22 @@ func Evaluate(action, envelope, context map[string]interface{}, token map[string
 		return "DENY"
 	}
 
-	// Envelope revocation
+	// Envelope revocation (incl. parent inheritance)
 	if rev, ok := context["revoked_envelopes"].([]interface{}); ok {
 		if inStringList(rev, getStr(envelope, "envelope_id")) {
+			return "DENY"
+		}
+		if inStringList(rev, getStr(envelope, "parent_envelope_id")) {
+			return "DENY"
+		}
+	}
+
+	// Key revocation
+	if rk, ok := context["revoked_keys"].([]interface{}); ok {
+		if inStringList(rk, getStr(envelope, "signer_key_id")) {
+			return "DENY"
+		}
+		if token != nil && inStringList(rk, getStr(token, "signer_key_id")) {
 			return "DENY"
 		}
 	}
@@ -145,21 +158,19 @@ func Evaluate(action, envelope, context map[string]interface{}, token map[string
 		}
 	}
 
-	// Destination
-	if dest := getStr(action, "destination"); dest != "" {
-		if allowed, ok := scope["destinations"].([]interface{}); ok && len(allowed) > 0 {
-			if !inStringList(allowed, dest) {
-				return "DENY"
-			}
+	// Destination allowlist
+	if allowed, ok := scope["destinations"].([]interface{}); ok && len(allowed) > 0 {
+		dest, has := action["destination"].(string)
+		if !has || !inStringList(allowed, dest) {
+			return "DENY"
 		}
 	}
 
-	// Tool name
-	if tool := getStr(action, "tool_name"); tool != "" {
-		if allowed, ok := scope["tool_names"].([]interface{}); ok && len(allowed) > 0 {
-			if !inStringList(allowed, tool) {
-				return "DENY"
-			}
+	// Tool allowlist
+	if allowed, ok := scope["tool_names"].([]interface{}); ok && len(allowed) > 0 {
+		tool, has := action["tool_name"].(string)
+		if !has || !inStringList(allowed, tool) {
+			return "DENY"
 		}
 	}
 

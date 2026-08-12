@@ -62,11 +62,11 @@ Status legend:
 | CORE-INV2-001 | golden | ✅ | core_inv2_001_golden.json | |
 | CORE-INV2-002 | negative | ✅ | core_inv2_002_negative.json | audience |
 | CORE-INV2-003 | negative | ✅ | core_inv2_003_negative.json | reversibility |
-| CORE-INV2-004 | negative | ⏸ | — | externality (Phase 2 matrix) |
+| CORE-INV2-004 | negative | ✅ | core_inv2_004_negative.json | externality |
 | CORE-INV2-005 | negative | ✅ | core_inv2_005_negative.json | quantity |
-| CORE-INV2-006 | negative | ⏸ | — | destination allowlist (Phase 2 matrix) |
+| CORE-INV2-006 | negative | ✅ | core_inv2_006_negative.json | destination |
 | CORE-INV2-007 | negative | ✅ | core_inv2_007_negative.json | data_class |
-| CORE-INV2-008 | negative | ⏸ | — | absent optional attribute (Phase 2 matrix) |
+| CORE-INV2-008 | negative | ✅ | core_inv2_008_negative.json | absent optional |
 
 ### INV-3 — Token Binding
 
@@ -92,13 +92,14 @@ Status legend:
 
 | Test ID | Type | Status | Vector | Note |
 |---------|------|--------|--------|------|
-| CORE-INV5-001 | golden | ✅ | — | core_inv5_001_golden.json |
+| CORE-INV5-001 | golden | ✅ | core_inv5_001_golden.json | |
 | CORE-INV5-002 | negative | ✅ | core_inv5_002_negative.json | |
 | CORE-INV5-003 | negative | ✅ | core_inv5_003_negative.json | |
 | CORE-INV5-004 | negative | ✅ | core_inv5_004_negative.json | |
 | CORE-INV5-005 | golden | ✅ | core_inv5_005_golden.json | |
-| CORE-INV5-006 | negative | ✅ | — | core_inv5_006_negative.json |
-| CORE-INV5-007 | negative | ✅ | — | core_inv5_007_negative.json |
+| CORE-INV5-006 | negative | ✅ | core_inv5_006_negative.json | duplicate keys |
+| CORE-INV5-007 | negative | ✅ | core_inv5_007_negative.json | non-canonical |
+| CORE-INV5-008 | negative | ✅ | core_inv5_008_negative.json | key revoke |
 
 ### INV-7 — Bounded Autonomy
 
@@ -109,12 +110,13 @@ Status legend:
 | CORE-INV7-003 | golden | ⏸ | — | Human path vs budget (Phase 3) |
 | CORE-INV7-004 | negative | ⏸ | — | Forged budget state |
 | CORE-INV7-005 | negative | ✅ | core_inv7_005_negative.json | |
+| CORE-INV7-006 | negative | ✅ | core_inv7_006_negative.json | parent-envelope inheritance |
 
 ## 4. Summary
 
-- **In suite now:** 28 executed (27 Core-mapped + 1 Runtime preview)
-- **Critical to add:** 0 — Gate A reached
-- **Deferred (post-0.9):** 8 → INV-1-003/004, INV-2-004/006/008, INV-3-005, INV-7-003/004
+- **In suite now:** 33 executed (32 Core-mapped + 1 Runtime preview)
+- **Critical to add:** 0 — Gate A + Gate B reached
+- **Deferred (post-0.9):** 5 → INV-1-003/004, INV-3-005, INV-7-003/004
 
 Gate A is reached when all ⚠️ rows become ✅ and the harness reports green
 in local, HTTP, and CLI modes.

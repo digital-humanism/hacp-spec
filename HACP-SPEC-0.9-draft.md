@@ -162,16 +162,31 @@ issue_token(envelope_id, proposed_action, principal, constraints) -> DecisionTok
 
 MUST bind `action_hash`, `policy_digest`, `signer_key_id`, expiry, and unique `token_id`. MUST NOT issue tokens for `DENY` or `CHECKPOINT` outcomes.
 
-### 5.3 revoke
+### 5.3 Revocation (Normative)
 
-```text
-revoke(target: { envelope_id | token_id | key_id }, reason) -> RevocationRecord
-```
+A revocation is a signed `RevocationRecord` with `target_kind` ∈
+{`envelope`, `token`, `key`} and `target_id`. Revocation is propagated as
+follows:
 
-- MUST be idempotent.
-- MUST produce a signed `RevocationRecord` and a `REVOKED` provenance event.
-- Inheritance: revoking an envelope invalidates all tokens referencing it and all descendant envelopes via `parent_envelope_id`.
-- After revocation, `evaluate()` and token verification involving the target MUST NOT yield `ALLOW`.
+1. **Token:** the identified token is denied.
+2. **Envelope:** the identified envelope, every token issued under it, and
+   every descendant (child) envelope — transitively — and their tokens are
+   denied.
+3. **Key:** every envelope or token whose `signer_key_id` equals `target_id`
+   is denied.
+
+Verification order (normative): an implementation MUST consult the
+revocation denylist **before** signature verification. A revoked artifact
+that carries a cryptographically valid signature MUST still be denied with
+the applicable reason code (`ENVELOPE_REVOKED`, `TOKEN_REVOKED`,
+`KEY_REVOKED`).
+
+Every revocation MUST emit a signed `REVOKED` provenance event referencing
+the `target_id`. Revocation records are append-only and themselves subject
+to signature verification.
+
+The normative decision table for boundary evaluation is defined in
+`boundary-matrix.md`. In case of conflict, `boundary-matrix.md` governs.
 
 ### 5.4 explain
 
@@ -190,7 +205,7 @@ A **meaningful boundary crossing** occurs when any security-relevant attribute o
 Normative rules:
 
 1. On meaningful boundary crossing, `evaluate()` MUST NOT return `ALLOW`. It SHALL return `CHECKPOINT` if policy permits human escalation, otherwise `DENY` (`BOUNDARY_CROSSING`).
-2. Attribute comparisons MUST be deterministic and defined by the published boundary matrix (`boundary-matrix.md`, Phase 2 artifact).
+2. Attribute comparisons MUST be deterministic and defined by the published boundary matrix (`boundary-matrix.md`). In case of conflict between this section and `boundary-matrix.md`, the matrix governs.
 3. Absent optional security-relevant attributes MUST be treated as ungranted unless the policy explicitly defaults them.
 
 ## 7. Autonomy Budget

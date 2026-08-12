@@ -30,8 +30,16 @@ export function evaluate(
   const envExp = getInt(envelope, "expires_at");
   if (envExp !== null && currentTime > envExp) return "DENY";
 
-  // Envelope revocation
+  // Envelope revocation (incl. parent inheritance)
   if (inList(context["revoked_envelopes"], getStr(envelope, "envelope_id")))
+    return "DENY";
+  if (inList(context["revoked_envelopes"], getStr(envelope, "parent_envelope_id")))
+    return "DENY";
+
+  // Key revocation
+  if (inList(context["revoked_keys"], getStr(envelope, "signer_key_id")))
+    return "DENY";
+  if (token && inList(context["revoked_keys"], getStr(token, "signer_key_id")))
     return "DENY";
 
   // Token revocation + expiry
@@ -98,25 +106,17 @@ export function evaluate(
   const maxQ = getInt(scope, "max_quantity");
   if (q !== null && maxQ !== null && q > maxQ) return "DENY";
 
-  // Destination
-  const dest = getStr(action, "destination");
-  if (
-    dest &&
-    Array.isArray(scope["destinations"]) &&
-    scope["destinations"].length > 0 &&
-    !inList(scope["destinations"], dest)
-  )
-    return "DENY";
+  // Destination allowlist (absent optional => UNKNOWN_ATTRIBUTE)
+  if (Array.isArray(scope["destinations"]) && scope["destinations"].length > 0) {
+    const dest = getStr(action, "destination");
+    if (!dest || !inList(scope["destinations"], dest)) return "DENY";
+  }
 
-  // Tool name
-  const tool = getStr(action, "tool_name");
-  if (
-    tool &&
-    Array.isArray(scope["tool_names"]) &&
-    scope["tool_names"].length > 0 &&
-    !inList(scope["tool_names"], tool)
-  )
-    return "DENY";
+  // Tool allowlist (absent optional => UNKNOWN_ATTRIBUTE)
+  if (Array.isArray(scope["tool_names"]) && scope["tool_names"].length > 0) {
+    const tool = getStr(action, "tool_name");
+    if (!tool || !inList(scope["tool_names"], tool)) return "DENY";
+  }
 
   return "ALLOW";
 }

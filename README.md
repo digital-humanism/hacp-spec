@@ -42,7 +42,7 @@ HACP Conformance Harness v0.9.2 - Mode: local
 [PASS] CORE-INV7-002: Budget exhausted - (N+1)-th action
 ...
 ============================================================
-RESULTS: 28/28 passed
+RESULTS: 33/33 passed
 ============================================================
 ```
 
@@ -173,13 +173,13 @@ python harness/harness.py --mode cli --binary-path ./your-impl
 | Invariant | Description | Vectors |
 |-----------|-------------|---------|
 | **INV-1** | Human Final Decision | 4 vectors |
-| **INV-2** | Boundary Re-Authorization | 5 vectors |
+| **INV-2** | Boundary Re-Authorization | 8 vectors |
 | **INV-3** | Token Binding | 4 vectors |
 | **INV-4** | Traceability | 5 vector |
-| **INV-5** | Cryptographic Integrity | 7 vectors |
-| **INV-7** | Bounded Autonomy | 3 vectors |
+| **INV-5** | Cryptographic Integrity | 8 vectors |
+| **INV-7** | Bounded Autonomy | 4 vectors |
 
-**Total:** 28 vectors (12 golden + 16 negative)
+**Total:** 33 vectors
 
 ### Test Scenarios
 
@@ -339,8 +339,8 @@ Two independent clean-room implementations pass the full conformance suite (20/2
 
 | Language | Directory | Dependencies | Conformance |
 |----------|-----------|--------------|-------------|
-| Go | `hacp-go/` | stdlib only | 28/28 ✅ |
-| TypeScript | `hacp-ts/` | Node.js stdlib | 28/28 ✅ |
+| Go | `hacp-go/` | stdlib only | 33/33 ✅ |
+| TypeScript | `hacp-ts/` | Node.js stdlib | 33/33 ✅ |
 
 Both were written from the published specification alone and communicate with the harness exclusively via JSON.
 
@@ -361,7 +361,7 @@ HACP enforces transparency through:
 
 - [x] Normative specification (v0.9.0-draft)
 - [x] JSON schemas (6 core objects)
-- [x] Conformance suite (28 vectors, 28/28 passing)
+- [x] Conformance suite (33 vectors, 33/33 passing)
 - [x] Reproducible test keypair
 - [x] Cross-language harness (local/http/cli)
 
