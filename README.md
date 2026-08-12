@@ -24,7 +24,7 @@ A language-agnostic protocol for preserving human agency in AI agent systems. HA
 # Install dependencies
 pip install -r harness/requirements.txt
 
-# Run all 20 test vectors
+# Run all 28 test vectors
 python harness/harness.py --mode local
 ```
 
@@ -42,7 +42,7 @@ HACP Conformance Harness v0.9.2 - Mode: local
 [PASS] CORE-INV7-002: Budget exhausted - (N+1)-th action
 ...
 ============================================================
-RESULTS: 20/20 passed
+RESULTS: 28/28 passed
 ============================================================
 ```
 
@@ -174,12 +174,12 @@ python harness/harness.py --mode cli --binary-path ./your-impl
 |-----------|-------------|---------|
 | **INV-1** | Human Final Decision | 4 vectors |
 | **INV-2** | Boundary Re-Authorization | 5 vectors |
-| **INV-3** | Token Binding | 3 vectors |
-| **INV-4** | Traceability | 1 vector |
-| **INV-5** | Cryptographic Integrity | 4 vectors |
+| **INV-3** | Token Binding | 4 vectors |
+| **INV-4** | Traceability | 5 vector |
+| **INV-5** | Cryptographic Integrity | 7 vectors |
 | **INV-7** | Bounded Autonomy | 3 vectors |
 
-**Total:** 20 vectors (10 golden + 10 negative)
+**Total:** 28 vectors (12 golden + 16 negative)
 
 ### Test Scenarios
 
@@ -200,9 +200,14 @@ python harness/harness.py --mode cli --binary-path ./your-impl
 - Valid token with correct action_hash (golden)
 - Token with modified action field (hash mismatch)
 - Token presented after expires_at
+- Cross-envelope token replay (envelope A token for envelope B action)
 
 **Traceability (INV-4):**
+- Valid signed EVALUATED provenance event resolves by id (golden)
 - Token revoked after issuance (REVOKED provenance event)
+- Tampered provenance payload_hash → DENY
+- Decision without provenance event → DENY
+- Broken prev_event_hash linkage → DENY
 
 **Cryptographic Integrity (INV-5):**
 - Valid Ed25519 signature (golden)
@@ -210,6 +215,8 @@ python harness/harness.py --mode cli --binary-path ./your-impl
 - Unknown signing key
 - Wrong algorithm (HMAC vs Ed25519)
 - JCS canonicalization with reordered keys (golden)
+- Duplicate JSON keys rejected
+- Non-canonical (pretty-printed) serialization hash mismatch
 
 **Bounded Autonomy (INV-7):**
 - System principal within budget (golden)
@@ -332,8 +339,8 @@ Two independent clean-room implementations pass the full conformance suite (20/2
 
 | Language | Directory | Dependencies | Conformance |
 |----------|-----------|--------------|-------------|
-| Go | `hacp-go/` | stdlib only | 20/20 ✅ |
-| TypeScript | `hacp-ts/` | Node.js stdlib | 20/20 ✅ |
+| Go | `hacp-go/` | stdlib only | 28/28 ✅ |
+| TypeScript | `hacp-ts/` | Node.js stdlib | 28/28 ✅ |
 
 Both were written from the published specification alone and communicate with the harness exclusively via JSON.
 
@@ -354,7 +361,7 @@ HACP enforces transparency through:
 
 - [x] Normative specification (v0.9.0-draft)
 - [x] JSON schemas (6 core objects)
-- [x] Conformance suite (20 vectors, 20/20 passing)
+- [x] Conformance suite (28 vectors, 28/28 passing)
 - [x] Reproducible test keypair
 - [x] Cross-language harness (local/http/cli)
 

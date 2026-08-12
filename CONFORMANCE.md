@@ -14,14 +14,14 @@ public key, without access to the reference implementation.
 
 ## 1. Suite Declaration
 
-Core Conformance Suite 0.9 currently executes **20 vectors**:
+Core Conformance Suite 0.9 currently executes **28 vectors**:
 
-- **19** map to Core Test IDs in `INVARIANTS.md`
+- **27** map to Core Test IDs in `INVARIANTS.md`
 - **1** (`CORE-INV1-006`) is a Runtime-preview vector (checkpoint timeout),
   counted for execution but owned by Phase 3 (Runtime profile)
 
-**Critical additions required before Gate A:** 8 vectors (see §3, status
-"to add"). After addition the Core suite = **27 Core-mapped vectors**.
+**Gate A: reached.** All critical negatives present; harness green in local
+and CLI modes across Python, Go, and TypeScript.
 
 All vectors are reproducible: golden vectors carry real `action_hash` and
 Ed25519 `signature` baked offline (`tools/bake_vector.py`), `draft_mode:
@@ -74,7 +74,7 @@ Status legend:
 |---------|------|--------|--------|------|
 | CORE-INV3-001 | golden | ✅ | core_inv3_001_golden.json | |
 | CORE-INV3-002 | negative | ✅ | core_inv3_002_negative.json | |
-| CORE-INV3-003 | negative | ⚠️ | — | Cross-envelope token replay |
+| CORE-INV3-003 | negative |✅ | — | core_inv3_003_negative.json |
 | CORE-INV3-004 | negative | ✅ | core_inv3_004_negative.json | |
 | CORE-INV3-005 | negative | ⏸ | — | Truncated/re-padded signature |
 
@@ -82,23 +82,23 @@ Status legend:
 
 | Test ID | Type | Status | Vector | Note |
 |---------|------|--------|--------|------|
-| CORE-INV4-001 | golden | ⚠️ | — | Provenance event resolves |
+| CORE-INV4-001 | golden | ✅ | — | core_inv4_001_golden.json |
 | CORE-INV4-002 | golden | ✅ | core_inv4_002_golden.json | |
-| CORE-INV4-003 | negative | ⚠️ | — | Tamper payload_hash |
-| CORE-INV4-004 | negative | ⚠️ | — | Decision without provenance |
-| CORE-INV4-005 | negative | ⚠️ | — | Broken prev_event_hash |
+| CORE-INV4-003 | negative | ✅ | — | core_inv4_003_negative.json |
+| CORE-INV4-004 | negative | ✅ | — | core_inv4_004_negative.json |
+| CORE-INV4-005 | negative | ✅ | — | core_inv4_005_negative.json |
 
 ### INV-5 — Cryptographic Integrity
 
 | Test ID | Type | Status | Vector | Note |
 |---------|------|--------|--------|------|
-| CORE-INV5-001 | golden | ⚠️ | — | Valid signature golden |
+| CORE-INV5-001 | golden | ✅ | — | core_inv5_001_golden.json |
 | CORE-INV5-002 | negative | ✅ | core_inv5_002_negative.json | |
 | CORE-INV5-003 | negative | ✅ | core_inv5_003_negative.json | |
 | CORE-INV5-004 | negative | ✅ | core_inv5_004_negative.json | |
 | CORE-INV5-005 | golden | ✅ | core_inv5_005_golden.json | |
-| CORE-INV5-006 | negative | ⚠️ | — | Duplicate JSON keys |
-| CORE-INV5-007 | negative | ⚠️ | — | Non-canonical serialization hashed |
+| CORE-INV5-006 | negative | ✅ | — | core_inv5_006_negative.json |
+| CORE-INV5-007 | negative | ✅ | — | core_inv5_007_negative.json |
 
 ### INV-7 — Bounded Autonomy
 
@@ -112,8 +112,8 @@ Status legend:
 
 ## 4. Summary
 
-- **In suite now:** 20 executed (19 Core-mapped + 1 Runtime preview)
-- **Critical to add (Gate A):** 8 → INV-3-003, INV-4-001/003/004/005, INV-5-001/006/007
+- **In suite now:** 28 executed (27 Core-mapped + 1 Runtime preview)
+- **Critical to add:** 0 — Gate A reached
 - **Deferred (post-0.9):** 8 → INV-1-003/004, INV-2-004/006/008, INV-3-005, INV-7-003/004
 
 Gate A is reached when all ⚠️ rows become ✅ and the harness reports green
