@@ -479,9 +479,13 @@ class CLITarget:
             temp_path = f.name
 
         try:
-            # Execute binary
+            # Execute binary (or node for .js targets)
+            cmd = [self.binary_path, "evaluate", "--vector", temp_path]
+            if str(self.binary_path).endswith(".js"):
+                cmd = ["node", self.binary_path, "evaluate", "--vector", temp_path]
+
             result = subprocess.run(
-                [self.binary_path, "evaluate", "--vector", temp_path],
+                cmd,
                 capture_output=True,
                 text=True,
                 timeout=self.timeout
