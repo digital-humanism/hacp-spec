@@ -20,8 +20,18 @@ This document defines the mandatory cryptographic primitives for HACP. It is des
 
 ## 3. Key Management and Rotation
 
-1. **Key Rotation:** When a `signer_key_id` is rotated, the old key MUST be marked as revoked in the revocation state. 
-2. **Verification Order:** Verifiers MUST check the revocation state of the `signer_key_id` BEFORE verifying the signature. If the key is revoked, the object MUST be rejected immediately, regardless of signature validity.
+1. **Key Rotation:** When a `signer_key_id` is rotated, the old key MUST be marked as revoked in the revocation state.
+
+2. **Verification Order:** Verifiers MUST check the revocation state of the `signer_key_id` as part of the signature verification path. The normative evaluation order is defined in `HACP-SPEC-0.9-draft.md` §5.1:
+   - Schema validation
+   - Key resolution and revocation check (KEY_REVOKED if revoked)
+   - Signature verification (only if key is not revoked)
+   - Envelope/token revocation checks
+   - Remaining policy evaluation
+
+3. **Fail-closed:** If the signer key is revoked, the object MUST be rejected immediately with `KEY_REVOKED`, regardless of signature validity.
+
+4. **Post-signature revocation:** Envelope and token revocation checks occur after successful signature verification. This prevents probing of revocation state with unsigned or garbage identifiers.
 
 ## 4. Prohibited Practices
 

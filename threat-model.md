@@ -56,6 +56,92 @@ HACP operates across three primary trust boundaries:
 - Short-lived tokens (`expires_at`) minimize the window of exposure.
 - Policy digest binding ensures tokens cannot be reused if policy changes.
 
+### 3.6 Bypass Proxy (Enforcement)
+**Threat:** Agent with unrestricted network access bypasses sidecar by connecting directly to upstream.
+**Mitigation:**
+- Explicit HTTP_PROXY configuration.
+- Network policy blocking direct egress.
+- Container runtime isolation.
+- Future: eBPF enforcement.
+
+**Residual risk:** High if deployment isolation is absent.
+
+### 3.7 Header Spoofing (Enforcement)
+**Threat:** Agent sends forged HACP headers with invalid signatures.
+**Mitigation:**
+- Signature verification before trust.
+- Key revocation check during verification.
+- Envelope/token revocation after signature.
+- Fail-closed on all validation failures.
+
+**Residual risk:** None if verification is correct.
+
+### 3.8 Fat Tool Scope (Enforcement)
+**Threat:** Agent requests action outside token scope.
+**Mitigation:**
+- Scope guard verification.
+- Tool name binding in `constraints`.
+- Path and method binding in `constraints`.
+- Boundary matrix evaluation.
+
+**Residual risk:** Medium if scopes are authored too broadly.
+
+### 3.9 Control Channel Compromise (Enforcement)
+**Threat:** Attacker compromises control plane and sends forged revocation events.
+**Mitigation:**
+- Authenticated streaming channel (gRPC).
+- Signed revocation events.
+- Monotonic sequence numbers.
+- Snapshot resynchronization.
+
+**Residual risk:** Control plane compromise remains critical.
+
+### 3.10 Control Channel Outage (Enforcement)
+**Threat:** Control channel unavailable, revocation state becomes stale.
+**Mitigation:**
+- Local denylist persistence.
+- Maximum staleness threshold (default 5000ms).
+- Fail-closed when stale with `TRACEABILITY_FAILURE`.
+
+**Residual risk:** Availability loss under control-plane outage.
+
+### 3.11 Sidecar Crash (Enforcement)
+**Threat:** Sidecar crashes, agent attempts to forward requests.
+**Mitigation:**
+- Network isolation makes sidecar the only egress path.
+- Crash prevents forwarding.
+- Fail-closed by design.
+
+**Residual risk:** Agent action availability loss is intentional fail-closed behavior.
+
+### 3.12 Provenance Loss (Enforcement)
+**Threat:** Ring buffer full or unavailable, enforcement continues.
+**Mitigation:**
+- Ring buffer acceptance before forward.
+- Deny on buffer failure with `TRACEABILITY_FAILURE`.
+- Asynchronous flush.
+
+**Residual risk:** DoS risk under sustained load if buffer is undersized.
+
+### 3.13 TLS Tunnel Abuse (Enforcement)
+**Threat:** Agent uses CONNECT to tunnel HTTPS through sidecar without inspection.
+**Mitigation:**
+- CONNECT must not be blindly tunneled.
+- MVP denies CONNECT unless explicit controlled termination is configured.
+- HTTPS enforcement requires explicit deployment design.
+
+**Residual risk:** HTTPS interception requires explicit configuration.
+
+### 3.14 Header Downgrade (Enforcement)
+**Threat:** Misconfiguration disables enforcement mode.
+**Mitigation:**
+- Required headers are mandatory in enforce mode.
+- Shadow mode is non-conformant.
+- Disabled mode is non-conformant.
+- Default mode is enforce.
+
+**Residual risk:** Misconfiguration can disable enforcement.
+
 ## 4. Deployment Tiers and Agent Trust
 
 HACP-Core is designed for **Cooperative** and **Managed** agent environments. 
