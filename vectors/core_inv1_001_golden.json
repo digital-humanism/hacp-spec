@@ -10,17 +10,29 @@
       "principal_kind": "human",
       "intent_statement": "Human principal for human-required action",
       "scope": {
-        "verbs": ["delete"],
-        "resource_classes": ["production_database"],
-        "audiences": ["internal"],
-        "reversibility": ["irreversible"],
-        "externality": ["internal"],
-        "data_classes": ["restricted"]
+        "verbs": [
+          "delete"
+        ],
+        "resource_classes": [
+          "production_database"
+        ],
+        "audiences": [
+          "internal"
+        ],
+        "reversibility": [
+          "irreversible"
+        ],
+        "externality": [
+          "internal"
+        ],
+        "data_classes": [
+          "restricted"
+        ]
       },
       "issued_at": 1786000000,
       "expires_at": 1786003600,
-      "signer_key_id": "key-ed25519-prod-001",
-      "signature": "dummy"
+      "signer_key_id": "key-ed25519-test-001",
+      "signature": "stmpGwRsW0jzmONWtiyTN0HOWMe8J_fNIvXx74fF8VRpTljcEE1QT_eE4fN-HsLv-U-rbrMYAbENFlCXYr2gBw"
     },
     "proposed_action": {
       "hacp_version": "0.9",
@@ -39,19 +51,26 @@
       "hacp_version": "0.9",
       "token_id": "33333333-3333-3333-3333-333333333333",
       "envelope_id": "22222222-2222-2222-2222-222222222222",
-      "action_hash": "PLACEHOLDER",
+      "action_hash": "f65e98170ef597c50f9333c1c5d58dd333365959287c4ae6932eba2baf9b5813",
       "policy_digest": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
       "principal": "human_admin_01",
-      "signer_key_id": "key-ed25519-prod-001",
+      "signer_key_id": "key-ed25519-test-001",
       "issued_at": 1786000000,
       "expires_at": 1786003600,
       "decision": "ALLOW",
-      "signature": "PLACEHOLDER"
+      "signature": "ivfyi4zjYdfHvEHEcUv-3GSvYtWcnuBRauzTtrhsC7bRcJmELGVphe8b7hikqGs4k5hoMMr8hxFyxO8uZqfmBw"
     }
   },
   "policy_context": {
     "current_action_count": 0,
-    "human_required_verbs": ["delete"]
+    "human_required_verbs": [
+      "delete"
+    ],
+    "clock": 1786000100
   },
-  "expected": {"outcome": "ALLOW"}
+  "expected": {
+    "outcome": "ALLOW",
+    "action_hash": "f65e98170ef597c50f9333c1c5d58dd333365959287c4ae6932eba2baf9b5813"
+  },
+  "draft_mode": false
 }

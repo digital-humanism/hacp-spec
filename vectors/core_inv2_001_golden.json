@@ -10,17 +10,37 @@
       "principal_kind": "human",
       "intent_statement": "Test boundary scope - all allowed",
       "scope": {
-        "verbs": ["read", "create", "update"],
-        "resource_classes": ["customer_record", "order"],
-        "audiences": ["internal", "external"],
-        "reversibility": ["reversible", "irreversible"],
-        "externality": ["internal", "external"],
-        "data_classes": ["public", "internal", "confidential"]
+        "verbs": [
+          "read",
+          "create",
+          "update"
+        ],
+        "resource_classes": [
+          "customer_record",
+          "order"
+        ],
+        "audiences": [
+          "internal",
+          "external"
+        ],
+        "reversibility": [
+          "reversible",
+          "irreversible"
+        ],
+        "externality": [
+          "internal",
+          "external"
+        ],
+        "data_classes": [
+          "public",
+          "internal",
+          "confidential"
+        ]
       },
       "issued_at": 1786000000,
       "expires_at": 1786003600,
-      "signer_key_id": "key-ed25519-prod-001",
-      "signature": "dummy"
+      "signer_key_id": "key-ed25519-test-001",
+      "signature": "M6k07MIjrsBIbk0a9yfDEoE1AjnzGqvidpc39IvJ-HfvE_8JUe6SIw3-UFbozNRiI_-HY2x_orneHNepn8ruCA"
     },
     "proposed_action": {
       "hacp_version": "0.9",
@@ -39,16 +59,23 @@
       "hacp_version": "0.9",
       "token_id": "33333333-3333-3333-3333-333333333333",
       "envelope_id": "22222222-2222-2222-2222-222222222222",
-      "action_hash": "PLACEHOLDER",
+      "action_hash": "ca82e979c6fc1dedbfaa6a1c3d87511facd286896735cf4cde74c572ab91e6d4",
       "policy_digest": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
       "principal": "human_admin_01",
-      "signer_key_id": "key-ed25519-prod-001",
+      "signer_key_id": "key-ed25519-test-001",
       "issued_at": 1786000000,
       "expires_at": 1786003600,
       "decision": "ALLOW",
-      "signature": "PLACEHOLDER"
+      "signature": "8ESxwoWvXllRCc2mmcSkSsk8RJRXeNycxT3ozRV_Hm8qZBI8witiafAHKSXfGV2mYrMOQwTAL4shMn8mJx7dDw"
     }
   },
-  "policy_context": {"current_action_count": 0},
-  "expected": {"outcome": "ALLOW"}
+  "policy_context": {
+    "current_action_count": 0,
+    "clock": 1786000100
+  },
+  "expected": {
+    "outcome": "ALLOW",
+    "action_hash": "ca82e979c6fc1dedbfaa6a1c3d87511facd286896735cf4cde74c572ab91e6d4"
+  },
+  "draft_mode": false
 }

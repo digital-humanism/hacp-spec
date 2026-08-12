@@ -1,159 +1,202 @@
-# HACP Specification
+# HACP — Human Agency Continuity Protocol
 
-**Version:** `0.9.0-draft`  
-**Status:** Draft for public review  
-**Specification License:** CC BY 4.0  
-**Reference Implementation:** `humanist-core` — AGPLv3 with Commercial Dual Licensing  
+**Version:** 0.9.0-draft  
+**Status:** Phase 1 Complete  
+**License:** CC BY 4.0
 
----
+A language-agnostic protocol for preserving human agency in AI agent systems. HACP enforces pre-execution policy decisions through cryptographic tokens, preventing autonomous M2M loops and ensuring human oversight.
 
-## 1. What is HACP?
+## Core Principles
 
-**HACP** — **Human Agency Continuity Protocol** — is an open protocol for preserving human agency in AI-assisted and autonomous agent systems.
+1. **Pre-execution enforcement** — Decisions made BEFORE action execution
+2. **Deterministic hot path** — No LLMs on the decision path
+3. **Cryptographic binding** — Tokens bound to exact action hashes (SHA-256)
+4. **Fail-closed mandate** — Internal errors → DENY, never ALLOW
+5. **Scope containment** — Actions must stay within envelope boundaries
 
-HACP defines how a proposed action is represented, evaluated, authorized, revoked, and cryptographically recorded **before execution**.
+## Quick Start
 
-The protocol is designed for enterprise environments where AI agents can perform consequential operations such as:
+### Run Conformance Tests (Local Mode)
 
-- modifying tickets or records;
-- sending external communications;
-- executing tool calls;
-- exporting data;
-- triggering workflows;
-- calling external APIs;
-- performing irreversible or high-risk operations.
+```bash
+# Install dependencies
+pip install -r harness/requirements.txt
 
-HACP ensures that a human retains the final semantic decision, while still allowing automation within explicitly authorized boundaries.
-
----
-
-## 2. Why HACP?
-
-Many current AI governance approaches rely on post-hoc mechanisms:
-
-- output watermarking;
-- content provenance metadata;
-- advisory risk scoring;
-- LLM-based safety filters;
-- logging after execution.
-
-These mechanisms may help with audit or compliance, but they do not prevent unauthorized or unsafe actions from being executed.
-
-HACP takes a different approach.
-
-It moves control to the **pre-execution boundary**:
-
-```text
-IntentEnvelope
-   ↓
-ProposedAction
-   ↓
-ScopeGuard / Boundary Evaluation
-   ↓
-DecisionToken
-   ↓
-Enforced Execution or Denial
-   ↓
-Provenance Event
+# Run all 20 test vectors
+python harness/harness.py --mode local
 ```
 
-The decision is made before the action is performed, and the token is cryptographically bound to the exact action being authorized.
+Expected output:
+```
+============================================================
+HACP Conformance Harness v0.9.2 - Mode: local
+============================================================
 
----
+[PASS] CORE-INV1-001: Human principal with human-required consequence class
+[PASS] CORE-INV2-001: All attributes within granted scope
+[PASS] CORE-INV3-001: Token presented with the exact bound action
+[PASS] CORE-INV5-002: Flip one byte in signed payload
+[PASS] CORE-INV7-002: Budget exhausted - (N+1)-th action
+...
+============================================================
+RESULTS: 20/20 passed
+============================================================
+```
 
-## 3. Core Principles
+### Verify Vector Integrity (CI Mode)
 
-HACP is built around the following principles:
+```bash
+# Check that all baked vectors have correct hashes and signatures
+python tools/bake_vector.py --check
+```
 
-1. **Human final semantic decision**  
-   A human or explicitly authorized policy authority must be able to approve, deny, or checkpoint consequential actions.
+Expected output:
+```
+[CHECK] CORE-INV1-001 (golden) OK
+[CHECK] CORE-INV2-001 (golden) OK
+[CHECK] CORE-INV3-001 (golden) OK
+...
+============================================================
+CHECK RESULTS: 20/20 passed
+============================================================
+```
 
-2. **Deterministic hot path**  
-   The core allow/deny/checkpoint decision must not require an LLM call at execution time.
+## Reproducibility Guarantees
 
-3. **Cryptographic honesty**  
-   Decisions, intents, and provenance events should be signed and tamper-evident.
+HACP conformance vectors are **byte-reproducible** across platforms and languages:
 
-4. **Revocability**  
-   Tokens, envelopes, and signer keys must support revocation.
+### Fixed Test Keypair
 
-5. **Auditability**  
-   Every decision should be traceable to a policy version, principal, signer key, and action hash.
+```
+seed = SHA-256(b"hacp-conformance-v0.9-key-001")
+public_key = Ed25519_derive_public(seed)
+```
 
-6. **Minimal trust in LLM output**  
-   LLM signals may be used as telemetry or explanation, but not as the sole mandatory authority for execution.
+The test keypair is committed to `harness/keys/`:
+- `test-ed25519-001.pub` — Public key (verifier only)
+- `test-ed25519-001.seed` — Private seed (baker only)
+- `KEYS.md` — Documentation
 
-7. **Enforcement over advisory control**  
-   HACP is intended to support real enforcement points, not only recommendations.
+**Security Notice:** These keys are published intentionally for reproducibility. They MUST NOT be used in production.
 
----
+### Deterministic Baking
 
-## 4. HACP Profiles
+```bash
+# Bake all golden vectors (compute hashes, sign payloads)
+python tools/bake_vector.py
+```
 
-HACP is divided into compatibility profiles.
+For each golden vector:
+1. `action_hash = SHA-256(JCS(proposed_action))`
+2. `signature = Ed25519(test_sk, JCS(token_without_signature))`
+3. `draft_mode: false`
+4. `policy_context.clock: explicit` (no `time.time()` in runner)
 
-### 4.1 HACP-Core
+### Canonicalization
 
-The minimal protocol layer.
+All hashing and signing uses strict JCS-like canonicalization (RFC 8785):
+- Keys sorted lexicographically (UTF-8)
+- Numbers without `.0`
+- Strings with JSON escape rules
+- No duplicate keys, no non-finite floats
 
-A Core-compatible implementation must support:
+Same logical payload → same canonical bytes → same hash on any platform.
 
-- `IntentEnvelope`;
-- `ProposedAction`;
-- `DecisionToken`;
-- `evaluate()` decision function;
-- token verification;
-- revocation interface;
-- cryptographic signing or verification;
-- provenance event generation.
+## Conformance Testing Workflow
 
-### 4.2 HACP-Runtime
+### For Clean-Room Implementations (Go, TypeScript, Rust)
 
-Adds support for asynchronous human interaction.
+1. **Clone repository:**
+   ```bash
+   git clone https://github.com/digital-humanism/hacp-spec.git
+   ```
 
-Includes:
+2. **Implement `evaluate()`** per `api/decision-api.md`:
+   ```text
+   function evaluate(
+       envelope: IntentEnvelope,
+       action: ProposedAction,
+       context: PolicyContext
+   ) -> AgencyDecision
+   ```
 
-- checkpoint creation;
-- timeout handling;
-- resume semantics;
-- state expiration;
-- notification payloads;
-- human signer assurance.
+3. **Expose HTTP endpoint** (`POST /evaluate`):
+   ```bash
+   ./your-impl conformance-server --port 8080
+   ```
 
-### 4.3 HACP-Enforcement
+4. **Run harness against your implementation:**
+   ```bash
+   python harness/harness.py --mode http --target-url http://localhost:8080
+   ```
 
-Adds support for external enforcement.
+5. **Verify results:**
+   - Golden vectors → `ALLOW` with valid token
+   - Negative vectors → `DENY` or `CHECKPOINT` with correct reason codes
+   - All 20/20 passed = clean-room verification complete
 
-Includes:
+### Alternative: CLI Mode
 
-- sidecar or gateway interception;
-- request headers or protocol bindings;
-- token binding to request/action;
-- fail-closed behavior for high-risk actions;
-- MCP and HTTP binding profiles.
+```bash
+# Your binary accepts vector file path
+./your-impl evaluate --vector vectors/core_inv3_001_golden.json
+# stdout: {"decision": "ALLOW", "decision_token": {...}}
 
----
+# Test with harness
+python harness/harness.py --mode cli --binary-path ./your-impl
+```
 
-## 5. Relationship to AI Output Watermarking
+## Test Coverage
 
-HACP is complementary to, but distinct from, AI output watermarking and content provenance systems such as C2PA.
+### Invariants Covered
 
-Watermarking attempts to mark content after generation. HACP authorizes actions before execution.
+| Invariant | Description | Vectors |
+|-----------|-------------|---------|
+| **INV-1** | Human Final Decision | 4 vectors |
+| **INV-2** | Boundary Re-Authorization | 5 vectors |
+| **INV-3** | Token Binding | 3 vectors |
+| **INV-4** | Traceability | 1 vector |
+| **INV-5** | Cryptographic Integrity | 4 vectors |
+| **INV-7** | Bounded Autonomy | 3 vectors |
 
-| Concern | Watermarking / C2PA | HACP |
-|---|---|---|
-| Timing | Post-hoc | Pre-execution |
-| Primary goal | Content provenance | Action authorization |
-| Prevents unauthorized execution | No | Yes, when enforced |
-| Cryptographic binding to action | Weak or removable | Strong, via signed DecisionToken |
-| Human final decision | Not guaranteed | Protocol-level requirement |
-| Revocation | Limited | Supported |
+**Total:** 20 vectors (10 golden + 10 negative)
 
-HACP does not replace watermarking. It addresses a different problem: preventing unauthorized agent actions, not merely labeling generated content.
+### Test Scenarios
 
----
+**Human Final Decision (INV-1):**
+- Human principal with human-required action
+- System principal attempting human-required action (CHECKPOINT)
+- Expired delegation envelope
+- Checkpoint timeout
 
-## 6. Repository Structure
+**Boundary Re-Authorization (INV-2):**
+- All attributes within scope (golden)
+- Audience boundary crossing (internal → external)
+- Reversibility boundary crossing (reversible → irreversible)
+- Quantity scope exceeded (max 100, proposed 500)
+- Data class boundary crossing (internal → confidential)
+
+**Token Binding (INV-3):**
+- Valid token with correct action_hash (golden)
+- Token with modified action field (hash mismatch)
+- Token presented after expires_at
+
+**Traceability (INV-4):**
+- Token revoked after issuance (REVOKED provenance event)
+
+**Cryptographic Integrity (INV-5):**
+- Valid Ed25519 signature (golden)
+- Tampered signature
+- Unknown signing key
+- Wrong algorithm (HMAC vs Ed25519)
+- JCS canonicalization with reordered keys (golden)
+
+**Bounded Autonomy (INV-7):**
+- System principal within budget (golden)
+- Budget exhausted (N+1)-th action
+- Envelope revoked mid-budget
+
+## Repository Structure
 
 ```
 hacp-spec/
@@ -197,222 +240,139 @@ hacp-spec/
 ├── harness/                         # Cross-language conformance testing harness
 │   ├── harness.py                   # Test runner (local / http / cli modes)
 │   ├── requirements.txt             # Harness dependencies
+│   ├── keys/                        # Fixed test keypair (TEST ONLY)
+│   │   ├── KEYS.md                  # Key registry and documentation
+│   │   ├── test-ed25519-001.pub     # Public key (32 bytes, hex)
+│   │   └── test-ed25519-001.seed    # Private seed (32 bytes, hex)
 │   └── README.md                    # Harness usage documentation
 │
-└── runner.py                        # Legacy runner (deprecated, use harness/)
+└── tools/                           # Offline vector generation tools
+    ├── gen_test_keys.py             # Generate deterministic test keypair
+    └── bake_vector.py               # Bake vectors with hashes and signatures
 ```
 
-## 7. Normative Language
+## API Contract
 
-The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHALL**, **SHALL NOT**, **SHOULD**, **SHOULD NOT**, **RECOMMENDED**, **MAY**, and **OPTIONAL** in this specification are to be interpreted as described in RFC 2119 and RFC 8174.
+See [`api/decision-api.md`](api/decision-api.md) for the complete language-agnostic interface:
 
----
+- **Section 1:** Core interface (`evaluate`, `issue_token`, `revoke`, `explain`)
+- **Section 2:** Error handling and fail-closed mandate
+- **Section 3:** Conformance testing interface (HTTP and CLI targets)
 
-## 8. Implementer Quick Start
+### HTTP Interface (Enterprise)
 
-To implement HACP-Core:
+```http
+POST /evaluate
+Content-Type: application/json
 
-1. Read `HACP-SPEC-0.9-draft.md`.
-2. Implement the core data structures defined in `schemas/`.
-3. Implement an `evaluate()` function that receives:
-   - `IntentEnvelope`;
-   - `ProposedAction`;
-   - policy context;
-   - revocation state.
-4. Return one of:
-   - `ALLOW`;
-   - `DENY`;
-   - `CHECKPOINT`.
-5. For `ALLOW`, issue a signed `DecisionToken`.
-6. Bind the token to the canonicalized hash of the `ProposedAction`.
-7. Record the decision in a `ProvenanceEvent`.
-8. Support token and envelope revocation.
+{
+  "test_id": "CORE-INV3-001",
+  "type": "golden",
+  "inputs": { ... },
+  "policy_context": { "clock": 1786000100 },
+  "expected": { "outcome": "ALLOW" }
+}
+```
 
-Implementations MUST NOT require an LLM call to produce a mandatory allow/deny decision on the hot path.
+### CLI Interface (Development)
 
----
+```bash
+./hacp-impl evaluate --vector vectors/core_inv3_001_golden.json
+```
 
-## 9. Canonicalization and Cryptography
+## Implementation Status
 
-HACP requires deterministic serialization before hashing or signing.
+### Reference Implementation (Python)
 
-Implementations MUST follow `canonicalization.md`.
+**Repository:** [`humanist-core`](https://github.com/digital-humanism/humanist-core)
 
-The current draft recommends:
+- **Status:** v0.5.0-alpha (Phase 1-5 complete)
+- **Coverage:** 100% test coverage (816 statements, 122 tests)
+- **License:** AGPLv3 + Commercial Dual Licensing
 
-- JSON Canonicalization Scheme (JCS) for JSON payloads;
-- SHA-256 for action and payload hashing;
-- Ed25519 for production signatures;
-- HMAC only for local development profiles;
-- explicit key identifiers;
-- no dynamic algorithm negotiation.
+### Clean-Room Implementations
 
-A `DecisionToken` is not valid unless it is cryptographically bound to the exact action it authorizes.
+**Status:** Ready for independent verification
 
----
+The conformance suite enables clean-room implementations in any language:
+- Same JSON vectors
+- Same public key
+- Same pass/fail results
+- No access to Python reference code required
 
-## 10. Conformance
+**In progress:**
+- Go implementation (planned)
+- TypeScript implementation (planned)
 
-A public conformance suite is planned.
+## Philosophy
 
-It will include:
+**Digital Humanism** — Human agency as a first-class architectural concern.
 
-- golden vectors;
-- negative vectors;
-- canonicalization tests;
-- revocation tests;
-- expired-token tests;
-- forged-signature tests;
-- boundary matrix tests;
-- checkpoint timeout tests;
-- enforcement binding tests.
+HACP enforces transparency through:
+- Open standard (CC BY 4.0)
+- Dual licensing (AGPLv3 + Commercial)
+- No telemetry, no hidden compromises
+- Cryptographic honesty as foundation of trust
 
-The compatibility marks:
+## Roadmap
 
-- `HACP-Core Compatible`
-- `HACP-Runtime Compatible`
-- `HACP-Enforcement Compatible`
+### Phase 1: Specification ✅ (Complete)
 
-may only be used by implementations that pass the corresponding conformance suite once the conformance policy is published.
+- [x] Normative specification (v0.9.0-draft)
+- [x] JSON schemas (6 core objects)
+- [x] Conformance suite (20 vectors, 20/20 passing)
+- [x] Reproducible test keypair
+- [x] Cross-language harness (local/http/cli)
 
----
+### Phase 2: Clean-Room Verification (In Progress)
 
-## 11. Security Model
+- [ ] Go implementation
+- [ ] TypeScript implementation
+- [ ] Rust implementation
+- [ ] Independent verification reports
 
-HACP assumes that deployments may contain imperfect or adversarial LLM behavior.
+### Phase 3: Production Readiness
 
-Therefore:
+- [ ] `humanist-core` synchronization with spec
+- [ ] LangChain v2 integration
+- [ ] Enterprise documentation
+- [ ] Security audit
 
-- LLM output is not trusted as an authority.
-- Proposed actions should arrive through a mediated interface.
-- Tool calls should be schema-constrained.
-- High-risk actions should require explicit authorization.
-- Enforcement points should fail closed when token validation cannot be completed.
-- Revocation state should be propagated as quickly as deployment constraints allow.
+### Phase 4: Ecosystem
 
-HACP does not claim to solve prompt injection by itself. It defines a control boundary that can be enforced when actions are mediated and interceptable.
+- [ ] Public conformance registry
+- [ ] Certification program
+- [ ] Commercial support
 
-See `threat-model.md` for details.
+## Contributing
 
----
+### Adding Test Vectors
 
-## 12. Non-Goals
+1. Create vector JSON in `vectors/` following `INVARIANTS.md`
+2. For golden vectors, set `signature: "PLACEHOLDER"` and `draft_mode: true`
+3. Run `python tools/bake_vector.py` to compute hashes and signatures
+4. Run `python tools/bake_vector.py --check` to verify integrity
+5. Run `python harness/harness.py --mode local` to validate
 
-HACP is intentionally scoped.
+### Reporting Issues
 
-The following are not goals of HACP-Core:
+Open an issue with:
+- Test ID (e.g., `CORE-INV3-001`)
+- Expected vs actual behavior
+- Relevant vector JSON
 
-- building a global identity mesh;
-- replacing DLP systems;
-- providing OS-level sandboxing;
-- acting as a general MCP firewall;
-- detecting AI-generated content after the fact;
-- guaranteeing removal of AI watermarking;
-- solving all prompt-injection risks inside unmediated LLM reasoning;
-- replacing service mesh infrastructure.
+## References
 
-See `NON-GOALS.md`.
+- [RFC 8785 — JSON Canonicalization Scheme (JCS)](https://tools.ietf.org/html/rfc8785)
+- [RFC 8032 — Edwards-Curve Digital Signature Algorithm (Ed25519)](https://tools.ietf.org/html/rfc8032)
+- [OAuth 2.0 Conformance Testing](https://oauth.net/2/conformance/)
+- [C2PA Content Authenticity](https://c2pa.org/)
 
----
+## License
 
-## 13. Licensing
-
-This specification is provided under **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
-
-The reference implementation, `humanist-core`, is licensed under **AGPLv3**, with commercial dual licensing available for closed-source and enterprise embedding.
-
-The separation is intentional:
-
-- the specification remains open;
-- conformance is intended to be public;
-- commercial support and closed embedding are available through separate licensing.
+**Specification:** [CC BY 4.0](LICENSE)  
+**Reference Implementation:** AGPLv3 + Commercial Dual Licensing
 
 ---
 
-## 14. Trademark and Compatibility Claims
-
-The name **HACP** and compatibility statements are intended to be protected through conformance, not marketing.
-
-Once the conformance process is published:
-
-- implementations should not claim HACP compatibility without passing the relevant test suite;
-- partial implementations should clearly state which profile and version they support;
-- experimental implementations should identify themselves as draft or non-conformant.
-
----
-
-## 15. Versioning
-
-This is a draft specification.
-
-The versioning policy is:
-
-- `0.9.x` — draft stabilization;
-- `1.0.0` — normative freeze after:
-  - public review;
-  - conformance suite publication;
-  - at least one independent clean-room implementation;
-  - validation of Core revocation and token-binding semantics.
-
-Backward compatibility requirements will be defined before `1.0.0`.
-
----
-
-## 16. Roadmap
-
-Current draft focus:
-
-1. Stabilize Core objects.
-2. Define canonicalization and signing rules.
-3. Publish JSON Schemas.
-4. Define deterministic boundary attributes.
-5. Define revocation semantics.
-6. Publish conformance vectors.
-7. Define Runtime checkpoint state machine.
-8. Define Enforcement bindings for MCP and HTTP.
-
----
-
-## 17. Reference Implementation
-
-The current reference implementation is maintained in the `humanist-core` project.
-
-It includes:
-
-- authority core;
-- boundary detection;
-- risk engine;
-- autonomy budget;
-- cryptographic provenance;
-- runtime integration;
-- evaluation metrics;
-- ROI and enterprise deployment examples.
-
-The reference implementation is not the specification. In case of conflict, the specification and conformance suite are authoritative.
-
----
-
-## 18. Contribution
-
-Contributions should focus on:
-
-- testability;
-- implementation independence;
-- deterministic behavior;
-- clear normative language;
-- security review;
-- enterprise deployment realism.
-
-Philosophical or marketing changes are not accepted into normative documents without clear engineering justification.
-
----
-
-## 19. Summary
-
-HACP is an open protocol for enforcing human agency in AI agent systems.
-
-It does not attempt to mark AI output after the fact. It authorizes, denies, or checkpoints actions before execution, using deterministic policy evaluation and cryptographic decision tokens.
-
-The goal is simple:
-
-> **No consequential agent action should be executable without a verifiable, revocable, and auditable decision.**
+**Contact:** [digital.humanism.collective@protonmail.com](mailto:digital.humanism.collective@protonmail.com)

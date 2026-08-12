@@ -141,56 +141,37 @@ def load_schemas() -> Dict[str, Any]:
 
 
 # --- Generator ---
-class VectorGenerator:
+class KeyLoader:
     """
-    Generates valid cryptographic artifacts for golden vectors.
-    Used in local mode to create complete test data.
+    Loads fixed test keypair for signature verification.
+    Verifier-only: no key generation, no signing.
     """
 
     def __init__(self):
         if not HAS_CRYPTO:
-            raise ImportError("cryptography library required for generator")
-        self.private_key = Ed25519PrivateKey.generate()
-        self.public_key = self.private_key.public_key()
+            raise ImportError("cryptography library required")
+        
+        self.keys_dir = SPEC_ROOT / "harness" / "keys"
+        self.public_key = self._load_public_key()
+        self.signer_key_id = "key-ed25519-test-001"
 
-    def sign_vector(self, vector: Dict) -> Dict:
-        """
-        Sign a golden vector to create complete test data.
-        Modifies vector in place and returns it.
-        """
-        test_type = vector.get("type")
-        if test_type != "golden":
-            return vector
-
-        action = vector["inputs"]["proposed_action"]
-
-        # Compute action_hash
-        canonical_action = canonicalize(action)
-        action_hash = compute_sha256(canonical_action)
-
-        # Sign intent_envelope if present
-        envelope = vector["inputs"].get("intent_envelope")
-        if envelope and envelope.get("signature") == "dummy":
-            envelope_for_signing = {
-                k: v for k, v in envelope.items() if k != "signature"
-            }
-            envelope["signature"] = sign_payload(
-                canonicalize(envelope_for_signing), self.private_key
+    def _load_public_key(self):
+        """Load Ed25519 public key from fixed test key file."""
+        pub_file = self.keys_dir / "test-ed25519-001.pub"
+        if not pub_file.exists():
+            raise FileNotFoundError(
+                f"Public key not found at {pub_file}. "
+                "Run 'python tools/gen_test_keys.py' first."
             )
+        
+        pub_hex = pub_file.read_text(encoding="utf-8").strip()
+        pub_bytes = bytes.fromhex(pub_hex)
+        
+        if len(pub_bytes) != 32:
+            raise ValueError(f"Public key must be 32 bytes, got {len(pub_bytes)}")
+        
+        return Ed25519PublicKey.from_public_bytes(pub_bytes)
 
-        # Sign decision_token if present and decision is ALLOW
-        token = vector["inputs"].get("decision_token")
-        if token:
-            token["action_hash"] = action_hash
-            token_for_signing = {
-                k: v for k, v in token.items() if k != "signature"
-            }
-            token["signature"] = sign_payload(
-                canonicalize(token_for_signing), self.private_key
-            )
-            vector["inputs"]["decision_token"] = token
-
-        return vector
 
 # --- Verifier ---
 class ResponseVerifier:
@@ -342,8 +323,8 @@ def evaluate_logic(action: Dict, envelope: Dict, context: Dict,
 
     # INV-1: Human Final Decision
     human_verbs = context.get("human_required_verbs", [])
-    if action["verb"] in human_verbs:
-        if envelope["principal_kind"] == "system":
+    if action.get("verb") in human_verbs:
+        if envelope.get("principal_kind") == "system":
             parent_envelope_id = envelope.get("parent_envelope_id")
             if not parent_envelope_id:
                 return "CHECKPOINT"
@@ -352,27 +333,27 @@ def evaluate_logic(action: Dict, envelope: Dict, context: Dict,
     scope = envelope.get("scope", {})
 
     allowed_audiences = scope.get("audiences", [])
-    if action["audience"] not in allowed_audiences:
+    if action.get("audience") not in allowed_audiences:
         return "DENY"
 
     allowed_reversibility = scope.get("reversibility", [])
-    if action["reversibility"] not in allowed_reversibility:
+    if action.get("reversibility") not in allowed_reversibility:
         return "DENY"
 
     allowed_externality = scope.get("externality", [])
-    if action["externality"] not in allowed_externality:
+    if action.get("externality") not in allowed_externality:
         return "DENY"
 
     allowed_data_classes = scope.get("data_classes", [])
-    if action["data_class"] not in allowed_data_classes:
+    if action.get("data_class") not in allowed_data_classes:
         return "DENY"
 
     allowed_verbs = scope.get("verbs", [])
-    if action["verb"] not in allowed_verbs:
+    if action.get("verb") not in allowed_verbs:
         return "DENY"
 
     allowed_resources = scope.get("resource_classes", [])
-    if action["resource_class"] not in allowed_resources:
+    if action.get("resource_class") not in allowed_resources:
         return "DENY"
 
     if "quantity" in action:
@@ -392,6 +373,7 @@ def evaluate_logic(action: Dict, envelope: Dict, context: Dict,
 
     return "ALLOW"
 
+
 # --- Target Interfaces ---
 class LocalTarget:
     """
@@ -399,17 +381,16 @@ class LocalTarget:
     Simulates HACP-Core logic without external dependencies.
     """
 
-    def __init__(self, generator: VectorGenerator):
-        self.generator = generator
+    def __init__(self, key_loader: KeyLoader):
+        self.key_loader = key_loader
 
     def evaluate(self, vector: Dict) -> Dict:
         """Evaluate vector using local emulation."""
-        signed_vector = self.generator.sign_vector(vector.copy())
-
-        action = signed_vector["inputs"]["proposed_action"]
-        envelope = signed_vector["inputs"]["intent_envelope"]
-        context = signed_vector.get("policy_context", {})
-        token = signed_vector["inputs"].get("decision_token")
+        # Vectors are already baked — no signing in runtime
+        action = vector["inputs"]["proposed_action"]
+        envelope = vector["inputs"]["intent_envelope"]
+        context = vector.get("policy_context", {})
+        token = vector["inputs"].get("decision_token")
 
         # Step 1: Policy evaluation
         decision = evaluate_logic(action, envelope, context, token)
@@ -423,14 +404,14 @@ class LocalTarget:
             if token.get("action_hash") != computed_hash:
                 decision = "DENY"
             else:
-                # INV-5: Signature verification (only if hash matches)
+                # INV-5: Signature verification
                 token_for_verify = {
                     k: v for k, v in token.items() if k != "signature"
                 }
                 sig_valid = verify_signature(
                     canonicalize(token_for_verify),
                     token["signature"],
-                    self.generator.public_key
+                    self.key_loader.public_key
                 )
                 if not sig_valid:
                     decision = "DENY"
@@ -441,6 +422,7 @@ class LocalTarget:
             response["decision_token"] = token
 
         return response
+
 
 class HTTPTarget:
     """
@@ -680,23 +662,33 @@ Examples:
     # Load schemas
     schemas = load_schemas()
 
-    # Create generator (for local mode and verification)
-    generator = VectorGenerator() if HAS_CRYPTO else None
+    # Create key loader (for local mode and verification)
+    key_loader = KeyLoader() if HAS_CRYPTO else None
 
     # Create target
     if args.mode == "local":
-        if not generator:
+        if not key_loader:
             print("Error: cryptography library required for local mode")
             sys.exit(1)
-        target = LocalTarget(generator)
+        target = LocalTarget(key_loader)
     elif args.mode == "http":
-        target = HTTPTarget(args.target_url, args.api_key, args.timeout)
+        target = HTTPTarget(
+            base_url=args.target_url,
+            api_key=args.api_key,
+            timeout=args.timeout
+        )
     elif args.mode == "cli":
-        target = CLITarget(args.binary_path, args.timeout)
+        target = CLITarget(
+            binary_path=args.binary_path,
+            timeout=args.timeout
+        )
+    else:
+        print(f"Unknown mode: {args.mode}")
+        sys.exit(1)
 
     # Create verifier
     verifier = ResponseVerifier(
-        public_key=generator.public_key if generator else None
+        public_key=key_loader.public_key if key_loader else None
     )
 
     # Create harness
