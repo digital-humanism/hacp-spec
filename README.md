@@ -2,8 +2,8 @@
 
 ![tests](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml/badge.svg)
 
-**Version:** 0.9.0-draft  
-**Status:** Phase 1 + Phase 2 Complete  
+**Version:** 0.9.2  
+**Status:** Phase 1–3 Complete · Phase 4 (Enforcement) Gate A Closed  
 **License:** CC BY 4.0
 
 A language-agnostic protocol for preserving human agency in AI agent systems. HACP enforces pre-execution policy decisions through cryptographic tokens, preventing autonomous M2M loops and ensuring human oversight.
@@ -44,6 +44,44 @@ HACP Conformance Harness v0.9.2 - Mode: local
 ============================================================
 RESULTS: 38/38 passed
 ============================================================
+```
+### Run Conformance Tests (Runner Protocol)
+
+For language-neutral verification via stdin/stdout JSON:
+
+```bash
+# Test an external implementation (e.g., hacp-sidecar)
+python harness/harness_runner.py \
+  --runner "./path/to/implementation-runner" \
+  --vectors-dir vectors \
+  --manifest harness/conformance_manifest.json \
+  --implementation-name my-impl \
+  --implementation-version 0.9.2
+```
+
+Expected output:
+
+```
+============================================================
+HACP Conformance Harness v0.9.2 - Runner Mode
+Protocol version: 1
+Spec: 0.9.2 (HACP-Core)
+============================================================
+
+Manifest verified: 0.9.2 (HACP-Core)
+Vector set: core-0.9.2
+Digest: sha256:9c0557dd...
+
+[PASS] CORE-INV1-001: Human principal with human-required consequence class
+...
+[PASS] CORE-RUNTIME-005: System principal resolves its own checkpoint
+
+============================================================
+RESULTS: 38/38 passed
+============================================================
+```
+
+Full runner protocol specification: [`harness/runner_protocol.md`](harness/runner_protocol.md)
 ```
 
 ### Verify Vector Integrity (CI Mode)
@@ -98,6 +136,30 @@ For each golden vector:
 3. `draft_mode: false`
 4. `policy_context.clock: explicit` (no `time.time()` in runner)
 
+### Conformance Manifest
+
+The canonical vector set is pinned via a SHA-256 digest stored in [`harness/conformance_manifest.json`](harness/conformance_manifest.json):
+
+```json
+{
+  "spec_version": "0.9.2",
+  "profile": "HACP-Core",
+  "vector_set": "core-0.9.2",
+  "canonicalization": "JCS-RFC8785",
+  "digest_algorithm": "SHA-256",
+  "vector_digest": "sha256:9c0557ddbaf5526c57979fc6126b9864ac38f13b313b2082ab57194f047b52e2",
+  "total_vectors": 38
+}
+```
+
+The harness verifies this digest before running any vector. This ensures CI runs against a known-good vector set, preventing silent divergence when vectors are updated.
+
+Regenerate after adding new vectors:
+
+```bash
+python harness/generate_manifest.py
+```
+
 ### Canonicalization
 
 All hashing and signing uses strict JCS-like canonicalization (RFC 8785):
@@ -113,12 +175,18 @@ Same logical payload → same canonical bytes → same hash on any platform.
 
 ### Verified Implementations
 
-The following implementations have passed the full conformance suite and are listed as reference clean-room proofs:
+### Verified Implementations
 
-- **Go** (`hacp-go/`) — stdlib only, 38/38
-- **TypeScript** (`hacp-ts/`) — Node.js stdlib, 38/38
+The following implementations have passed the full conformance suite and are listed as conformant proofs:
 
-Any new implementation can be verified the same way by exposing the HTTP or CLI interface and running the harness against it.
+| Implementation | Type | Language | Conformance | Vectors |
+|----------------|------|----------|-------------|---------|
+| `hacp-go` | Clean-room library | Go | ✅ Conformant | 38/38 (HACP-Core 0.9.2) |
+| `hacp-ts` | Clean-room library | TypeScript | ✅ Conformant | 38/38 (HACP-Core 0.9.2) |
+| [`hacp-sidecar`](https://github.com/digital-humanism/hacp-sidecar) | Enforcement proxy | Go | ✅ Conformant | 38/38 (HACP-Core 0.9.2) |
+| `humanist-core` | Reference impl | Python | ⏸ Pending | — |
+
+Any new implementation can be verified by exposing a runner (stdin/stdout JSON per [`harness/runner_protocol.md`](harness/runner_protocol.md)) and running the harness against it.
 
 ### For Clean-Room Implementations (Go, TypeScript, Rust)
 
@@ -267,6 +335,10 @@ hacp-spec/
 │
 ├── harness/                         # Cross-language conformance testing harness
 │   ├── harness.py                   # Test runner (local / http / cli modes)
+│   ├── harness_runner.py            # Runner protocol engine (stdin/stdout JSON)
+│   ├── runner_protocol.md           # Normative runner protocol specification
+│   ├── conformance_manifest.json    # Pinned vector set with SHA-256 digest
+│   ├── generate_manifest.py         # Regenerate manifest after vector changes
 │   ├── requirements.txt             # Harness dependencies
 │   ├── keys/                        # Fixed test keypair (TEST ONLY)
 │   │   ├── KEYS.md                  # Key registry and documentation
@@ -376,12 +448,20 @@ HACP enforces transparency through:
 ### Phase 3: Production Readiness
 
 - [x] checkpoint-protocol.md + 5 runtime vectors
+- [x] Language-neutral runner protocol + conformance manifest
+- [x] [`hacp-sidecar`](https://github.com/digital-humanism/hacp-sidecar) enforcement proxy (38/38 conformant)
 - [ ] `humanist-core` synchronization with spec
 - [ ] LangChain v2 integration
 - [ ] Enterprise documentation
 - [ ] Security audit
 
 ### Phase 4: Ecosystem
+
+**Gate A** — Protocol correctness: ✅ 38/38 vectors pass  
+**Gate B** — Semantic completeness (boundary matrix): ⏸ Pending  
+**Gate C** — Deployability (docker-compose reference stack): ⏸ Pending  
+**Gate D** — Operational viability (p99/throughput benchmark): ⏸ Pending  
+**Gate E** — Distributed management (gRPC control plane): ⏸ Pending
 
 - [ ] Public conformance registry
 - [ ] Certification program
