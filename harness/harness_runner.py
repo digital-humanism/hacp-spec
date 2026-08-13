@@ -120,9 +120,10 @@ class RunnerTarget:
             self.runner_command,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=None if self.verbose else subprocess.PIPE,
+            stderr=None if self.verbose else subprocess.DEVNULL,
             text=False,
         )
+
     def stop(self):
         """Stop the runner process."""
         if self.process:
@@ -170,8 +171,17 @@ class RunnerTarget:
                 raise RunnerError(f"Runner timeout after {self.timeout_ms}ms")
 
             if self.process.poll() is not None:
-                stderr = self.process.stderr.read().decode('utf-8', errors='replace')
-                raise RunnerError(f"Runner exited unexpectedly: {stderr}")
+                stderr = ""
+
+                if self.process.stderr is not None:
+                    stderr = self.process.stderr.read().decode(
+                        "utf-8",
+                        errors="replace",
+                    )
+
+                raise RunnerError(
+                    f"Runner exited unexpectedly: {stderr}"
+                )
 
             # Read one line (blocking)
             line = self.process.stdout.readline()
