@@ -24,7 +24,7 @@ A language-agnostic protocol for preserving human agency in AI agent systems. HA
 # Install dependencies
 pip install -r harness/requirements.txt
 
-# Run all 33 test vectors
+# Run all 38 test vectors
 python harness/harness.py --mode local
 ```
 
