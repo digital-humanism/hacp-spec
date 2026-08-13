@@ -1,7 +1,7 @@
 # HACP Core Conformance Suite 0.9
 
-**Version:** 0.9.0-draft
-**Status:** Gate A pending (critical negatives to add)
+**Version:** 0.9.2
+**Status:** Gate A closed (2026-08-14)
 **License:** CC BY 4.0
 
 This document declares the HACP-Core conformance suite, maps every testable
@@ -26,7 +26,28 @@ and CLI modes across Python, Go, and TypeScript.
 All vectors are reproducible: golden vectors carry real `action_hash` and
 Ed25519 `signature` baked offline (`tools/bake_vector.py`), `draft_mode:
 false`, and an explicit `policy_context.clock`. The harness verifies only;
-it never signs at runtime.
+it never signs at runtime. The harness verifies only; it never signs at runtime.
+
+### Verification Methods
+
+Two harness engines are available:
+
+| Engine | File | Recommended for |
+|--------|------|-----------------|
+| **Runner Protocol** ⭐ | `harness/harness_runner.py` | External implementations (language-neutral, black-box) |
+| Legacy | `harness/harness.py` | In-tree implementations (local/HTTP/CLI) |
+
+The runner protocol communicates via stdin/stdout JSON (protocol version "1"),
+treating implementations as black boxes. This enables verification without
+importing implementation code.
+
+Full runner protocol specification: [`harness/runner_protocol.md`](harness/runner_protocol.md)
+
+### Conformance Manifest
+
+The vector set is pinned via SHA-256 digest in [`harness/conformance_manifest.json`](harness/conformance_manifest.json).
+The harness verifies this digest before running any vector, ensuring CI runs
+against a known-good vector set.
 
 ## 2. Patch Policy (0.9.x)
 
@@ -125,15 +146,84 @@ Status legend:
 ## 4. Summary
 
 - **In suite now:** 38 executed (32 Core-mapped + 6 Runtime profile)
-- **Critical to add:** 0 — Gate A + B + C reached
+- **Critical to add:** 0 — Gate A closed
 - **Deferred (post-0.9):** 5 → INV-1-003/004, INV-3-005, INV-7-003/004
 
-Gate A is reached when all ⚠️ rows become ✅ and the harness reports green
-in local, HTTP, and CLI modes.
+### Gate A Status
 
-## 5. Running the Suite
+**Gate A was closed on 2026-08-14.** All 38 vectors pass via the runner
+protocol against `hacp-sidecar`, the first enforcement-profile implementation.
+
+Conformant implementations:
+
+| Implementation | Type | Profile | Vectors | Date |
+|----------------|------|---------|---------|------|
+| `hacp-go` | Clean-room library | HACP-Core | 38/38 ✅ | 2026-01 (Phase 2) |
+| `hacp-ts` | Clean-room library | HACP-Core | 38/38 ✅ | 2026-01 (Phase 2) |
+| [`hacp-sidecar`](https://github.com/digital-humanism/hacp-sidecar) | Enforcement proxy | HACP-Core | 38/38 ✅ | 2026-08-14 |
+
+## 5. Patch Policy Application
+
+Per Section 2 (Patch Policy):
+
+- Adding new negative vectors (e.g., for boundary matrix in Gate B) is a **patch** (0.9.x)
+- Changing golden vector outcomes is a **major** change (1.0)
+- Adding new Test IDs (e.g., INV-6) is a **minor** change requiring re-certification
+
+Gate B (boundary matrix) will add negative vectors under 0.9.x without
+breaking existing conformant implementations. Gate B vectors will be
+documented in `vectors/README.md` and added to this coverage table.
+
+## 6. Running the Suite
+
+### Verify Vector Integrity
 
 ```bash
-python tools/bake_vector.py --check     # integrity of committed vectors
-python harness/harness.py --mode local  # emulation
-python harness/harness.py --mode cli --binary-path <impl>  # clean-room
+python tools/bake_vector.py --check
+```
+
+### Runner Protocol (Recommended)
+
+Test an external implementation via stdin/stdout JSON:
+
+```bash
+python harness/harness_runner.py \
+  --runner "./path/to/implementation-runner" \
+  --vectors-dir vectors \
+  --manifest harness/conformance_manifest.json \
+  --implementation-name my-impl \
+  --implementation-version 0.9.2
+```
+
+Exit codes:
+- `0` — Conformant (all vectors pass)
+- `1` — Conformance failure
+- `2` — Harness/configuration error
+- `3` — Runner execution/protocol error
+
+### Legacy Engine (Local / HTTP / CLI)
+
+```bash
+python harness/harness.py --mode local                                    # emulation
+python harness/harness.py --mode http --target-url http://localhost:8080  # HTTP server
+python harness/harness.py --mode cli --binary-path <impl>                 # CLI binary
+```
+
+### Test with hacp-sidecar
+
+```bash
+# Build the conformance runner
+cd hacp-sidecar
+go build -o hacp-conformance-runner ./cmd/hacp-conformance-runner
+
+# Run conformance suite
+cd ../hacp-spec
+python harness/harness_runner.py \
+  --runner "../hacp-sidecar/hacp-conformance-runner" \
+  --vectors-dir vectors \
+  --manifest harness/conformance_manifest.json \
+  --implementation-name hacp-sidecar \
+  --implementation-version 0.3.0
+```
+
+Expected output: `RESULTS: 38/38 passed`
