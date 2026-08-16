@@ -1,6 +1,7 @@
 {
   "test_id": "CORE-INV5-002",
   "type": "negative",
+  "draft_mode": true,
   "description": "Flip one byte in signed payload. Verification must fail and result in DENY.",
   "inputs": {
     "intent_envelope": {
@@ -9,30 +10,11 @@
       "principal": "system_agent_01",
       "principal_kind": "system",
       "intent_statement": "Test envelope for INV5",
-      "scope": {
-        "verbs": [
-          "delete"
-        ],
-        "resource_classes": [
-          "system_config"
-        ],
-        "audiences": [
-          "internal"
-        ],
-        "reversibility": [
-          "irreversible"
-        ],
-        "externality": [
-          "internal"
-        ],
-        "data_classes": [
-          "restricted"
-        ]
-      },
+      "scope": { "verbs": ["delete"], "resource_classes": ["system_config"], "audiences": ["internal"], "reversibility": ["irreversible"], "externality": ["internal"], "data_classes": ["restricted"] },
       "issued_at": 1786000000,
       "expires_at": 1786003600,
-      "signer_key_id": "key-ed25519-test-001",
-      "signature": "WNoW91pVBY1K7jFGuoPcCr3KhONnO8Sc7MvNTNBiDEwfcMKo5JlIRUy-5pUlzPfb1Qriddp6skKXge-AHTZhAA"
+      "signer_key_id": "key-ed25519-prod-001",
+      "signature": "dummy"
     },
     "proposed_action": {
       "hacp_version": "0.9",
@@ -51,23 +33,16 @@
       "hacp_version": "0.9",
       "token_id": "44444444-4444-4444-4444-444444444444",
       "envelope_id": "22222222-2222-2222-2222-222222222222",
-      "action_hash": "5fa52e7b4a75e1f126e856c6cf6c357fddc66b0cd9f9f534a7d5e23a79de0d7f",
-      "policy_digest": "01b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+      "action_hash": "b5d4045c3f466fa91fe2cc6abe79232a1a57cdf104f7a26e716e0a1e2789df78",
+      "policy_digest": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
       "principal": "system_agent_01",
-      "signer_key_id": "key-ed25519-test-001",
+      "signer_key_id": "key-ed25519-prod-001",
       "issued_at": 1786000000,
       "expires_at": 1786003600,
       "decision": "ALLOW",
-      "signature": "NXTXJw4NW7BkI3DFQq8IR30lNOl8GCvi_UX7dxoLK_jMuJqmNf2ZHft2lhPd9IAMDsXBcDM0PpfGVo_Pjv6WCw"
+      "signature": "TAMPERED_SIGNATURE_1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     }
   },
-  "policy_context": {
-    "current_action_count": 0
-  },
-  "expected": {
-    "outcome": "DENY",
-    "reason_codes": [
-      "SIGNATURE_FAILURE"
-    ]
-  }
+  "policy_context": { "current_action_count": 0 },
+  "expected": { "outcome": "DENY", "reason_codes": ["SIGNATURE_FAILURE"] }
 }
