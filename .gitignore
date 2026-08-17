@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Node / TypeScript
+node_modules/
+dist/
+
+# Go / Windows binaries
+*.exe
+*.out
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/

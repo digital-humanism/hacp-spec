@@ -12,6 +12,41 @@ The harness ships with **two engines**:
 For new implementations, the runner protocol is the recommended path.
 It validates observable protocol behavior without importing implementation code.
 
+## Current Conformance Baseline
+
+The current canonical HACP-Core v0.9.2 vector set contains **38 normative vectors** and is pinned by the conformance manifest.
+
+```text
+Spec:          HACP-Core v0.9.2
+Vector set:    core-0.9.2
+Vectors:       38
+Manifest:      verified
+Vector digest: sha256:1e167887106463cf89c81f3898e1f3ae4fd905bc807084959c787287f6575d58
+```
+
+Current verified implementations against this baseline:
+
+| Implementation | Verification path | Result |
+|----------------|-------------------|--------|
+| `humanist-core` | Python conformance suite against canonical vectors | 38/38 ✅ |
+| `hacp-ts` | TypeScript conformance suite against canonical vectors | 38/38 ✅ |
+| `hacp-go` | In-tree clean-room verification | 38/38 ✅ |
+| [`hacp-sidecar`](https://github.com/digital-humanism/hacp-sidecar) | Runner Protocol / black-box harness | 38/38 ✅ |
+
+Additional verification completed on the same baseline:
+
+```text
+TypeScript total suite:         44/44 PASS
+Python full regression:        324/324 PASS
+Python statement coverage:        100%
+Python branch coverage:           100%
+Python ↔ Go real sidecar E2E:      5/5 PASS
+```
+
+Detailed TypeScript and Go verification record:
+
+- [`../docs/conformance/HACP_TYPESCRIPT_GO_CONFORMANCE_REPORT.md`](../docs/conformance/HACP_TYPESCRIPT_GO_CONFORMANCE_REPORT.md)
+
 ## Installation
 
 ```bash
@@ -101,10 +136,19 @@ Full specification: [`runner_protocol.md`](runner_protocol.md)
 |----------------|----------------|---------|---------|
 | [`hacp-sidecar`](https://github.com/digital-humanism/hacp-sidecar) | `hacp-conformance-runner` | HACP-Core 0.9.2 | 38/38 ✅ |
 
+The current runner-mode verification result for `hacp-sidecar` is:
+
+```text
+Manifest verified: 0.9.2 (HACP-Core)
+Vector set: core-0.9.2
+Digest: sha256:1e167887106463cf89c81f3898e1f3ae4fd905bc807084959c787287f6575d58
+RESULTS: 38/38 passed
+```
+
 ## Legacy Engine (Local / HTTP / CLI)
 
-The original `harness.py` supports three target modes and is still used
-for in-tree clean-room implementations.
+The original `harness.py` supports three target modes and remains useful
+for in-tree implementations and historical compatibility.
 
 ### Local Mode (Spec Validation)
 
@@ -114,7 +158,7 @@ Emulates HACP-Core logic locally:
 python harness.py --mode local
 ```
 
-### HTTP Target (Clean-Room Server)
+### HTTP Target
 
 Tests HTTP server implementations:
 
@@ -122,7 +166,7 @@ Tests HTTP server implementations:
 python harness.py --mode http --target-url http://localhost:8080
 ```
 
-### CLI Target (Clean-Room Binary)
+### CLI Target
 
 Tests CLI implementations:
 
@@ -144,13 +188,13 @@ The vector set is pinned via a SHA-256 digest in
   "vector_set": "core-0.9.2",
   "canonicalization": "JCS-RFC8785",
   "digest_algorithm": "SHA-256",
-  "vector_digest": "sha256:9c0557dd...",
+  "vector_digest": "sha256:1e167887106463cf89c81f3898e1f3ae4fd905bc807084959c787287f6575d58",
   "total_vectors": 38
 }
 ```
 
 The harness verifies this digest before running any vector. This
-ensures CI runs against a known-good vector set and prevents silent
+ensures CI runs against a known vector set and prevents silent
 divergence when vectors are updated.
 
 ### Regenerating the Manifest
@@ -164,6 +208,44 @@ python generate_manifest.py
 Then commit the updated `conformance_manifest.json` together with the
 new vectors so downstream implementations pin against the same digest.
 
+When a vector is intentionally changed, a manifest mismatch is expected
+until the digest is regenerated. Do not bypass the manifest gate merely
+to make a conformance run proceed.
+
+## Reproducing the Current Go Runner Verification
+
+Build the current Go runner:
+
+```powershell
+cd ...\GitHub\Dev\hacp-sidecar
+go build -o hacp-conformance-runner.exe .\cmd\hacp-conformance-runner
+```
+
+Run the canonical harness:
+
+```powershell
+cd ...\GitHub\Dev\hacp-spec\harness
+
+python harness_runner.py `
+  --runner "...\GitHub\Dev\hacp-sidecar\hacp-conformance-runner.exe" `
+  --vectors-dir "...\GitHub\Dev\hacp-spec\vectors" `
+  --manifest conformance_manifest.json `
+  --implementation-name hacp-sidecar `
+  --implementation-version 0.3.0 `
+  --output console `
+  --verbose
+```
+
+Expected result:
+
+```text
+Manifest verified: 0.9.2 (HACP-Core)
+Vector set: core-0.9.2
+Digest: sha256:1e167887106463cf89c81f3898e1f3ae4fd905bc807084959c787287f6575d58
+
+RESULTS: 38/38 passed
+```
+
 ## Exit Codes
 
 ### Runner Protocol (`harness_runner.py`)
@@ -175,9 +257,9 @@ new vectors so downstream implementations pin against the same digest.
 | `2` | Harness/configuration error (bad manifest, missing vectors, etc.) |
 | `3` | Runner execution/protocol error (crash, malformed JSON, timeout) |
 
-Exit code `3` is distinct from `1`: it means the *infrastructure* of
-verification failed, not that the implementation failed a vector.
-CI pipelines should typically fail on any non-zero exit.
+Exit code `3` is distinct from `1`: it means the verification
+infrastructure failed, not that the implementation failed a vector.
+CI pipelines should fail on any non-zero exit.
 
 ### Legacy Engine (`harness.py`)
 
@@ -193,39 +275,38 @@ CI pipelines should typically fail on any non-zero exit.
 **Symptom:** harness prints 2–3 `[PASS]` lines then stops indefinitely.
 
 **Root cause:** The runner writes many diagnostic lines to `stderr`
-(e.g., `log.Printf` in Go). In non-verbose mode the harness redirects
-`stderr` to `DEVNULL` so diagnostics are discarded. If an older harness
-version redirected `stderr` to `PIPE` without draining it, the OS pipe
-buffer fills and the runner blocks on the next write — while the parent
-simultaneously blocks on `stdout.readline()` waiting for the JSON
-response. Classic pipe deadlock.
+(e.g., `log.Printf` in Go). In non-verbose mode the current harness
+redirects `stderr` to `DEVNULL` so diagnostics are discarded. Older
+harness versions that redirected `stderr` to `PIPE` without draining it
+could deadlock once the OS pipe buffer filled.
 
-**Fix:** Upgrade `harness_runner.py` to the current version (which uses
-`subprocess.DEVNULL` in non-verbose mode), or run with `--verbose`
-during development.
+**Fix:** Upgrade `harness_runner.py` to the current version, or run with
+`--verbose` during development.
 
-**Prevention for runner authors:** minimize stderr output in
-production mode; keep detailed diagnostics behind a flag.
+**Prevention for runner authors:** minimize stderr output in production
+mode and keep detailed diagnostics behind a flag.
 
 ### "Vector digest mismatch"
 
 The manifest's `vector_digest` does not match the current contents of
 the vectors directory. Either:
 
-- Vectors were modified without regenerating the manifest → run
+- vectors were modified without regenerating the manifest → run
   `python generate_manifest.py` and commit the result, or
-- You are running against the wrong vectors directory → check
+- you are running against the wrong vectors directory → check
   `--vectors-dir`.
+
+Do not disable manifest verification to work around this error.
 
 ### "Unsupported protocol version"
 
 The runner returned a `protocol_version` the harness does not
-understand. Currently the harness supports only `"1"`. Update either
-the runner or the harness to a compatible version.
+understand. The current harness supports protocol version `"1"`.
+Update either the runner or the harness to a compatible version.
 
 ## Repository Layout
 
-```
+```text
 harness/
 ├── harness.py                    # Legacy engine (local / http / cli)
 ├── harness_runner.py             # Runner protocol engine (recommended)
@@ -240,9 +321,29 @@ harness/
 └── README.md                     # This file
 ```
 
+## Assurance Boundary
+
+A successful conformance run establishes agreement with the canonical
+HACP-Core vector baseline. It is strong regression and interoperability
+evidence, but it is not by itself:
+
+- a formal proof of protocol correctness;
+- a complete security proof;
+- a substitute for property-based testing;
+- a substitute for fuzzing;
+- a substitute for adversarial production testing.
+
+The manifest-verified 38-vector baseline should therefore remain a
+release gate while additional assurance layers are added.
+
 ## References
 
 - Runner protocol specification: [`runner_protocol.md`](runner_protocol.md)
 - Conformance concept: [`../README.md`](../README.md) → "Conformance Testing"
+- TypeScript and Go verification report: [`../docs/conformance/HACP_TYPESCRIPT_GO_CONFORMANCE_REPORT.md`](../docs/conformance/HACP_TYPESCRIPT_GO_CONFORMANCE_REPORT.md)
 - Target interface contract: [`../api/decision-api.md`](../api/decision-api.md)
 - Vector format: [`../vectors/README.md`](../vectors/README.md)
+
+---
+
+**Contact:** [digital.humanism.collective@protonmail.com](mailto:digital.humanism.collective@protonmail.com)

@@ -5,23 +5,52 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: conformance-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   conformance:
+    name: HACP-Core v0.9.2 Conformance
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # ------------------------------------------------------------
+      # Python / canonical harness
+      # ------------------------------------------------------------
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: harness/requirements.txt
 
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r harness/requirements.txt
+          python -m pip install -r harness/requirements.txt
+
+      - name: Verify canonical vector integrity
+        run: |
+          python tools/bake_vector.py --check
+
+      - name: Run local HACP-Core conformance
+        run: |
+          python harness/harness.py --mode local
+
+      # ------------------------------------------------------------
+      # Go clean-room implementation
+      # ------------------------------------------------------------
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -29,29 +58,103 @@ jobs:
           go-version: "1.21"
 
       - name: Build Go clean-room implementation
+        working-directory: hacp-go
         run: |
-          cd hacp-go
           go build -o hacp-go .
 
-      - name: Set up Node
+      - name: Run Go clean-room conformance
+        run: |
+          python harness/harness.py             --mode cli             --binary-path hacp-go/hacp-go
+
+      # ------------------------------------------------------------
+      # TypeScript implementation
+      # ------------------------------------------------------------
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "npm"
+          cache-dependency-path: hacp-ts/package-lock.json
 
-      - name: Build TypeScript clean-room implementation
+      - name: Install TypeScript dependencies
+        working-directory: hacp-ts
+        run: npm ci
+
+      - name: Build TypeScript implementation
+        working-directory: hacp-ts
+        run: npm run build
+
+      - name: Run TypeScript test suite
+        working-directory: hacp-ts
+        run: npm test
+
+      - name: Run TypeScript CLI conformance
         run: |
-          cd hacp-ts
-          npm install
-          npm run build
+          python harness/harness.py             --mode cli             --binary-path hacp-ts/dist/src/cli.js
 
-      - name: Verify vector integrity (CI check)
-        run: python tools/bake_vector.py --check
+      # ------------------------------------------------------------
+      # Repository baseline assertions
+      # ------------------------------------------------------------
 
-      - name: Run conformance (local mode)
-        run: python harness/harness.py --mode local
+      - name: Verify conformance manifest metadata
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
 
-      - name: Run conformance (Go clean-room, CLI)
-        run: python harness/harness.py --mode cli --binary-path hacp-go/hacp-go
+          path = Path("harness/conformance_manifest.json")
+          manifest = json.loads(path.read_text(encoding="utf-8"))
 
-      - name: Run conformance (TypeScript clean-room, CLI)
-        run: python harness/harness.py --mode cli --binary-path hacp-ts/dist/cli.js
+          required = {
+              "spec_version": "0.9.2",
+              "profile": "HACP-Core",
+              "vector_set": "core-0.9.2",
+              "canonicalization": "JCS-RFC8785",
+              "digest_algorithm": "SHA-256",
+              "total_vectors": 38,
+          }
+
+          for key, expected in required.items():
+              actual = manifest.get(key)
+              if actual != expected:
+                  raise SystemExit(
+                      f"{path}: {key} mismatch: "
+                      f"expected {expected!r}, got {actual!r}"
+                  )
+
+          digest = manifest.get("vector_digest")
+          if not isinstance(digest, str) or not digest.startswith("sha256:") or len(digest) != 71:
+              raise SystemExit(
+                  f"{path}: invalid vector_digest format: {digest!r}"
+              )
+
+          print("Manifest metadata verified")
+          print(f"Spec:       {manifest['spec_version']}")
+          print(f"Profile:    {manifest['profile']}")
+          print(f"Vector set: {manifest['vector_set']}")
+          print(f"Vectors:    {manifest['total_vectors']}")
+          print(f"Digest:     {manifest['vector_digest']}")
+          PY
+
+      - name: Verify canonical vector count
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(
+              Path("harness/conformance_manifest.json").read_text(encoding="utf-8")
+          )
+          expected = manifest["total_vectors"]
+
+          vectors = sorted(Path("vectors").glob("*.json"))
+          actual = len(vectors)
+
+          if actual != expected:
+              raise SystemExit(
+                  f"Canonical vector count mismatch: expected {expected}, found {actual}"
+              )
+
+          print(f"Canonical vector inventory verified: {actual}/{expected}")
+          PY

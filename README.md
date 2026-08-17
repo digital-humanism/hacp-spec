@@ -1,24 +1,24 @@
-# HACP — Human Agency Continuity Protocol
+**# HACP — Human Agency Continuity Protocol**
 
 ![tests](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml/badge.svg)
 
-**Version:** 0.9.2  
-**Status:** Phase 1–3 Complete · Phase 4 (Enforcement) Gate A Closed  
-**License:** CC BY 4.0
+****Version:**** 0.9.2  
+****Status:**** Phase 1–3 Complete · Phase 4 (Enforcement) Gate A Closed  
+****License:**** CC BY 4.0
 
 A language-agnostic protocol for preserving human agency in AI agent systems. HACP enforces pre-execution policy decisions through cryptographic tokens, preventing autonomous M2M loops and ensuring human oversight.
 
-## Core Principles
+**## Core Principles**
 
-1. **Pre-execution enforcement** — Decisions made BEFORE action execution
-2. **Deterministic hot path** — No LLMs on the decision path
-3. **Cryptographic binding** — Tokens bound to exact action hashes (SHA-256)
-4. **Fail-closed mandate** — Internal errors → DENY, never ALLOW
-5. **Scope containment** — Actions must stay within envelope boundaries
+1\. ****Pre-execution enforcement**** — Decisions made BEFORE action execution
+2\. ****Deterministic hot path**** — No LLMs on the decision path
+3\. ****Cryptographic binding**** — Tokens bound to exact action hashes (SHA-256)
+4\. ****Fail-closed mandate**** — Internal errors → DENY, never ALLOW
+5\. ****Scope containment**** — Actions must stay within envelope boundaries
 
-## Quick Start
+**## Quick Start**
 
-### Run Conformance Tests (Local Mode)
+**### Run Conformance Tests (Local Mode)**
 
 ```bash
 # Install dependencies
@@ -31,9 +31,9 @@ python harness/harness.py --mode local
 Expected output:
 
 ```
-============================================================
+\============================================================
 HACP Conformance Harness v0.9.2 - Mode: local
-============================================================
+\============================================================
 
 [PASS] CORE-INV1-001: Human principal with human-required consequence class
 [PASS] CORE-INV2-001: All attributes within granted scope
@@ -41,48 +41,47 @@ HACP Conformance Harness v0.9.2 - Mode: local
 [PASS] CORE-INV5-002: Flip one byte in signed payload
 [PASS] CORE-INV7-002: Budget exhausted - (N+1)-th action
 ...
-============================================================
+\============================================================
 RESULTS: 38/38 passed
-============================================================
+\============================================================
 ```
-### Run Conformance Tests (Runner Protocol)
+**### Run Conformance Tests (Runner Protocol)**
 
 For language-neutral verification via stdin/stdout JSON:
 
 ```bash
 # Test an external implementation (e.g., hacp-sidecar)
-python harness/harness_runner.py \
-  --runner "./path/to/implementation-runner" \
-  --vectors-dir vectors \
-  --manifest harness/conformance_manifest.json \
-  --implementation-name my-impl \
+python harness/harness_runner.py \\
+  --runner "./path/to/implementation-runner" \\
+  --vectors-dir vectors \\
+  --manifest harness/conformance_manifest.json \\
+  --implementation-name my-impl \\
   --implementation-version 0.9.2
 ```
 
 Expected output:
 
 ```
-============================================================
+\============================================================
 HACP Conformance Harness v0.9.2 - Runner Mode
 Protocol version: 1
 Spec: 0.9.2 (HACP-Core)
-============================================================
+\============================================================
 
 Manifest verified: 0.9.2 (HACP-Core)
 Vector set: core-0.9.2
-Digest: sha256:9c0557dd...
+Digest: sha256:1e167887...
 
 [PASS] CORE-INV1-001: Human principal with human-required consequence class
 ...
 [PASS] CORE-RUNTIME-005: System principal resolves its own checkpoint
 
-============================================================
+\============================================================
 RESULTS: 38/38 passed
-============================================================
+\============================================================
 ```
 
 Full runner protocol specification: [`harness/runner_protocol.md`](harness/runner_protocol.md)
-```
 
 ### Verify Vector Integrity (CI Mode)
 
@@ -91,23 +90,57 @@ Full runner protocol specification: [`harness/runner_protocol.md`](harness/runne
 python tools/bake_vector.py --check
 ```
 
-### Run Clean-Room Implementations
+**### Run Clean-Room Implementations**
 
 ```bash
 # Go (stdlib only)
 cd hacp-go && go build -o hacp-go .
 python harness/harness.py --mode cli --binary-path hacp-go/hacp-go
 
-# TypeScript (Node.js stdlib)
-cd hacp-ts && npm install && npm run build
-python harness/harness.py --mode cli --binary-path hacp-ts/dist/cli.js
+# TypeScript
+cd hacp-ts
+npm ci
+npm run build
+npm test
+
+# Optional CLI-mode harness integration
+cd ..
+python harness/harness.py --mode cli --binary-path hacp-ts/dist/src/cli.js
 ```
 
-## Reproducibility Guarantees
+**## Cross-Language Conformance Baseline
 
-HACP conformance vectors are **byte-reproducible** across platforms and languages.
+The current HACP-Core v0.9.2 canonical vector set has converged across Python, TypeScript, and Go:
 
-### Fixed Test Keypair
+```text
+Python       38/38 PASS
+TypeScript   38/38 PASS
+Go           38/38 PASS
+
+Normative failures:        0
+Skipped normative vectors: 0
+Manifest verified:         YES
+```
+
+Additional verification completed around the same baseline:
+
+```text
+TypeScript total suite:         44/44 PASS
+Python full regression:        324/324 PASS
+Python statement coverage:        100%
+Python branch coverage:           100%
+Python ↔ Go real sidecar E2E:      5/5 PASS
+```
+
+This establishes a reproducible cross-language conformance baseline for the current model. It is a conformance and regression milestone, not a formal security proof.
+
+See [`docs/conformance/HACP_TYPESCRIPT_GO_CONFORMANCE_REPORT.md`](docs/conformance/HACP_TYPESCRIPT_GO_CONFORMANCE_REPORT.md) for the detailed TypeScript and Go verification record.
+
+## Reproducibility Guarantees**
+
+HACP conformance vectors are ****byte-reproducible**** across platforms and languages.
+
+**### Fixed Test Keypair**
 
 ```
 seed = SHA-256(b"hacp-conformance-v0.9-key-001")
@@ -120,9 +153,9 @@ The test keypair is committed to `harness/keys/`:
 - `test-ed25519-001.seed` — Private seed (baker only)
 - `KEYS.md` — Documentation
 
-**Security Notice:** These keys are published intentionally for reproducibility. They MUST NOT be used in production.
+****Security Notice:**** These keys are published intentionally for reproducibility. They MUST NOT be used in production.
 
-### Deterministic Baking
+**### Deterministic Baking**
 
 ```bash
 # Bake all golden vectors (compute hashes, sign payloads)
@@ -131,12 +164,12 @@ python tools/bake_vector.py
 
 For each golden vector:
 
-1. `action_hash = SHA-256(JCS(proposed_action))`
-2. `signature = Ed25519(test_sk, JCS(token_without_signature))`
-3. `draft_mode: false`
-4. `policy_context.clock: explicit` (no `time.time()` in runner)
+1\. `action_hash = SHA-256(JCS(proposed_action))`
+2\. `signature = Ed25519(test_sk, JCS(token_without_signature))`
+3\. `draft_mode: false`
+4\. `policy_context.clock: explicit` (no `time.time()` in runner)
 
-### Conformance Manifest
+**### Conformance Manifest**
 
 The canonical vector set is pinned via a SHA-256 digest stored in [`harness/conformance_manifest.json`](harness/conformance_manifest.json):
 
@@ -147,7 +180,7 @@ The canonical vector set is pinned via a SHA-256 digest stored in [`harness/conf
   "vector_set": "core-0.9.2",
   "canonicalization": "JCS-RFC8785",
   "digest_algorithm": "SHA-256",
-  "vector_digest": "sha256:9c0557ddbaf5526c57979fc6126b9864ac38f13b313b2082ab57194f047b52e2",
+  "vector_digest": "sha256:1e167887106463cf89c81f3898e1f3ae4fd905bc807084959c787287f6575d58",
   "total_vectors": 38
 }
 ```
@@ -160,7 +193,7 @@ Regenerate after adding new vectors:
 python harness/generate_manifest.py
 ```
 
-### Canonicalization
+**### Canonicalization**
 
 All hashing and signing uses strict JCS-like canonicalization (RFC 8785):
 
@@ -171,11 +204,11 @@ All hashing and signing uses strict JCS-like canonicalization (RFC 8785):
 
 Same logical payload → same canonical bytes → same hash on any platform.
 
-## Conformance Testing Workflow
+**## Conformance Testing Workflow**
 
-### Verified Implementations
+**### Verified Implementations**
 
-### Verified Implementations
+**### Verified Implementations**
 
 The following implementations have passed the full conformance suite and are listed as conformant proofs:
 
@@ -188,15 +221,15 @@ The following implementations have passed the full conformance suite and are lis
 
 Any new implementation can be verified by exposing a runner (stdin/stdout JSON per [`harness/runner_protocol.md`](harness/runner_protocol.md)) and running the harness against it.
 
-### For Clean-Room Implementations (Go, TypeScript, Rust)
+**### For Clean-Room Implementations (Go, TypeScript, Rust)**
 
-1. **Clone repository:**
+1\. ****Clone repository:****
 
    ```bash
    git clone https://github.com/digital-humanism/hacp-spec.git
    ```
 
-2. **Implement `evaluate()`** per `api/decision-api.md`:
+2\. ****Implement `evaluate()`**** per `api/decision-api.md`:
 
    ```text
    function evaluate(
@@ -206,24 +239,24 @@ Any new implementation can be verified by exposing a runner (stdin/stdout JSON p
    ) -> AgencyDecision
    ```
 
-3. **Expose HTTP endpoint** (`POST /evaluate`):
+3\. ****Expose HTTP endpoint**** (`POST /evaluate`):
 
    ```bash
    ./your-impl conformance-server --port 8080
    ```
 
-4. **Run harness against your implementation:**
+4\. ****Run harness against your implementation:****
 
    ```bash
    python harness/harness.py --mode http --target-url http://localhost:8080
    ```
 
-5. **Verify results:**
+5\. ****Verify results:****
    - Golden vectors → `ALLOW` with valid token
    - Negative vectors → `DENY` or `CHECKPOINT` with correct reason codes
    - All 38/38 passed = clean-room verification complete
 
-### Alternative: CLI Mode
+**### Alternative: CLI Mode**
 
 ```bash
 # Your binary accepts vector file path
@@ -234,65 +267,65 @@ Any new implementation can be verified by exposing a runner (stdin/stdout JSON p
 python harness/harness.py --mode cli --binary-path ./your-impl
 ```
 
-## Test Coverage
+**## Test Coverage**
 
-### Invariants Covered
+**### Invariants Covered**
 
 | Invariant | Description | Vectors |
 |-----------|-------------|---------|
-| **INV-1** | Human Final Decision | 4 vectors |
-| **INV-2** | Boundary Re-Authorization | 8 vectors |
-| **INV-3** | Token Binding | 4 vectors |
-| **INV-4** | Traceability | 5 vector |
-| **INV-5** | Cryptographic Integrity | 8 vectors |
-| **INV-7** | Bounded Autonomy | 4 vectors |
-| **Runtime** | Checkpoint state machine (Phase 3) | 5 vectors |
+| ****INV-1**** | Human Final Decision | 4 vectors |
+| ****INV-2**** | Boundary Re-Authorization | 8 vectors |
+| ****INV-3**** | Token Binding | 4 vectors |
+| ****INV-4**** | Traceability | 5 vector |
+| ****INV-5**** | Cryptographic Integrity | 8 vectors |
+| ****INV-7**** | Bounded Autonomy | 4 vectors |
+| ****Runtime**** | Checkpoint state machine (Phase 3) | 5 vectors |
 
-**Total:** 38 vectors (8 golden + 30 negative)
+****Total:**** 38 vectors (8 golden + 30 negative)
 
-### Test Scenarios
+**### Test Scenarios**
 
-**Human Final Decision (INV-1):**
+****Human Final Decision (INV-1):****
 - Human principal with human-required action
 - System principal attempting human-required action (CHECKPOINT)
 - Expired delegation envelope
 - Checkpoint timeout
 
-**Boundary Re-Authorization (INV-2):**
+****Boundary Re-Authorization (INV-2):****
 - All attributes within scope (golden)
 - Audience boundary crossing (internal → external)
 - Reversibility boundary crossing (reversible → irreversible)
 - Quantity scope exceeded (max 100, proposed 500)
 - Data class boundary crossing (internal → confidential)
 
-**Token Binding (INV-3):**
+****Token Binding (INV-3):****
 - Valid token with correct action_hash (golden)
 - Token with modified action field (hash mismatch)
 - Token presented after expires_at
 - Cross-envelope token replay (envelope A token for envelope B action)
 
-**Traceability (INV-4):**
+****Traceability (INV-4):****
 - Valid signed EVALUATED provenance event resolves by id (golden)
 - Token revoked after issuance (REVOKED provenance event)
 - Tampered provenance payload_hash → DENY
 - Decision without provenance event → DENY
 - Broken prev_event_hash linkage → DENY
 
-**Cryptographic Integrity (INV-5):**
+****Cryptographic Integrity (INV-5):****
 - Valid Ed25519 signature (golden)
-- Tampered signature
+- Tampered signed payload / signature failure
 - Unknown signing key
 - Wrong algorithm (HMAC vs Ed25519)
 - JCS canonicalization with reordered keys (golden)
 - Duplicate JSON keys rejected
 - Non-canonical (pretty-printed) serialization hash mismatch
 
-**Bounded Autonomy (INV-7):**
+****Bounded Autonomy (INV-7):****
 - System principal within budget (golden)
 - Budget exhausted (N+1)-th action
 - Envelope revoked mid-budget
 
-## Repository Structure
+**## Repository Structure**
 
 ```
 hacp-spec/
@@ -357,25 +390,30 @@ hacp-spec/
 │   ├── crypto.go                    # Ed25519 + SHA-256
 │   └── evaluate.go                  # Policy logic
 │
-└── hacp-ts/                         # Clean-room TypeScript implementation (Node stdlib)
+└── hacp-ts/                         # TypeScript implementation
     ├── package.json
+    ├── package-lock.json
     ├── tsconfig.json
-    └── src/
-        ├── cli.ts                   # CLI entry
-        ├── canonical.ts             # JCS canonicalization
-        ├── crypto.ts                # Ed25519 + SHA-256
-        └── evaluate.ts              # Policy logic
+    ├── src/
+    │   ├── cli.ts                   # CLI entry
+    │   ├── canonical.ts             # JCS canonicalization
+    │   ├── crypto.ts                # Ed25519 + SHA-256
+    │   ├── evaluate.ts              # Runtime policy logic
+    │   └── conformance.ts           # HACP-Core v0.9.2 conformance evaluator
+    └── tests/
+        ├── action-hash.test.ts      # Canonical action-hash invariants
+        └── conformance.test.ts      # 38-vector conformance suite
 ```
 
-## API Contract
+**## API Contract**
 
 See [`api/decision-api.md`](api/decision-api.md) for the complete language-agnostic interface:
 
-- **Section 1:** Core interface (`evaluate`, `issue_token`, `revoke`, `explain`)
-- **Section 2:** Error handling and fail-closed mandate
-- **Section 3:** Conformance testing interface (HTTP and CLI targets)
+- ****Section 1:**** Core interface (`evaluate`, `issue_token`, `revoke`, `explain`)
+- ****Section 2:**** Error handling and fail-closed mandate
+- ****Section 3:**** Conformance testing interface (HTTP and CLI targets)
 
-### HTTP Interface (Enterprise)
+**### HTTP Interface (Enterprise)**
 
 ```http
 POST /evaluate
@@ -390,36 +428,36 @@ Content-Type: application/json
 }
 ```
 
-### CLI Interface (Development)
+**### CLI Interface (Development)**
 
 ```bash
 ./hacp-impl evaluate --vector vectors/core_inv3_001_golden.json
 ```
 
-## Implementation Status
+**## Implementation Status**
 
-### Reference Implementation (Python)
+**### Reference Implementation (Python)**
 
-**Repository:** [`humanist-core`](https://github.com/digital-humanism/humanist-core)
+****Repository:**** [`humanist-core`](https://github.com/digital-humanism/humanist-core)
 
-- **Status:** v0.5.0-alpha (Phase 1-5 complete)
-- **Coverage:** 100% test coverage (816 statements, 122 tests)
-- **License:** AGPLv3 + Commercial Dual Licensing
+- ****Status:**** v0.5.0-alpha (Phase 1-5 complete)
+- ****Coverage:**** 100% test coverage (816 statements, 122 tests)
+- ****License:**** AGPLv3 + Commercial Dual Licensing
 
-### Clean-Room Implementations — Phase 2 Complete ✅
+**### Clean-Room Implementations — Phase 2 Complete ✅**
 
-Two independent clean-room implementations pass the full conformance suite (38/38), proving the specification is implementable without reading the reference code.
+The Go and TypeScript implementations pass the complete canonical HACP-Core v0.9.2 conformance suite (38/38) independently of the Python SDK runtime.
 
 | Language | Directory | Dependencies | Conformance |
 |----------|-----------|--------------|-------------|
 | Go | `hacp-go/` | stdlib only | 38/38 ✅ |
-| TypeScript | `hacp-ts/` | Node.js stdlib | 38/38 ✅ |
+| TypeScript | `hacp-ts/` | Node.js + TypeScript toolchain | 38/38 ✅ |
 
-Both were written from the published specification alone and communicate with the harness exclusively via JSON.
+Both are validated against the canonical language-independent vector set; runner-based verification remains the preferred black-box interoperability boundary.
 
-## Philosophy
+**## Philosophy**
 
-**Digital Humanism** — Human agency as a first-class architectural concern.
+****Digital Humanism**** — Human agency as a first-class architectural concern.
 
 HACP enforces transparency through:
 
@@ -428,56 +466,56 @@ HACP enforces transparency through:
 - No telemetry, no hidden compromises
 - Cryptographic honesty as foundation of trust
 
-## Roadmap
+**## Roadmap**
 
-### Phase 1: Specification ✅ (Complete)
+**### Phase 1: Specification ✅ (Complete)**
 
-- [x] Normative specification (v0.9.0-draft)
+- [x] Normative specification baseline (HACP-Core v0.9.2)
 - [x] JSON schemas (6 core objects)
 - [x] Conformance suite (38 vectors, 38/38 passing)
 - [x] Reproducible test keypair
 - [x] Cross-language harness (local/http/cli)
 
-### Phase 2: Clean-Room Verification ✅ (Complete)
+**### Phase 2: Clean-Room Verification ✅ (Complete)**
 
 - [x] Go implementation (38/38)
 - [x] TypeScript implementation (38/38)
 - [x] Independent verification reports
 - [ ] Rust implementation (optional, future)
 
-### Phase 3: Production Readiness
+**### Phase 3: Production Readiness**
 
 - [x] checkpoint-protocol.md + 5 runtime vectors
 - [x] Language-neutral runner protocol + conformance manifest
 - [x] [`hacp-sidecar`](https://github.com/digital-humanism/hacp-sidecar) enforcement proxy (38/38 conformant)
-- [ ] `humanist-core` synchronization with spec
+- [x] `humanist-core` synchronization with HACP-Core v0.9.2 (38/38)
 - [ ] LangChain v2 integration
 - [ ] Enterprise documentation
 - [ ] Security audit
 
-### Phase 4: Ecosystem
+**### Phase 4: Ecosystem**
 
-**Gate A** — Protocol correctness: ✅ 38/38 vectors pass  
-**Gate B** — Semantic completeness (boundary matrix): ⏸ Pending  
-**Gate C** — Deployability (docker-compose reference stack): ⏸ Pending  
-**Gate D** — Operational viability (p99/throughput benchmark): ⏸ Pending  
-**Gate E** — Distributed management (gRPC control plane): ⏸ Pending
+****Gate A**** — Protocol correctness: ✅ 38/38 vectors pass  
+****Gate B**** — Semantic completeness (boundary matrix): ⏸ Pending  
+****Gate C**** — Deployability (docker-compose reference stack): ⏸ Pending  
+****Gate D**** — Operational viability (p99/throughput benchmark): ⏸ Pending  
+****Gate E**** — Distributed management (gRPC control plane): ⏸ Pending
 
 - [ ] Public conformance registry
 - [ ] Certification program
 - [ ] Commercial support
 
-## Contributing
+**## Contributing**
 
-### Adding Test Vectors
+**### Adding Test Vectors**
 
-1. Create vector JSON in `vectors/` following `INVARIANTS.md`
-2. For golden vectors, set `signature: "PLACEHOLDER"` and `draft_mode: true`
-3. Run `python tools/bake_vector.py` to compute hashes and signatures
-4. Run `python tools/bake_vector.py --check` to verify integrity
-5. Run `python harness/harness.py --mode local` to validate
+1\. Create vector JSON in `vectors/` following `INVARIANTS.md`
+2\. For golden vectors, set `signature: "PLACEHOLDER"` and `draft_mode: true`
+3\. Run `python tools/bake_vector.py` to compute hashes and signatures
+4\. Run `python tools/bake_vector.py --check` to verify integrity
+5\. Run `python harness/harness.py --mode local` to validate
 
-### Reporting Issues
+**### Reporting Issues**
 
 Open an issue with:
 
@@ -485,18 +523,18 @@ Open an issue with:
 - Expected vs actual behavior
 - Relevant vector JSON
 
-## References
+**## References**
 
 - [RFC 8785 — JSON Canonicalization Scheme (JCS)](https://tools.ietf.org/html/rfc8785)
 - [RFC 8032 — Edwards-Curve Digital Signature Algorithm (Ed25519)](https://tools.ietf.org/html/rfc8032)
 - [OAuth 2.0 Conformance Testing](https://oauth.net/2/conformance/)
 - [C2PA Content Authenticity](https://c2pa.org/)
 
-## License
+**## License**
 
-**Specification:** [CC BY 4.0](LICENSE)  
-**Reference Implementation:** AGPLv3 + Commercial Dual Licensing
+****Specification:**** [CC BY 4.0](LICENSE)  
+****Reference Implementation:**** AGPLv3 + Commercial Dual Licensing
 
----
+**---**
 
-**Contact:** [digital.humanism.collective@protonmail.com](mailto:digital.humanism.collective@protonmail.com)
+****Contact:**** [digital.humanism.collective@protonmail.com](mailto:digital.humanism.collective@protonmail.com)
