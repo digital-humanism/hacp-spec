@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package hacp.control.v1;
+
+option go_package = "hacp-sidecar/gen/controlplane/v1;controlplanev1";
+
+// ControlPlane distributes revocation state to HACP enforcement points.
+//
+// Durable recovery is based exclusively on revision.
+// sequence is stream-local and MUST NOT be persisted as a recovery cursor.
+service ControlPlane {
+  // Returns the complete revocation state at one atomic revision.
+  rpc GetRevocationSnapshot(GetRevocationSnapshotRequest)
+      returns (RevocationSnapshot);
+
+  // Delivers control-plane changes strictly after after_revision.
+  rpc WatchRevocations(WatchRevocationsRequest)
+      returns (stream WatchRevocationsResponse);
+}
+
+enum RevocationKind {
+  REVOCATION_KIND_UNSPECIFIED = 0;
+  REVOCATION_KIND_KEY = 1;
+  REVOCATION_KIND_TOKEN = 2;
+  REVOCATION_KIND_ENVELOPE = 3;
+  REVOCATION_KIND_PARENT_ENVELOPE = 4;
+}
+
+message RevocationEntry {
+  RevocationKind kind = 1;
+  string subject_id = 2;
+}
+
+message RevocationEvent {
+  // Durable globally ordered control-plane revision.
+  //
+  // Revisions MUST increase monotonically.
+  // A sidecar may apply revision N only after revision N-1.
+  uint64 revision = 1;
+
+  // Stable identifier used for diagnostics and audit.
+  string event_id = 2;
+
+  RevocationKind kind = 3;
+
+  // key_id, token_id, envelope_id, or parent envelope_id.
+  string subject_id = 4;
+
+  // Unix epoch milliseconds.
+  int64 issued_at_ms = 5;
+}
+
+message GetRevocationSnapshotRequest {
+  string sidecar_id = 1;
+}
+
+message RevocationSnapshot {
+  // All entries describe revocation state exactly at this revision.
+  uint64 revision = 1;
+
+  repeated RevocationEntry entries = 2;
+
+  int64 generated_at_ms = 3;
+}
+
+message WatchRevocationsRequest {
+  string sidecar_id = 1;
+
+  // Server MUST deliver only events where:
+  //
+  //     event.revision > after_revision
+  //
+  // This is the durable recovery cursor.
+  uint64 after_revision = 2;
+}
+
+message WatchRevocationsResponse {
+  // Stream-local ordering.
+  //
+  // Starts from 1 for every newly established stream.
+  // MUST NOT be used as a durable recovery cursor.
+  uint64 sequence = 1;
+
+  oneof payload {
+    RevocationEvent event = 2;
+    Heartbeat heartbeat = 3;
+    ResetRequired reset_required = 4;
+  }
+}
+
+message Heartbeat {
+  // Highest committed control-plane revision.
+  uint64 current_revision = 1;
+
+  int64 server_time_ms = 2;
+}
+
+message ResetRequired {
+  // Earliest revision from which replay is currently possible.
+  uint64 oldest_available_revision = 1;
+
+  // Highest committed control-plane revision.
+  uint64 current_revision = 2;
+
+  string reason = 3;
+}
