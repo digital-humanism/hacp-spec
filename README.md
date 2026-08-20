@@ -2,7 +2,7 @@
 
 ![tests](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml/badge.svg)
 
-**Version:** 0.9.2  
+**Version:** 0.9.3
 **Status:** Phase 1–3 complete · Phase 4 Gates A–E closed  
 **License:** CC BY 4.0
 

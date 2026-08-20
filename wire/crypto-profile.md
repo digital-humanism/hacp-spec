@@ -1,6 +1,6 @@
 # HACP Cryptographic Profile
 
-**Version:** 0.9.0-draft
+**Version:** 0.9.3
 **Status:** Draft for public review
 **License:** CC BY 4.0
 

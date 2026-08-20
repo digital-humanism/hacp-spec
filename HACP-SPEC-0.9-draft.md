@@ -1,6 +1,6 @@
 # HACP Specification — Core Profile
 
-**Version:** 0.9.0-draft
+**Version:** 0.9.3
 **Status:** Draft for public review
 **License:** CC BY 4.0
 **Profiles:** This document is normative for **HACP-Core**. HACP-Runtime and HACP-Enforcement are defined in separate profile documents and build upon this document.

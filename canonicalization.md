@@ -1,6 +1,6 @@
 # HACP Canonicalization Rules
 
-**Version:** 0.9.0-draft
+**Version:** 0.9.3
 **Status:** Draft for public review
 
 This document defines deterministic serialization, hashing, and signing rules for HACP objects (`IntentEnvelope`, `ProposedAction`, `DecisionToken`, `ProvenanceEvent`). All implementations MUST apply these rules before computing any hash or signature.

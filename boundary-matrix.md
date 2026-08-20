@@ -1,6 +1,6 @@
 # HACP Boundary Matrix (INV-2)
 
-**Version:** 0.9.0-draft
+**Version:** 0.9.3
 **Status:** Normative (referenced by SPEC §6)
 **License:** CC BY 4.0
 

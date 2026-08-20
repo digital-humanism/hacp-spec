@@ -1,7 +1,7 @@
 # HACP Wire Headers
 
 Status: Draft
-Version: 0.9.0-draft-enforcement.2
+Version: 0.9.3
 Phase: 4 Gate D
 Normative references:
 - HACP-SPEC-0.9-draft.md

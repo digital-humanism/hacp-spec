@@ -14,7 +14,7 @@ public key, without access to the reference implementation.
 
 ## 1. Suite Declaration
 
-Core Conformance Suite 0.9 currently executes *38 vectors**:
+Core Conformance Suite 0.9 currently executes **38 vectors**:
 
 - **27** map to Core Test IDs in `INVARIANTS.md`
 - **1** (`CORE-INV1-006`) is a Runtime-preview vector (checkpoint timeout),
