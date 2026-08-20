@@ -364,7 +364,7 @@ def run_runner_mode(args):
             },
             "result": "conformant" if summary["failed"] == 0 else "failure",
             "started_at": datetime.utcnow().isoformat() + "Z",
-            "duration_ms": 0,  # TODO: track duration
+            "duration_ms": 0,  # Reserved by Runner Protocol v1; timing is not currently reported.
             "failures": [
                 {
                     "test_id": r.test_id,

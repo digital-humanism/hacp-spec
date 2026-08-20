@@ -55,7 +55,7 @@ Runtime = Core + the following MUST:
 ## 4. HACP-Enforcement
 
 **Requires:** HACP-Runtime (and therefore HACP-Core).
-**Normative document:** `profiles/enforcement.md` (pending, Phase 4 design artifact).
+**Normative document:** `profiles/enforcement.md`.
 
 Adds external enforcement without rewriting agent business logic:
 

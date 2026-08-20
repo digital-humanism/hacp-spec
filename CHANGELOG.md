@@ -14,7 +14,7 @@ conformance milestones rather than claiming production certification.
 
 ### Added
 
-- Placeholder for changes after the HACP-Core v0.9.2 cross-language conformance baseline.
+- None yet.
 
 ### Changed
 
@@ -27,6 +27,33 @@ conformance milestones rather than claiming production certification.
 ### Security
 
 - None yet.
+
+---
+
+## [0.9.3-rc.1] - 2026-08-20
+
+### Added
+
+- Release-candidate documentation alignment for the HACP 0.9.3 specification corpus.
+- Distributed control-plane specification artifacts for Gate E, including revocation streaming, snapshot recovery, revision continuity, replay, and stale-control-state semantics.
+- `CONTROL_STATE_STALE` in the normative error model.
+
+### Changed
+
+- Aligned human-readable specification document headers to version `0.9.3`.
+- Preserved the frozen HACP-Core `v0.9.2` conformance baseline and `core-0.9.2` vector set.
+- Preserved Runner Protocol `1` and wire `hacp_version` `0.9`.
+- Updated enforcement-profile documentation to reflect the published normative document.
+- Updated canonicalization documentation to describe the already published conformance coverage.
+
+### Fixed
+
+- Corrected minor conformance documentation formatting.
+- Removed obsolete release-readiness/debug artifacts.
+
+### Security
+
+- No cryptographic, vector, key, or wire-format semantics were changed in this release candidate.
 
 ---
 

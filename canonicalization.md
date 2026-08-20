@@ -73,4 +73,4 @@ Implementations MUST NOT:
 
 ## 9. Conformance
 
-Canonicalization test vectors (golden and negative) will be published in the conformance suite. Implementations claiming HACP compatibility MUST pass all canonicalization vectors.
+Canonicalization behavior is covered by golden and negative vectors in the published conformance suite. Implementations claiming HACP compatibility MUST pass all applicable canonicalization vectors.
