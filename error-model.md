@@ -46,6 +46,7 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 | Code | Condition |
 |---|---|
 | `INTERNAL_ERROR` | Unexpected exception, missing dependency, or unclassified failure. MUST result in `DENY`. MUST NOT be used for policy outcomes. |
+`CONTROL_STATE_STALE` | Distributed control-plane state is not sufficiently fresh or safe to authorize execution. Causes include exceeding the configured maximum staleness interval, revision gaps, inconsistent heartbeats, or unsafe state pending snapshot recovery. MUST result in `DENY` until valid control state is re-established.
 | `OK` | Action authorized (`ALLOW`). Used in telemetry and logs, not in `DENY`/`CHECKPOINT` reason codes. |
 
 ## 5. Extensibility
