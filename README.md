@@ -10,6 +10,10 @@ HACP is a language-agnostic protocol for preserving human agency in AI agent sys
 
 It defines a deterministic, cryptographically verifiable authorization layer that evaluates proposed actions **before execution**, binds decisions to exact action semantics, constrains delegated autonomy, and fails closed when authority or distributed control state cannot be trusted.
 
+HACP is informed by the human-agency principles articulated in the [Digital Humanism Manifesto](https://github.com/digital-humanism/manifesto), particularly the preservation of human agency and the use of semantic checkpoints in agentic systems.
+
+The Manifesto is broader than HACP. This specification defines one concrete technical realization of selected principles rather than a normative implementation of the Manifesto as a whole.
+
 ---
 
 ## Why HACP
