@@ -7,13 +7,14 @@ vectors using the fixed test keypair. This tool is NOT part of the
 conformance path — it runs offline to produce reproducible vectors.
 
 Usage:
-    python tools/bake_vector.py              # Bake all golden vectors
-    python tools/bake_vector.py --check      # Verify vectors match (CI mode)
-    python tools/bake_vector.py --vector vectors/core_inv3_001_golden.json
+    python tools/enforcement_v2_bake_vectors.py --vectors-dir vectors/enforcement-v2-draft
+    python tools/enforcement_v2_bake_vectors.py --check --vectors-dir vectors/enforcement-v2-draft
+    python tools/enforcement_v2_bake_vectors.py --vector vectors/enforcement-v2-draft/hc2_001_golden.json
 
 Rules:
-    - Golden vectors: computes action_hash, signs envelope and token
-    - Negative vectors: untouched (they contain intentionally broken data)
+    - Golden and negative Enforcement v2 vectors receive deterministic
+      cryptographic baseline artifacts.
+    - Negative vectors preserve their expected negative semantics.
     - draft_mode: false after baking
     - signer_key_id: key-ed25519-test-001
     - policy_context.clock: explicit, no time.time()
@@ -123,13 +124,9 @@ def bake_vector(vector: Dict, private_key: Ed25519PrivateKey) -> Dict:
     - Sets signer_key_id to test key
     - Ensures policy_context.clock is set
 
-    For negative vectors: returns unchanged.
+    Golden and negative Enforcement v2 vectors are cryptographically baked.
+    Their expected semantic outcome is preserved.
     """
-    test_type = vector.get("type")
-
-    # Negative vectors are untouched
-    if test_type != "golden":
-        return vector
 
     action = vector["inputs"]["proposed_action"]
 
@@ -167,7 +164,7 @@ def bake_vector(vector: Dict, private_key: Ed25519PrivateKey) -> Dict:
                 canonicalize(token_for_signing), private_key
             )
 
-     # Step 3b: sign provenance_event if present
+    # Step 3b: Sign provenance_event if present
     event = vector["inputs"].get("provenance_event")
     prior = vector["inputs"].get("prior_provenance_event")
     if event:
@@ -201,10 +198,6 @@ def verify_vector(vector: Dict, private_key: Ed25519PrivateKey) -> bool:
     Verify that a baked vector's cryptographic artifacts are correct.
     Returns True if valid, False otherwise.
     """
-    test_type = vector.get("type")
-    if test_type != "golden":
-        return True  # Negative vectors are not verified
-
     action = vector["inputs"]["proposed_action"]
     canonical_action = canonicalize(action)
     expected_hash = compute_sha256(canonical_action)
@@ -295,7 +288,6 @@ def main():
 
     # Process vectors
     baked_count = 0
-    skipped_count = 0
     failed_count = 0
 
     for v_file in vector_files:
@@ -315,20 +307,16 @@ def main():
                 failed_count += 1
         else:
             # Bake mode
-            if test_type == "golden":
-                print(f"[BAKE]  {test_id}", end=" ")
-                baked = bake_vector(vector, private_key)
+            print(f"[BAKE]  {test_id} ({test_type})", end=" ")
 
-                # Write back
-                with open(v_file, "w", encoding="utf-8") as f:
-                    json.dump(baked, f, indent=2, ensure_ascii=False)
-                    f.write("\n")
+            baked = bake_vector(vector, private_key)
 
-                print("done")
-                baked_count += 1
-            else:
-                print(f"[SKIP]  {test_id} ({test_type})")
-                skipped_count += 1
+            with open(v_file, "w", encoding="utf-8") as f:
+                json.dump(baked, f, indent=2, ensure_ascii=False)
+                f.write("\n")
+
+            print("done")
+            baked_count += 1
 
     # Summary
     print()
@@ -340,7 +328,7 @@ def main():
         if failed_count > 0:
             sys.exit(1)
     else:
-        print(f"BAKE RESULTS: {baked_count} baked, {skipped_count} skipped")
+        print(f"BAKE RESULTS: {baked_count} baked")
     print("=" * 60)
 
 

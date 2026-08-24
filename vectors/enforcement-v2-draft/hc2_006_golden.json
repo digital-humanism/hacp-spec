@@ -32,7 +32,7 @@
       "issued_at": 1786000000,
       "expires_at": 1786003600,
       "signer_key_id": "key-ed25519-test-001",
-      "signature": "PLACEHOLDER"
+      "signature": "sowmKlhJyXIj8jISjhxptxa-FjhZp9xUAaqFcXrlZlJwoTpYppPssPu2Fkya2imkdJZcZbCgQPNILZ5ifXr-Cg"
     },
     "proposed_action": {
       "hacp_version": "0.9",
@@ -51,7 +51,7 @@
       "hacp_version": "0.9",
       "token_id": "33333333-3333-3333-3333-000000000006",
       "envelope_id": "22222222-2222-2222-2222-222222222222",
-      "action_hash": "PLACEHOLDER",
+      "action_hash": "04242787c01210e7ac914224772c16e45f947f7f9bea602164a21509816830ba",
       "policy_digest": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
       "principal": "human_admin_01",
       "signer_key_id": "key-ed25519-test-001",
@@ -61,7 +61,7 @@
       "constraints": {
         "path": "/a%252Fb"
       },
-      "signature": "PLACEHOLDER"
+      "signature": "XdI1xNrhKEAxlTdGOii277vjlo2ZeLweutGSwKwZePkHz0rUlC1Ze4bgq2A8wyJxa0P8wLHx_jJ-WIJa04sfAw"
     },
     "http_request": {
       "method": "GET",
@@ -74,7 +74,8 @@
   },
   "expected": {
     "outcome": "ALLOW",
-    "reason_codes": []
+    "reason_codes": [],
+    "action_hash": "04242787c01210e7ac914224772c16e45f947f7f9bea602164a21509816830ba"
   },
-  "draft_mode": true
+  "draft_mode": false
 }
