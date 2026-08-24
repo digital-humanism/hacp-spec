@@ -144,11 +144,7 @@ class RunnerTarget:
             "operation": "evaluate",
             "vector_id": vector["test_id"],
             "input": {
-                "intent_envelope": vector["inputs"]["intent_envelope"],
-                "proposed_action": vector["inputs"]["proposed_action"],
-                "decision_token": vector["inputs"].get("decision_token"),
-                "checkpoint": vector["inputs"].get("checkpoint"),
-                "provenance_event": vector["inputs"].get("provenance_event"),
+                **vector["inputs"],
                 "policy_context": vector.get("policy_context", {})
             }
         }
