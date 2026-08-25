@@ -185,6 +185,27 @@ evaluation unless this profile explicitly defines otherwise.
 Hexadecimal digits within a valid percent-encoded triplet MUST compare
 case-insensitively.
 
+For request-binding comparison, a valid percent-encoded triplet is a
+three-character sequence consisting of `%` followed by exactly two ASCII
+hexadecimal digits (`0-9`, `A-F`, or `a-f`).
+
+Only the two hexadecimal digits within such a valid triplet receive the
+case-insensitive comparison defined above.
+
+A `%` character that does not begin a valid percent-encoded triplet has no
+special equivalence for request-binding comparison. Such a `%` character is
+compared literally and case-sensitively. Characters following it remain
+subject to these comparison rules independently.
+
+The presence of an invalid or incomplete percent sequence does not, by
+itself, define a separate request-binding validation failure in this profile.
+If the resulting request-binding representations do not compare equal, the
+request MUST be denied as a request binding mismatch with `SCOPE_EXCEEDED`.
+
+These comparison rules apply equally to the path and query portions of the
+request-binding representation. No percent-decoding, repair, or additional
+URI normalization is implied.
+
 The enforcement point MUST NOT recursively percent-decode the
 request-binding representation.
 
