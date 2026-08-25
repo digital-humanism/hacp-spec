@@ -238,6 +238,25 @@ Therefore:
 This rule does not perform percent-decoding and does not imply any
 broader URI normalization or reserved-character equivalence.
 
+### 7.1.2 Empty query delimiter preservation
+
+For HTTP request-binding comparison, the presence of the literal `?`
+delimiter is significant even when the query component following it is
+empty.
+
+A request-binding representation with no query component MUST NOT
+compare equal to a representation containing a literal `?` delimiter
+followed by an empty query component.
+
+Therefore:
+
+```text
+/x != /x?
+```
+
+This rule does not define any broader query normalization or
+equivalence semantics.
+
 If any binding claim does not match the current request, the request MUST be denied with `SCOPE_EXCEEDED`.
 
 ## 8. Scope guard
