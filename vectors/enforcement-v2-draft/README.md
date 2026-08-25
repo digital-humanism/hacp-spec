@@ -57,15 +57,35 @@ representation.
 | `ENF-HC2-B-008` | golden   | `/x?q=%`   | `/x?q=%`       | `ALLOW`                 |
 | `ENF-HC2-B-009` | golden   | `/a%2G%2F` | `/a%2G%2f`     | `ALLOW`                 |
 
+### HC2-C encoded delimiter preservation
+
+Verified black-box result:
+
+```text
+ENF-HC2-C-001 PASS
+ENF-HC2-C-002 PASS
+ENF-HC2-C-003 PASS
+
+RESULTS: 3/3 passed
+```
+
+HC2-C verifies that a percent-encoded question mark in the path remains
+encoded request-target data and does not compare equal to the literal
+path/query delimiter.
+
+These results do not imply general URI normalization or broader
+reserved-character equivalence conformance.
+
 ## Verification Status
 
-The HC2 and HC2-B vectors in this directory have been deterministically baked
+The HC2, HC2-B, and HC2-C vectors in this directory have been deterministically baked
 and verified through the Enforcement v2 conformance path.
 
 Current verified results:
 
 * HC2 baseline: `8/8 passed`
 * HC2-B boundary semantics: `9/9 passed`
+* HC2-C encoded delimiter preservation: `3/3 passed`
 
 These results demonstrate only the request-binding semantics explicitly
 defined by the current Enforcement v2 draft. They do not imply general URI
