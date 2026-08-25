@@ -76,9 +76,28 @@ path/query delimiter.
 These results do not imply general URI normalization or broader
 reserved-character equivalence conformance.
 
+### HC2-D empty query delimiter preservation
+
+Verified black-box result:
+
+```text
+ENF-HC2-D-001 PASS
+ENF-HC2-D-002 PASS
+ENF-HC2-D-003 PASS
+
+RESULTS: 3/3 passed
+```
+
+HC2-D verifies that the absence of a query component does not compare
+equal to a request-target containing a literal `?` delimiter followed
+by an empty query component.
+
+These results do not define broader query normalization or equivalence
+semantics.
+
 ## Verification Status
 
-The HC2, HC2-B, and HC2-C vectors in this directory have been deterministically baked
+The HC2, HC2-B, HC2-C, and HC2-D vectors in this directory have been deterministically baked
 and verified through the Enforcement v2 conformance path.
 
 Current verified results:
@@ -86,6 +105,7 @@ Current verified results:
 * HC2 baseline: `8/8 passed`
 * HC2-B boundary semantics: `9/9 passed`
 * HC2-C encoded delimiter preservation: `3/3 passed`
+* HC2-D empty query delimiter preservation: `3/3 passed`
 
 These results demonstrate only the request-binding semantics explicitly
 defined by the current Enforcement v2 draft. They do not imply general URI
