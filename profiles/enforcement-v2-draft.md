@@ -215,6 +215,29 @@ execution-boundary request targets to compare equal.
 
 No other URI normalization or equivalence is implied by these rules.
 
+### 7.1.1 Encoded question-mark delimiter preservation
+
+For HTTP request-binding comparison, a percent-encoded question mark in
+the path remains percent-encoded request-target data.
+
+A valid percent-encoded triplet representing `?` MUST NOT compare equal
+to the literal `?` delimiter that separates the path from the query
+portion of the request target.
+
+Percent-triplet hexadecimal digits remain case-insensitive according to
+the existing percent-triplet comparison rules.
+
+Therefore:
+
+```text
+/x%3Fy == /x%3fy
+
+/x%3Fy != /x?y
+```
+
+This rule does not perform percent-decoding and does not imply any
+broader URI normalization or reserved-character equivalence.
+
 If any binding claim does not match the current request, the request MUST be denied with `SCOPE_EXCEEDED`.
 
 ## 8. Scope guard
