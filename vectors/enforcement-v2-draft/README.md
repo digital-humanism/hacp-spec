@@ -111,9 +111,25 @@ The existing implementation conforms to the HC2-E request-binding invariant with
 
 These results do not define normalization or equivalence semantics for leading or trailing empty path segments, multiple consecutive empty path segments, dot-segments, percent-encoded delimiters, or general URI normalization.
 
+### HC2-F trailing empty path segment preservation
+
+The following cases verify that a trailing empty path segment following a non-empty path segment is representation-significant for HACP HTTP request binding.
+
+```text
+ENF-HC2-F-001 PASS
+ENF-HC2-F-002 PASS
+ENF-HC2-F-003 PASS
+
+RESULTS: 3/3 passed
+```
+
+The existing implementation conforms to the HC2-F request-binding invariant without production changes.
+
+These results do not define normalization or equivalence semantics for the empty path component as a whole, the root path, leading empty path segments, multiple consecutive empty path segments, dot-segments, percent-encoded delimiters, or general URI normalization.
+
 ## Verification Status
 
-The HC2, HC2-B, HC2-C, HC2-D, and HC2-E vectors in this directory have been deterministically baked
+The HC2, HC2-B, HC2-C, HC2-D, HC2-E, and HC2-F vectors in this directory have been deterministically baked
 and verified through the Enforcement v2 conformance path.
 
 Current verified results:
@@ -122,6 +138,8 @@ Current verified results:
 * HC2-B boundary semantics: `9/9 passed`
 * HC2-C encoded delimiter preservation: `3/3 passed`
 * HC2-D empty query delimiter preservation: `3/3 passed`
+* HC2-E internal empty path segment preservation: `3/3 passed`
+* HC2-F trailing empty path segment preservation: `3/3 passed`
 
 These results demonstrate only the request-binding semantics explicitly
 defined by the current Enforcement v2 draft. They do not imply general URI
