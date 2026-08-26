@@ -273,6 +273,22 @@ and the comparison is symmetric.
 
 This rule does not define normalization or equivalence semantics for leading or trailing empty path segments, multiple consecutive empty path segments, dot-segments, percent-encoded delimiters, or any other URI normalization.
 
+### 7.1.4 Trailing empty path segment preservation
+
+For HTTP request binding, a trailing empty path segment following a non-empty path segment is representation-significant.
+
+An implementation MUST NOT treat a request target containing such a trailing empty path segment as equivalent to the otherwise identical request target with that segment removed.
+
+Therefore:
+
+```text
+/a/ != /a
+```
+
+and the comparison is symmetric.
+
+This rule does not define normalization or equivalence semantics for the empty path component as a whole, the root path, leading empty path segments, multiple consecutive empty path segments, dot-segments, percent-encoded delimiters, or any other URI normalization.
+
 If any binding claim does not match the current request, the request MUST be denied with `SCOPE_EXCEEDED`.
 
 ## 8. Scope guard
