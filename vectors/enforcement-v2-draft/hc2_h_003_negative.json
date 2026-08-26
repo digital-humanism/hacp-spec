@@ -8,7 +8,7 @@
       "envelope_id": "22222222-2222-2222-2222-222222222222",
       "principal": "human_admin_01",
       "principal_kind": "human",
-      "intent_statement": "HC2 HTTP query ordering binding conformance",
+      "intent_statement": "HC2 HTTP path binding conformance",
       "scope": {
         "verbs": [
           "read"
