@@ -127,9 +127,43 @@ The existing implementation conforms to the HC2-F request-binding invariant with
 
 These results do not define normalization or equivalence semantics for the empty path component as a whole, the root path, leading empty path segments, multiple consecutive empty path segments, dot-segments, percent-encoded delimiters, or general URI normalization.
 
+### HC2-G percent-encoded unreserved representation preservation
+
+The following cases verify that RFC 3986 unreserved characters remain
+representation-significant for HACP HTTP request-target binding when
+compared with their corresponding single percent-encoded US-ASCII octet
+representations.
+
+```text
+ENF-HC2-G-001 PASS
+ENF-HC2-G-002 PASS
+ENF-HC2-G-003 PASS
+ENF-HC2-G-004 PASS
+ENF-HC2-G-005 PASS
+ENF-HC2-G-006 PASS
+ENF-HC2-G-007 PASS
+ENF-HC2-G-008 PASS
+
+RESULTS: 8/8 passed
+```
+
+The canonical tilde cases verify exact-match behavior and symmetric
+literal-versus-percent-encoded mismatch behavior. The remaining cases
+provide representative coverage across the RFC 3986 unreserved
+categories: alphabetic characters, digits, hyphen, underscore, and
+period.
+
+The existing implementation conforms to the HC2-G request-binding
+invariant without production changes.
+
+These results provide representative category coverage and do not
+constitute exhaustive testing of every unreserved character. They do not
+define dot-segment processing, general percent-decoding equivalence, or
+general URI normalization conformance.
+
 ## Verification Status
 
-The HC2, HC2-B, HC2-C, HC2-D, HC2-E, and HC2-F vectors in this directory have been deterministically baked
+The HC2, HC2-B, HC2-C, HC2-D, HC2-E, HC2-F, and HC2-G vectors in this directory have been deterministically baked
 and verified through the Enforcement v2 conformance path.
 
 Current verified results:
@@ -140,6 +174,7 @@ Current verified results:
 * HC2-D empty query delimiter preservation: `3/3 passed`
 * HC2-E internal empty path segment preservation: `3/3 passed`
 * HC2-F trailing empty path segment preservation: `3/3 passed`
+* HC2-G percent-encoded unreserved representation preservation: `8/8 passed`
 
 These results demonstrate only the request-binding semantics explicitly
 defined by the current Enforcement v2 draft. They do not imply general URI
