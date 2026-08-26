@@ -289,6 +289,63 @@ and the comparison is symmetric.
 
 This rule does not define normalization or equivalence semantics for the empty path component as a whole, the root path, leading empty path segments, multiple consecutive empty path segments, dot-segments, percent-encoded delimiters, or any other URI normalization.
 
+### 7.1.5 Percent-encoded unreserved representation preservation
+
+For HTTP request-target binding, a literal RFC 3986 unreserved character
+and its corresponding single percent-encoded US-ASCII octet
+representation MUST remain distinct unless this profile explicitly
+defines an applicable binding equivalence.
+
+URI resource equivalence does not, by itself, establish HACP
+authorization-binding equivalence.
+
+Therefore:
+
+```text
+/a/~b != /a/%7Eb
+
+/a/%7Eb != /a/~b
+```
+
+A representation difference not covered by an explicit HACP
+binding-equivalence rule MUST result in denial as a request binding
+mismatch with `SCOPE_EXCEEDED`.
+
+This rule applies to the period character as a member of the RFC 3986
+unreserved set. Therefore:
+
+```text
+/a/%2E/b != /a/./b
+```
+
+This rule does not define dot-segment processing. In particular, it does
+not establish any equivalence between:
+
+```text
+/a/./b
+and
+/a/b
+```
+
+or between:
+
+```text
+/a/x/../b
+and
+/a/b
+```
+
+Hexadecimal letter case inside a valid percent-encoded triplet remains
+subject to the existing case-insensitive percent-triplet comparison
+rule. Therefore:
+
+```text
+/a/%7Eb == /a/%7eb
+```
+
+No general percent-decoding, dot-segment removal, recursive decoding,
+or broader URI normalization is implied by this rule.
+
 If any binding claim does not match the current request, the request MUST be denied with `SCOPE_EXCEEDED`.
 
 ## 8. Scope guard
