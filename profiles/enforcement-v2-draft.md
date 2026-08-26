@@ -346,6 +346,38 @@ rule. Therefore:
 No general percent-decoding, dot-segment removal, recursive decoding,
 or broader URI normalization is implied by this rule.
 
+### 7.1.6 Query-component ordering preservation
+
+For HTTP request-target binding, ordering within the query component
+MUST remain representation-significant unless this profile explicitly
+defines an applicable binding equivalence.
+
+HACP MUST NOT infer unordered parameter-map equivalence from
+application-looking query syntax.
+
+Therefore:
+
+```text
+/x?a=1&b=2 != /x?b=2&a=1
+```
+
+The distinction is symmetric.
+
+A query-ordering difference not covered by an explicit HACP
+binding-equivalence rule MUST result in denial as a request binding
+mismatch with `SCOPE_EXCEEDED`.
+
+Exact representation remains binding-equivalent:
+
+```text
+/x?a=1&b=2 == /x?a=1&b=2
+```
+
+This rule does not define query-parameter parsing, duplicate-parameter
+semantics, first-wins or last-wins behavior, form-encoding semantics,
+query sorting or canonicalization, percent-decoding inside query data,
+or general query normalization.
+
 If any binding claim does not match the current request, the request MUST be denied with `SCOPE_EXCEEDED`.
 
 ## 8. Scope guard
