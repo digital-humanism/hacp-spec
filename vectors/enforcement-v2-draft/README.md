@@ -161,9 +161,39 @@ constitute exhaustive testing of every unreserved character. They do not
 define dot-segment processing, general percent-decoding equivalence, or
 general URI normalization conformance.
 
+### HC2-H query-component ordering preservation
+
+The following cases verify that query-component ordering remains
+representation-significant for HACP HTTP request-target binding unless an
+explicit equivalence rule applies.
+
+```text
+ENF-HC2-H-001 PASS
+ENF-HC2-H-002 PASS
+ENF-HC2-H-003 PASS
+
+RESULTS: 3/3 passed
+```
+
+The exact-ordering case verifies exact representation equality. The remaining
+cases verify symmetric rejection of reordered query-component representations.
+
+The existing implementation conforms to the HC2-H request-binding invariant
+without production changes.
+
+Initial verification exposed an invalid conformance-vector construction in
+which signed IntentEnvelope content had been modified without a corresponding
+signature update. The vectors were corrected by restoring the signed envelope
+content, after which all HC2-H cases passed against the unchanged
+implementation.
+
+These results do not define query parameter parsing, duplicate-parameter
+semantics, first-value or last-value selection, form encoding, query sorting,
+percent-decoding equivalence, or general query normalization.
+
 ## Verification Status
 
-The HC2, HC2-B, HC2-C, HC2-D, HC2-E, HC2-F, and HC2-G vectors in this directory have been deterministically baked
+The HC2, HC2-B, HC2-C, HC2-D, HC2-E, HC2-F, HC2-G, and HC2-H vectors in this directory have been deterministically baked
 and verified through the Enforcement v2 conformance path.
 
 Current verified results:
@@ -175,6 +205,7 @@ Current verified results:
 * HC2-E internal empty path segment preservation: `3/3 passed`
 * HC2-F trailing empty path segment preservation: `3/3 passed`
 * HC2-G percent-encoded unreserved representation preservation: `8/8 passed`
+* HC2-H query-component ordering preservation: `3/3 passed`
 
 These results demonstrate only the request-binding semantics explicitly
 defined by the current Enforcement v2 draft. They do not imply general URI
