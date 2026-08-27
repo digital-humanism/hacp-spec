@@ -457,6 +457,84 @@ In particular, it does not define:
 
 No broader query equivalence follows from this rule.
 
+### 7.1.8 Multiple consecutive empty path segment preservation
+
+The number of consecutive internal empty path segments is significant for request binding.
+
+An implementation MUST NOT infer equivalence between:
+
+```text
+/a///b
+```
+
+and:
+
+```text
+/a//b
+```
+
+solely because an HTTP framework, router, proxy, middleware component, or downstream application may collapse repeated path delimiters.
+
+Therefore:
+
+```text
+/a///b != /a//b
+```
+
+and the distinction is symmetric.
+
+A request-target constraint bound to:
+
+```text
+/a///b
+```
+
+MUST NOT match:
+
+```text
+/a//b
+```
+
+unless an explicit HACP equivalence rule defines such normalization.
+
+Likewise, a constraint bound to:
+
+```text
+/a//b
+```
+
+MUST NOT match:
+
+```text
+/a///b
+```
+
+without such an explicit rule.
+
+A mismatch caused solely by this representation difference MUST be treated as a request-binding mismatch and mapped to:
+
+```text
+SCOPE_EXCEEDED
+```
+
+Exact representation remains equivalent to itself.
+
+This rule applies only to the multiplicity of consecutive internal empty path segments between otherwise identical non-empty path segments.
+
+It does not define:
+
+* multiple trailing empty path segment semantics;
+* leading repeated slash semantics;
+* root versus empty-path representation;
+* percent-decoding or percent-encoded slash equivalence;
+* dot-segment processing;
+* router or framework path cleaning;
+* general slash normalization;
+* scheme or authority processing;
+* general URI normalization.
+
+No broader path equivalence follows from this rule.
+
 If any binding claim does not match the current request, the request MUST be denied with `SCOPE_EXCEEDED`.
 
 ## 8. Scope guard
