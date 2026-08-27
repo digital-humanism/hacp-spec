@@ -214,9 +214,31 @@ semantics, duplicate-field semantics, `+` versus `%20`, form-encoding
 semantics, query percent-decoding, query canonicalization, or general URI
 normalization.
 
+### HC2-J multiple consecutive empty path segment preservation
+
+The following cases verify that the multiplicity of consecutive internal empty
+path segments is significant for HACP HTTP request binding.
+
+```text
+ENF-HC2-J-001 PASS
+ENF-HC2-J-002 PASS
+ENF-HC2-J-003 PASS
+
+RESULTS: 3/3 passed
+```
+
+The existing implementation conforms to the HC2-J request-binding invariant
+without production changes.
+
+HC2-J verifies only the representation distinction between `/a///b` and
+`/a//b`. It does not define multiple trailing empty path segment semantics,
+leading repeated slash semantics, percent-encoded slash equivalence,
+dot-segment processing, router or framework path cleaning, general slash
+normalization, or general URI normalization.
+
 ## Verification Status
 
-The HC2, HC2-B, HC2-C, HC2-D, HC2-E, HC2-F, HC2-G, HC2-H, and HC2-I vectors in this directory have been deterministically baked
+The HC2, HC2-B, HC2-C, HC2-D, HC2-E, HC2-F, HC2-G, HC2-H, HC2-I, and HC2-J vectors in this directory have been deterministically baked
 and verified through the Enforcement v2 conformance path.
 
 Current verified results:
@@ -230,8 +252,9 @@ Current verified results:
 * HC2-G percent-encoded unreserved representation preservation: `8/8 passed`
 * HC2-H query-component ordering preservation: `3/3 passed`
 * HC2-I query empty-value delimiter preservation: `3/3 passed`
+* HC2-J multiple consecutive empty path segment preservation: `3/3 passed`
 
-Total verified request-binding cases: `43`
+Total verified request-binding cases: `46`
 
 These results demonstrate only the request-binding semantics explicitly
 defined by the current Enforcement v2 draft. They do not imply general URI
