@@ -378,6 +378,85 @@ semantics, first-wins or last-wins behavior, form-encoding semantics,
 query sorting or canonicalization, percent-decoding inside query data,
 or general query normalization.
 
+### 7.1.7 Query empty-value delimiter preservation
+
+The presence or absence of the literal `=` character in an otherwise identical query-component representation is significant for request binding.
+
+An implementation MUST NOT infer equivalence between:
+
+```text
+/x?a
+```
+
+and:
+
+```text
+/x?a=
+```
+
+solely because an application, framework, router, query parser, or downstream component may interpret both forms as representing an empty parameter value.
+
+Therefore:
+
+```text
+/x?a != /x?a=
+```
+
+and the distinction is symmetric.
+
+A request-target constraint bound to:
+
+```text
+/x?a
+```
+
+MUST NOT match:
+
+```text
+/x?a=
+```
+
+unless an explicit HACP equivalence rule defines such normalization.
+
+Likewise, a constraint bound to:
+
+```text
+/x?a=
+```
+
+MUST NOT match:
+
+```text
+/x?a
+```
+
+without such an explicit rule.
+
+A mismatch caused solely by this representation difference MUST be treated as a request-binding mismatch and mapped to:
+
+```text
+SCOPE_EXCEEDED
+```
+
+Exact representation remains equivalent to itself.
+
+This rule does not define query-parameter parsing or application-level query semantics.
+
+In particular, it does not define:
+
+* empty query-name semantics;
+* duplicate query-field semantics;
+* first-value or last-value behavior;
+* equivalence involving additional empty fields or delimiters;
+* `+` as a representation of space;
+* `application/x-www-form-urlencoded` semantics;
+* percent-decoding of the query component;
+* query sorting or parameter-map canonicalization;
+* application-specific query normalization;
+* general URI normalization.
+
+No broader query equivalence follows from this rule.
+
 If any binding claim does not match the current request, the request MUST be denied with `SCOPE_EXCEEDED`.
 
 ## 8. Scope guard
