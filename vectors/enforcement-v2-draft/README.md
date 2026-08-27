@@ -191,9 +191,32 @@ These results do not define query parameter parsing, duplicate-parameter
 semantics, first-value or last-value selection, form encoding, query sorting,
 percent-decoding equivalence, or general query normalization.
 
+### HC2-I query empty-value delimiter preservation
+
+The following cases verify that the presence or absence of the literal `=`
+delimiter in an otherwise identical query-component representation is
+significant for HACP HTTP request binding.
+
+```text
+ENF-HC2-I-001 PASS
+ENF-HC2-I-002 PASS
+ENF-HC2-I-003 PASS
+
+RESULTS: 3/3 passed
+```
+
+The existing implementation conforms to the HC2-I request-binding invariant
+without production changes.
+
+HC2-I verifies only the representation distinction between `/x?a` and
+`/x?a=`. It does not define query-parameter parsing, empty query-name
+semantics, duplicate-field semantics, `+` versus `%20`, form-encoding
+semantics, query percent-decoding, query canonicalization, or general URI
+normalization.
+
 ## Verification Status
 
-The HC2, HC2-B, HC2-C, HC2-D, HC2-E, HC2-F, HC2-G, and HC2-H vectors in this directory have been deterministically baked
+The HC2, HC2-B, HC2-C, HC2-D, HC2-E, HC2-F, HC2-G, HC2-H, and HC2-I vectors in this directory have been deterministically baked
 and verified through the Enforcement v2 conformance path.
 
 Current verified results:
@@ -206,6 +229,9 @@ Current verified results:
 * HC2-F trailing empty path segment preservation: `3/3 passed`
 * HC2-G percent-encoded unreserved representation preservation: `8/8 passed`
 * HC2-H query-component ordering preservation: `3/3 passed`
+* HC2-I query empty-value delimiter preservation: `3/3 passed`
+
+Total verified request-binding cases: `43`
 
 These results demonstrate only the request-binding semantics explicitly
 defined by the current Enforcement v2 draft. They do not imply general URI
