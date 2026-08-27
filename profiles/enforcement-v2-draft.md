@@ -535,6 +535,86 @@ It does not define:
 
 No broader path equivalence follows from this rule.
 
+### 7.1.9 Multiple trailing empty path segment preservation
+
+The number of trailing empty path segments is significant for request binding within the HC2-K canonical boundary.
+
+An implementation MUST NOT infer equivalence between:
+
+```text
+/a//
+```
+
+and:
+
+```text
+/a/
+```
+
+solely because an HTTP framework, router, proxy, middleware component, or downstream application may collapse repeated trailing path delimiters.
+
+Therefore:
+
+```text
+/a// != /a/
+```
+
+and the distinction is symmetric.
+
+A request-target constraint bound to:
+
+```text
+/a//
+```
+
+MUST NOT match:
+
+```text
+/a/
+```
+
+unless an explicit HACP equivalence rule defines such normalization.
+
+Likewise, a constraint bound to:
+
+```text
+/a/
+```
+
+MUST NOT match:
+
+```text
+/a//
+```
+
+without such an explicit rule.
+
+A mismatch caused solely by this representation difference MUST be treated as a request-binding mismatch and mapped to:
+
+```text
+SCOPE_EXCEEDED
+```
+
+Exact representation remains equivalent to itself.
+
+This rule applies only to the HC2-K canonical distinction between one and two trailing empty path segments after the same non-empty path segment.
+
+It does not define:
+
+* semantics for more than two trailing empty path segments;
+* leading repeated slash semantics;
+* root versus empty-path representation;
+* additional internal repeated-slash semantics beyond already defined rules;
+* percent-decoding or percent-encoded slash equivalence;
+* dot-segment processing;
+* router or framework path cleaning;
+* general trailing-slash normalization;
+* general slash normalization;
+* scheme or authority processing;
+* general URI normalization.
+
+No broader path equivalence follows from this rule.
+
 If any binding claim does not match the current request, the request MUST be denied with `SCOPE_EXCEEDED`.
 
 ## 8. Scope guard
