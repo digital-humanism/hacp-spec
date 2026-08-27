@@ -161,6 +161,28 @@ constitute exhaustive testing of every unreserved character. They do not
 define dot-segment processing, general percent-decoding equivalence, or
 general URI normalization conformance.
 
+#### HC2-G query-component coverage extension
+
+The HC2-G query-component coverage vectors verify that the existing percent-encoded unreserved representation-preservation invariant is applied consistently to the query portion of the bound HTTP request-target.
+
+Verified cases:
+
+```text
+ENF-HC2-G-Q-001  PASS  /x?q=A   == /x?q=A
+ENF-HC2-G-Q-002  PASS  /x?q=A   != /x?q=%41
+ENF-HC2-G-Q-003  PASS  /x?q=%41 != /x?q=A
+```
+
+Result:
+
+```text
+3/3 passed
+```
+
+The existing implementation applies the HC2-G request-binding invariant consistently to the query component without production changes.
+
+This coverage extension does not introduce a new normative class. It does not define parsed query-parameter semantics, duplicate-parameter handling, empty parameter-name or value semantics, `+` decoding, form encoding semantics, or general URI normalization.
+
 ### HC2-H query-component ordering preservation
 
 The following cases verify that query-component ordering remains
@@ -271,13 +293,13 @@ Current verified results:
 * HC2-D empty query delimiter preservation: `3/3 passed`
 * HC2-E internal empty path segment preservation: `3/3 passed`
 * HC2-F trailing empty path segment preservation: `3/3 passed`
-* HC2-G percent-encoded unreserved representation preservation: `8/8 passed`
+* HC2-G percent-encoded unreserved representation preservation: `11/11 passed` (`8` baseline + `3` query-component coverage)
 * HC2-H query-component ordering preservation: `3/3 passed`
 * HC2-I query empty-value delimiter preservation: `3/3 passed`
 * HC2-J multiple consecutive empty path segment preservation: `3/3 passed`
 * HC2-K multiple trailing empty path segment preservation: `3/3 passed`
 
-Total verified request-binding cases: `49`
+Total verified request-binding cases: `52`
 
 These results demonstrate only the request-binding semantics explicitly
 defined by the current Enforcement v2 draft. They do not imply general URI
