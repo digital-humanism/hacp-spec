@@ -615,6 +615,76 @@ It does not define:
 
 No broader path equivalence follows from this rule.
 
+### 7.1.10 Leading empty path segment preservation
+
+For HTTP request binding, a leading empty path segment preceding a non-empty path segment is representation-significant.
+
+An implementation MUST NOT treat a request target containing such a leading empty path segment as equivalent to the otherwise identical request target with that segment removed.
+
+Therefore:
+
+```text
+//a != /a
+```
+
+and the distinction is symmetric.
+
+A request-target constraint bound to:
+
+```text
+//a
+```
+
+MUST NOT match:
+
+```text
+/a
+```
+
+unless an explicit HACP equivalence rule defines such normalization.
+
+Likewise, a constraint bound to:
+
+```text
+/a
+```
+
+MUST NOT match:
+
+```text
+//a
+```
+
+without such an explicit rule.
+
+A mismatch caused solely by this representation difference MUST be treated as a request-binding mismatch and mapped to:
+
+```text
+SCOPE_EXCEEDED
+```
+
+Exact representation remains equivalent to itself.
+
+This rule applies only to the HC2-L canonical distinction between a leading empty path segment and the otherwise identical path with that segment removed.
+
+It does not define:
+
+* semantics for more than one leading empty path segment;
+* `///a` versus `//a`;
+* generic URI-reference network-path semantics;
+* authority interpretation or reconstruction;
+* absolute-form request-target semantics;
+* root versus empty-path representation;
+* percent-decoding or percent-encoded slash equivalence;
+* dot-segment processing;
+* proxy, intermediary, router, framework, or middleware path normalization;
+* general leading-slash normalization;
+* general slash normalization;
+* scheme or authority processing;
+* general URI normalization.
+
+No broader path equivalence follows from this rule.
+
 If any binding claim does not match the current request, the request MUST be denied with `SCOPE_EXCEEDED`.
 
 ## 8. Scope guard
