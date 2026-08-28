@@ -780,31 +780,11 @@ Budget rules:
 3. Budget counters MUST be checked atomically before forwarding.
 4. If budget state is unavailable, the request MUST be denied fail-closed with `BUDGET_EXHAUSTED`.
 
-## 10. Control channel
+## 10. Distributed control state
 
-The enforcement point MUST support a control channel for revocation and policy freshness.
+When enforcement relies on distributed control state, the enforcement point MUST establish that the required state is usable before relying on it for authorization.
 
-For Phase 4 MVP, the control channel MUST provide:
-
-1. Authenticated streaming delivery (gRPC streaming recommended).
-2. Signed revocation events.
-3. Monotonic sequence numbers.
-4. Full snapshot resynchronization after reconnect or sequence gap.
-5. Local denylist persistence for the current runtime.
-
-Revocation targets MUST include at least:
-
-1. Token identifiers.
-2. Envelope identifiers.
-3. Signing key identifiers.
-
-The control channel MUST NOT grant ALLOW decisions.
-
-The control channel MUST NOT override a DENY decision by itself.
-
-A CHECKPOINT resolution delivered through the control channel MUST still result in a new evaluator-signed decision token before any action is allowed.
-
-The enforcement point MUST define a maximum revocation staleness threshold.
+Required distributed control state MUST have a finite maximum staleness threshold.
 
 Default:
 
@@ -812,11 +792,41 @@ Default:
 max_revocation_staleness_ms = 5000
 ```
 
-If revocation state is older than this threshold, the enforcement point MUST deny requests fail-closed with `CONTROL_STATE_STALE`.
+The default value is a profile parameter. An implementation MAY use a different finite threshold when explicitly configured by the applicable deployment or policy.
 
-When distributed control state is required for enforcement, its usability and
-freshness MUST be established before authorization processing that depends on
-that state and before mutable replay or authorization-budget consumption.
+Required distributed control state MUST be treated as unusable when any of the following applies:
+
+1. No sufficiently trustworthy control state has yet been established.
+2. The established state is older than the applicable maximum staleness threshold.
+3. The enforcement point has evidence that the state may be incomplete, inconsistent, corrupted, or otherwise unsafe.
+
+When required distributed control state is unusable, the enforcement point MUST deny fail-closed with `CONTROL_STATE_STALE`.
+
+Transport connectivity alone MUST NOT establish that distributed control state is fresh, synchronized, complete, or trustworthy.
+
+A temporary loss of transport connectivity does not by itself require previously established control state to become unusable while that state remains within the applicable freshness bound and is otherwise trustworthy.
+
+Freshness evidence MAY be established without a mutation to the distributed authorization state.
+
+Previously unusable distributed control state MAY become usable again only after sufficient trustworthy synchronization evidence establishes that the local state is complete, consistent, and sufficiently current.
+
+When distributed control state participates in enforcement, its usability and freshness MUST be established before authorization processing that depends on that state and before mutable replay or authorization-budget consumption.
+
+The specific mechanism used to transport, synchronize, refresh, reconcile, or recover distributed control state is implementation-defined.
+
+Distributed revocation state MUST support at least the following revocation targets:
+
+1. Token identifiers.
+2. Envelope identifiers.
+3. Signing key identifiers.
+
+Distributed control-state mechanisms MUST NOT independently grant an `ALLOW` decision.
+
+Distributed control-state mechanisms MUST NOT independently override a `DENY` decision.
+
+Implementations MAY use mechanisms including streaming delivery, signed control events, monotonic revisions, snapshots, replay, heartbeats, or local persistence. These mechanisms are not required by this profile unless separately specified by another applicable protocol or profile.
+
+A CHECKPOINT resolution received through distributed control-state mechanisms MUST still result in a new evaluator-signed DecisionToken before the approved action is authorized.
 
 ## 11. Provenance
 
