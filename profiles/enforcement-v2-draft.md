@@ -135,8 +135,8 @@ The following table defines normative HACP reason codes per `error-model.md`.
 | Decision token is CHECKPOINT and unresolved. | `HUMAN_REQUIRED` |
 | Checkpoint not resolved before expiry. | `CHECKPOINT_TIMEOUT` |
 | Provenance record cannot be appended. | `TRACEABILITY_FAILURE` |
-| Revocation state is stale. | `TRACEABILITY_FAILURE` |
-| Control channel is unavailable beyond allowed staleness. | `TRACEABILITY_FAILURE` |
+| Revocation state is stale. | `CONTROL_STATE_STALE` |
+| Control channel is unavailable beyond allowed staleness. | `CONTROL_STATE_STALE` |
 | Provenance chain integrity broken. | `TRACEABILITY_FAILURE` |
 
 The enforcement point MUST NOT invent success semantics when a failure occurs.
@@ -746,7 +746,7 @@ Default:
 max_revocation_staleness_ms = 5000
 ```
 
-If revocation state is older than this threshold, the enforcement point MUST deny requests fail-closed with `TRACEABILITY_FAILURE`.
+If revocation state is older than this threshold, the enforcement point MUST deny requests fail-closed with `CONTROL_STATE_STALE`.
 
 ## 11. Provenance
 
