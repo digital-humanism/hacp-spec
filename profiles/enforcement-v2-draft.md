@@ -40,55 +40,121 @@ The enforcement point MUST be fail-closed.
 
 ## 3. Core invariant
 
-A request MUST NOT be forwarded unless the enforcement point has verified all of the following:
+A request MUST NOT be forwarded unless the enforcement point has verified all
+required conditions defined by this profile, including:
 
-1. Required HACP headers are present.
-2. The intent envelope parses and is canonically valid.
-3. The decision token parses and is canonically valid.
-4. The token decision is ALLOW.
-5. The signer key is not revoked.
-6. The token signature is valid.
-7. The envelope signature is valid.
-8. The envelope is not revoked.
-9. The token is not revoked.
-10. The envelope is not expired.
-11. The token is not expired.
-12. The token action_hash matches the envelope action_hash.
-13. The token is bound to the current request.
-14. The scope check passes.
-15. The budget check passes.
-16. Revocation state is fresh.
-17. A provenance record can be appended.
+- Required HACP headers are present.
+- The intent envelope parses and is canonically valid.
+- The decision token parses and is canonically valid.
+- The token decision is ALLOW.
+- The signer key is not revoked.
+- The token signature is valid.
+- The envelope signature is valid.
+- The envelope is not revoked.
+- The token is not revoked.
+- The envelope is not expired.
+- The token is not expired.
+- The token `action_hash` matches the envelope `action_hash`.
+- The token is bound to the current request.
+- The scope check passes.
+- The budget check passes.
+- Revocation state is fresh.
+- A provenance record can be appended.
 
-If any check fails, the enforcement point MUST deny the request and MUST NOT forward any part of the request payload upstream.
+This list defines required forwarding conditions and does not define their
+relative verification order. Verification precedence is defined by Section 4.
 
-## 4. Verification order (normative)
+If any required condition fails, the enforcement point MUST deny the request
+and MUST NOT forward any part of the request payload upstream.
 
-The enforcement point MUST evaluate in the following fixed order:
+## 4. Verification precedence (normative)
 
-1. Accept request.
-2. Require HACP headers (`X-HACP-Intent-Envelope`, `X-HACP-Decision-Token`).
-3. Parse and decode headers (RFC 8785 canonical JSON).
-4. Verify envelope schema and required fields.
-5. Verify token schema and required fields.
-6. Verify token decision is ALLOW (reject DENY/CHECKPOINT immediately).
-7. Resolve `signer_key_id` for both envelope and token.
-8. Verify signer key is not revoked (key revocation check).
-9. Verify token signature.
-10. Verify envelope signature.
-11. Check envelope revocation state.
-12. Check token revocation state.
-13. Verify envelope expiry.
-14. Verify token expiry.
-15. Verify token `action_hash` matches envelope `action_hash`.
-16. Verify token binding (request parameters).
-17. Verify scope containment.
-18. Verify budget and replay state.
-19. Verify revocation freshness (bounded staleness).
-20. Append provenance record.
-21. Forward request.
+The enforcement point MUST preserve the verification dependencies and
+side-effect barriers defined by this section.
 
-The enforcement point MUST stop evaluation on first failure.
+This profile does not require a single implementation-wide total order for
+checks whose relative order is not otherwise specified.
+
+### 4.1 Minimum structural validation
+
+An enforcement point MAY perform the minimum structural validation necessary
+to safely identify and evaluate subsequent enforcement prerequisites.
+
+Structural parsing or inspection does not, by itself, make an envelope,
+DecisionToken, or any claim carried by them authoritative.
+
+### 4.2 Control-state prerequisite
+
+When distributed control state participates in enforcement, its usability and
+freshness MUST be established before authorization checks that depend on that
+state.
+
+Stale or otherwise unsafe required control state MUST prevent mutable replay or
+authorization-budget consumption and MUST prevent forwarding.
+
+### 4.3 Authentication before trust
+
+Claims carried by an IntentEnvelope MUST NOT be treated as authoritative until
+the envelope has been authenticated.
+
+Claims carried by a DecisionToken MUST NOT be treated as authoritative until
+the token has been authenticated.
+
+This profile does not require DecisionToken signature verification and
+IntentEnvelope signature verification to occur in a fixed relative order unless
+another normative dependency requires such ordering.
+
+### 4.4 DecisionToken decision authority
+
+A DecisionToken decision MUST NOT be treated as authoritative until the token
+has been authenticated and established as applicable to the relevant
+authorization context.
+
+An unauthenticated token decision MUST NOT be reported or acted upon as an
+authoritative evaluator decision.
+
+### 4.5 Checkpoint semantics
+
+Existing checkpoint state, determination that a new checkpoint is required,
+and resumption following human approval are distinct enforcement operations.
+
+An existing checkpoint that blocks authorization MUST prevent progression to
+execution authorization and MUST prevent subsequent mutable replay or
+authorization-budget consumption.
+
+`RESOLVED_ALLOW` MUST NOT itself authorize execution. Resumption after human
+approval MUST follow the credential requirements defined by
+`checkpoint-protocol.md`.
+
+This profile does not otherwise define a universal relative order between an
+existing checkpoint failure and every possible credential failure, nor between
+a newly required checkpoint and every scope or boundary failure.
+
+### 4.6 Mutable enforcement state
+
+Replay and authorization-budget state MUST NOT be consumed across a prerequisite
+failure that this section requires to be resolved first.
+
+Additional ordering requirements for specific budget and replay mechanisms are
+defined by Section 9.
+
+### 4.7 Provenance and forwarding
+
+Required provenance acceptance MUST occur before the request is forwarded.
+
+The request MUST NOT be forwarded until all applicable required enforcement
+conditions have succeeded.
+
+### 4.8 Failure precedence
+
+Where this profile defines one verification as a prerequisite for another,
+failure of the prerequisite MUST prevent evaluation from progressing across
+that dependency.
+
+For checks whose relative order is not specified by this profile, an
+implementation MAY choose its internal execution order provided that it
+preserves all required fail-closed behavior, reason-code semantics,
+side-effect barriers, and authorization dependencies.
 
 ## 5. Enforcement modes
 
@@ -747,6 +813,10 @@ max_revocation_staleness_ms = 5000
 ```
 
 If revocation state is older than this threshold, the enforcement point MUST deny requests fail-closed with `CONTROL_STATE_STALE`.
+
+When distributed control state is required for enforcement, its usability and
+freshness MUST be established before authorization processing that depends on
+that state and before mutable replay or authorization-budget consumption.
 
 ## 11. Provenance
 
