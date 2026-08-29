@@ -25,7 +25,7 @@ from datetime import datetime
 
 # Import from existing harness
 import harness as base_harness
-
+import protocol_v1_verifier
 
 PROTOCOL_VERSION = "1"
 
@@ -209,8 +209,11 @@ class RunnerTarget:
             error_msg = response_data.get("error_message", "Unknown error")
             raise RunnerError(f"Runner internal error: {error_msg}")
 
-        # Build response compatible with base_harness.ResponseVerifier
-        response = {"decision": decision}
+        # Build response compatible with the Protocol v1 verifier.
+        response = {
+            "decision": decision,
+            "reason_codes": response_data.get("reason_codes", []),
+        }
         
         # If ALLOW and decision_token was in request, include it in response
         if decision == "ALLOW" and request["input"]["decision_token"]:
@@ -303,8 +306,8 @@ def run_runner_mode(args):
         verbose=args.verbose
     )
 
-    # Create verifier
-    verifier = base_harness.ResponseVerifier(
+    # Create Protocol v1 verifier.
+    verifier = protocol_v1_verifier.ProtocolV1ResponseVerifier(
         public_key=key_loader.public_key if key_loader else None
     )
 
