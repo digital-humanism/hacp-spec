@@ -54,7 +54,7 @@ HACP operates across three primary trust boundaries:
 **Mitigation:** 
 - Immediate revocation of the `signer_key_id`.
 - Short-lived tokens (`expires_at`) minimize the window of exposure.
-- Policy digest binding ensures tokens cannot be reused if policy changes.
+- Policy digest binding preserves the identity of the policy under which a token was issued. Policy transitions that require previously issued authority to be withdrawn rely on the existing revocation or expiry mechanisms for that withdrawal.
 
 ### 3.6 Bypass Proxy (Enforcement)
 **Threat:** Agent with unrestricted network access bypasses sidecar by connecting directly to upstream.
