@@ -297,6 +297,63 @@ Canonical vector reachability remediation is deferred to `1.0.n`.
 
 ---
 
+## CORE-INV2-004 — Externality Boundary Reason-Code Correspondence
+
+### Canonical Vector Observation
+
+The canonical `CORE-INV2-004` vector expects `DENY / BOUNDARY_CROSSING`.
+
+Its envelope contains `signature: "PLACEHOLDER"`, so the canonical construction does not reach the externality boundary in the current runner path.
+
+### Independent Production RED
+
+A separately constructed runner-level probe used valid Ed25519 material and otherwise valid prerequisites while preserving the intended semantic condition:
+
+- granted externality: `internal`
+- proposed externality: `external`
+
+Before the fix, production returned:
+
+`DENY / SCOPE_EXCEEDED`
+
+The normative requirement is:
+
+`DENY / BOUNDARY_CROSSING`
+
+The exact mismatch was reproduced twice without changing production code.
+
+### Minimal Production Fix
+
+The established production defect was corrected in `hacp-sidecar` commit `2cafcfe` (`fix: preserve externality boundary reason`).
+
+The change extends the existing `BOUNDARY_CROSSING` reason mapping to `externality` only.
+
+No unassessed boundary attribute was changed.
+
+### Verification
+
+- focused permanent regression: PASS
+- targeted regression: PASS
+- full `go test ./... -count=1`: PASS
+- signed production commit: `2cafcfe`
+
+### Classification
+
+`CORE-INV2-004` establishes both:
+
+1. a canonical vector construction / reachability defect; and
+2. an independently reproduced production reason-code correspondence defect.
+
+The production defect is CLOSED.
+
+Canonical vector reachability remediation is deferred to `1.0.n`.
+
+### Release Impact
+
+1.0.0 blocker: **NO**
+
+---
+
 ## R1 Current Summary
 
 ```text
@@ -306,18 +363,20 @@ Strict baseline:
 
 Classified in R1:
 CORE-INV1-005
+CORE-INV2-003
+CORE-INV2-004
 
 Production defects established:
-0
+2
 
 Vector construction / reachability defects:
-1
+3
 
 Normative conflicts:
 CORE-RUNTIME-005 remains HOLD
 
 New production changes authorized:
-0
+2
 ```
 
 R1 remains IN PROGRESS.
