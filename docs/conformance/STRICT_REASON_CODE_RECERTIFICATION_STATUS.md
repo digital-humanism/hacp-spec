@@ -240,6 +240,61 @@ Deferred target:
 
 The strict mismatch does not invalidate the HACP 1.0.0 decision-level contract because the canonical decision remains fail-closed and current production behavior conforms when the intended semantic boundary is reached with valid prerequisites.
 
+## CORE-INV2-003 — Reversibility Boundary Reason-Code Correspondence
+
+### Canonical Vector Observation
+
+The canonical `CORE-INV2-003` vector expects `DENY / BOUNDARY_CROSSING`.
+
+Its envelope contains `signature: "dummy"`, so the canonical construction does not reach the reversibility boundary in the current runner path.
+
+### Independent Production RED
+
+A separately constructed runner-level probe used valid Ed25519 material and otherwise valid prerequisites while preserving the intended semantic condition:
+
+- granted reversibility: `reversible`
+- proposed reversibility: `irreversible`
+
+Before the fix, production returned:
+
+`DENY / SCOPE_EXCEEDED`
+
+The normative requirement is:
+
+`DENY / BOUNDARY_CROSSING`
+
+The exact mismatch was reproduced twice without changing production code.
+
+### Minimal Production Fix
+
+The established production defect was corrected in `hacp-sidecar` commit `16e1740` (`fix: preserve reversibility boundary reason`).
+
+The change extends the existing `BOUNDARY_CROSSING` reason mapping from `audience` to `reversibility` only.
+
+No unassessed boundary attribute was changed.
+
+### Verification
+
+- focused permanent regression: PASS
+- targeted regression: PASS
+- full `go test ./... -count=1`: PASS
+- signed production commit: `16e1740`
+
+### Classification
+
+`CORE-INV2-003` establishes both:
+
+1. a canonical vector construction / reachability defect; and
+2. an independently reproduced production reason-code correspondence defect.
+
+The production defect is CLOSED.
+
+Canonical vector reachability remediation is deferred to `1.0.n`.
+
+### Release Impact
+
+1.0.0 blocker: **NO**
+
 ---
 
 ## R1 Current Summary
