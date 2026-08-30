@@ -411,6 +411,75 @@ Canonical vector reachability remediation is deferred to `1.0.n`.
 
 ---
 
+## CORE-INV2-008 — Absent Optional Tool Name Reason-Code Correspondence
+
+### Canonical Vector Observation
+
+The canonical `CORE-INV2-008` vector expects `DENY / UNKNOWN_ATTRIBUTE`.
+
+Its envelope contains `signature: "PLACEHOLDER"`, so the canonical construction does not reach the intended optional-attribute boundary in the current runner path.
+
+The semantic condition represented by the vector is:
+
+- envelope grants `tool_names: ["tool-a"]`;
+- the proposed action omits `tool_name`;
+- policy does not supply an explicit default.
+
+Under the normative boundary matrix, this condition requires `UNKNOWN_ATTRIBUTE`.
+
+### Independent Production RED
+
+A separately constructed runner-level probe used valid Ed25519 material and otherwise valid prerequisites while preserving the intended semantic condition.
+
+Before the fix, production returned:
+
+`DENY / BOUNDARY_CROSSING`
+
+The normative requirement is:
+
+`DENY / UNKNOWN_ATTRIBUTE`
+
+The exact mismatch was reproduced twice without changing production code.
+
+### Minimal Production Fix
+
+The established production defect was corrected in `hacp-sidecar` commit `ab90db7` (`fix: preserve unknown attribute reason`).
+
+The fix:
+
+- adds the core `UNKNOWN_ATTRIBUTE` reason code;
+- preserves presence information for `tool_name` in proposed-action parsing;
+- distinguishes an absent `tool_name` from a present but out-of-scope tool name;
+- preserves HTTP proxy ingress `tool_name` supplied through request context.
+
+No `destination` or `quantity` semantics were changed.
+
+### Verification
+
+- absent `tool_name` → `UNKNOWN_ATTRIBUTE`: PASS
+- present but out-of-scope `tool_name` → `BOUNDARY_CROSSING`: PASS
+- HTTP proxy out-of-scope tool regression: PASS
+- targeted regression: PASS
+- full `go test ./... -count=1`: PASS
+- signed production commit: `ab90db7`
+
+### Classification
+
+`CORE-INV2-008` establishes both:
+
+1. a canonical vector construction / reachability defect; and
+2. an independently reproduced production reason-code correspondence defect.
+
+The production defect is CLOSED.
+
+Canonical vector reachability remediation is deferred to `1.0.n`.
+
+### Release Impact
+
+1.0.0 blocker: **NO**
+
+---
+
 ## R1 Current Summary
 
 ```text
@@ -423,18 +492,19 @@ CORE-INV1-005
 CORE-INV2-003
 CORE-INV2-004
 CORE-INV2-007
+CORE-INV2-008
 
 Production defects established:
-3
+4
 
 Vector construction / reachability defects:
-4
+5
 
 Normative conflicts:
 CORE-RUNTIME-005 remains HOLD
 
 New production changes authorized:
-3
+4
 ```
 
 R1 remains IN PROGRESS.
