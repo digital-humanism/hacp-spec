@@ -29,19 +29,20 @@ Exact reason-code 38/38 and Enforcement revision 2 activation are not automatic 
 | CORE-INV1-005 | Vector / Sidecar / Conformance | Canonical vector expects `ENVELOPE_EXPIRED`, strict sidecar result is `INVALID_ENVELOPE` | Vector construction / reachability defect | `HACP-SPEC-0.9-draft.md` §5.1 + `error-model.md` §2; mapped through `INVARIANTS.md` INV-1 | None established | NO | Canonical vector contains `signature: "dummy"`; the value fails base64url decoding in `ParseIntentEnvelope()`, causing the runner to return `DENY / INVALID_ENVELOPE` before expiry evaluation; a valid signed expired-envelope probe returned `DENY / ENVELOPE_EXPIRED` twice | None required for production; future vector construction remediation requires separate normative/vector work | 1.0.n | CLOSED |
 | CORE-INV2-003 | Vector / Sidecar / Conformance | Canonical vector expects `BOUNDARY_CROSSING`; canonical construction is reachability-defective, while an independently constructed valid-prerequisite probe reached the reversibility boundary and reproduced `SCOPE_EXCEEDED` in production | Production defect + vector construction / reachability defect | `boundary-matrix.md` reversibility matrix; mapped through `INVARIANTS.md` INV-2 | Exact reason-code correspondence defect established and fixed | NO | Valid signed runner-level probe reproduced `SCOPE_EXCEEDED` vs `BOUNDARY_CROSSING` twice; minimal fix committed as `16e1740`; focused and full regression PASS | None for production; canonical vector reachability cleanup deferred | 1.0.n | CLOSED |
 | CORE-INV2-004 | Vector / Sidecar / Conformance | Canonical vector expects `BOUNDARY_CROSSING`; canonical construction is reachability-defective, while an independently constructed valid-prerequisite probe reached the externality boundary and reproduced `SCOPE_EXCEEDED` in production | Production defect + vector construction / reachability defect | `boundary-matrix.md` externality matrix; mapped through `INVARIANTS.md` INV-2 | Exact reason-code correspondence defect established and fixed | NO | Valid signed runner-level probe reproduced `SCOPE_EXCEEDED` vs `BOUNDARY_CROSSING` twice; minimal fix committed as `2cafcfe`; focused and full regression PASS | None for production; canonical vector reachability cleanup deferred | 1.0.n | CLOSED |
+| CORE-INV2-007 | Vector / Sidecar / Conformance | Canonical vector expects `BOUNDARY_CROSSING`; canonical construction is reachability-defective, while an independently constructed valid-prerequisite probe reached the data-class boundary and reproduced `SCOPE_EXCEEDED` in production | Production defect + vector construction / reachability defect | `boundary-matrix.md` data_class matrix; mapped through `INVARIANTS.md` INV-2 | Exact reason-code correspondence defect established and fixed | NO | Valid signed runner-level probe reproduced `SCOPE_EXCEEDED` vs `BOUNDARY_CROSSING` twice; minimal fix committed as `ea73350`; focused and full regression PASS | None for production; canonical vector reachability cleanup deferred | 1.0.n | CLOSED |
 | CORE-RUNTIME-005 | Spec / Vector / Sidecar | Canonical vector expects `HUMAN_RESOLUTION_REQUIRED`, current production returns `SELF_APPROVAL_DENIED` | Normative conflict | UNRESOLVED | Unknown / not established as release-critical | NO | Canonical expectation, later README semantics, current production behavior, and historical normative lineage are inconsistent | Establish authoritative normative ownership and migration history before any RED | 1.0.n / later adjudication | HOLD |
 
 ## Current R1 Totals
 
 ```text
 Classified strict mismatches:
-3
+4
 
 Established production defects:
-2
+3
 
 Vector construction / reachability defects:
-3
+4
 
 Normative conflicts on HOLD:
 1
