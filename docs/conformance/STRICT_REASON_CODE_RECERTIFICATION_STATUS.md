@@ -480,33 +480,64 @@ Canonical vector reachability remediation is deferred to `1.0.n`.
 
 ---
 
-## R1 Current Summary
+## R1 Final Summary
 
 ```text
-Strict baseline:
+Historical strict baseline:
 15/38 PASS
 23/38 FAIL
 
-Classified in R1:
-CORE-INV1-005
+Historical strict failures dispositioned in R1:
+23/23
+
+Established production defects:
+6
+
+Production defects fixed:
+6/6
+
+Production-defect cases:
 CORE-INV2-003
 CORE-INV2-004
+CORE-INV2-005
+CORE-INV2-006
 CORE-INV2-007
 CORE-INV2-008
 
-Production defects established:
-4
-
-Vector construction / reachability defects:
-5
-
-Normative conflicts:
+Normative conflict:
 CORE-RUNTIME-005 remains HOLD
 
-New production changes authorized:
-4
+Unresolved production defects established by R1:
+0
+
+Unresolved HACP 1.0.0 blockers established by R1:
+0
+
+R1 status:
+COMPLETE
 ```
 
-R1 remains IN PROGRESS.
+The historical strict baseline remains:
 
-The next R1 candidate must be selected independently and must begin with read-only normative, vector-construction, evaluation-order, and reachability analysis.
+```text
+15/38 PASS
+23/38 FAIL
+```
+
+R1 completion does **not** mean that strict exact-reason `38/38` has been achieved.
+
+R1 completion means that the full historical 23-failure strict surface has been dispositioned against the HACP 1.0.0 §1.1 Variant A release boundary, that established production defects have been corrected, and that no obvious unassessed strict-mismatch semantic family remains as an established HACP 1.0.0 blocker.
+
+The detailed closure evidence is recorded in:
+
+```text
+docs/conformance/R1_STRICT_MISMATCH_CLASSIFICATION_CLOSURE_ASSESSMENT.md
+```
+
+Residual exact-reason correspondence, vector reachability, executable-coverage hardening, and normative adjudication work is deferred to `1.0.n` or later as documented in the closure assessment.
+
+The next release stage is:
+
+```text
+R2 — Normative freeze review
+```
