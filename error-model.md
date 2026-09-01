@@ -34,7 +34,7 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 |---|---|
 | `SCOPE_EXCEEDED` | `ProposedAction` exceeds granted `ScopeGrant` (e.g., `quantity` > `max_quantity`). |
 | `BOUNDARY_CROSSING` | A security-relevant attribute crosses a meaningful boundary (e.g., `internal` → `external` audience) without re-authorization. |
-| `UNKNOWN_ATTRIBUTE` | An optional security-relevant attribute is absent, and the policy does not explicitly default it. |
+| `UNKNOWN_ATTRIBUTE` | A security-relevant attribute cannot be safely evaluated because either (a) an applicable optional attribute is absent and the policy does not explicitly default it, or (b) the applicable scope contains a security-relevant attribute whose semantics are unknown to the evaluator or enforcement point. |
 | `BUDGET_EXHAUSTED` | `autonomy_budget` for a `system` principal is fully consumed. |
 | `HUMAN_REQUIRED` | Action consequence class requires a human principal, but `principal_kind` is `system` without valid delegation. |
 | `POLICY_DENIED` | Action explicitly denied by a deterministic policy rule not covered by the above codes. |
@@ -46,7 +46,7 @@ The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RE
 | Code | Condition |
 |---|---|
 | `INTERNAL_ERROR` | Unexpected exception, missing dependency, or unclassified failure. MUST result in `DENY`. MUST NOT be used for policy outcomes. |
-`CONTROL_STATE_STALE` | Distributed control-plane state is not sufficiently fresh or safe to authorize execution. Causes include exceeding the configured maximum staleness interval, revision gaps, inconsistent heartbeats, or unsafe state pending snapshot recovery. MUST result in `DENY` until valid control state is re-established.
+| `CONTROL_STATE_STALE` | Distributed control-plane state is not sufficiently fresh or safe to authorize execution. Causes include exceeding the configured maximum staleness interval, revision gaps, inconsistent heartbeats, or unsafe state pending snapshot recovery. MUST result in `DENY` until valid control state is re-established. |
 | `OK` | Action authorized (`ALLOW`). Used in telemetry and logs, not in `DENY`/`CHECKPOINT` reason codes. |
 
 ## 5. Extensibility

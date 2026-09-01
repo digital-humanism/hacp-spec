@@ -50,16 +50,24 @@ Implementations MUST serialize signed payloads using the JSON Canonicalization S
 - Algorithm: Ed25519 (RFC 8032, pure mode). No algorithm negotiation is permitted.
 - `signer_key_id` MUST be present and MUST be covered by the signature.
 
-## 7. Verification Order and Token Binding
+## 7. Verification and Token Binding
 
-A verifier MUST perform the following steps in order; any failure MUST result in `DENY` (fail-closed):
+Canonicalization and token-binding checks MUST be performed as part of the
+normative verification order defined by `HACP-SPEC-0.9-draft.md` §5.1 and
+the cryptographic precedence rules in `wire/crypto-profile.md`.
 
-1. Schema-validate the received object.
-2. Canonicalize per Section 3.
-3. Recompute `action_hash` from the received action and compare with the token value. Mismatch → `DENY`.
-4. Verify the Ed25519 signature over the canonicalized payload.
-5. Check `expires_at` against the verifier's clock (with explicit, bounded skew tolerance).
-6. Check revocation state for `token_id`, `envelope_id`, and `signer_key_id`.
+For canonicalization and token binding:
+
+1. The received object MUST be schema-valid before canonicalization.
+2. The object MUST be canonicalized per Section 3 before hashing or signature verification.
+3. `action_hash` MUST be recomputed from the canonicalized received action and compared with the token-bound value.
+4. Ed25519 signatures MUST be verified over the canonicalized signing payload defined in Section 6.
+
+These steps do not override signer-key, object-revocation, expiry, or other
+verification precedence defined by `HACP-SPEC-0.9-draft.md` and
+`wire/crypto-profile.md`.
+
+Any verification failure MUST result in `DENY` (fail-closed).
 
 ## 8. Prohibitions
 

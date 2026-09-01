@@ -22,6 +22,18 @@ Every signed HACP object (`IntentEnvelope`, `ProposedAction`, `DecisionToken`, e
 - Verifiers MUST reject objects with an unsupported or unrecognized `hacp_version`.
 - Implementations MUST NOT silently ignore version mismatches.
 
+Specification versioning and HACP wire/object versioning are distinct version domains.
+
+The HACP `1.0.0` normative freeze does not, by itself, change the HACP wire/object version.
+
+Unless a separately justified normative change to HACP object or protocol requirements requires a new wire/object version, signed objects governed by HACP `1.0.0` continue to use:
+
+```text
+hacp_version = "0.9"
+```
+
+A future change to `hacp_version` requires its own normative basis and MUST NOT be inferred solely from a HACP specification release-number change.
+
 ## 3. Backward Compatibility Rules
 
 1. **Additive changes:** Adding optional fields to schemas is backward-compatible. Verifiers MUST ignore unknown fields if `additionalProperties: false` is not strictly enforced by the canonicalization rules (Note: HACP canonicalization strictly forbids unknown fields in signed payloads; therefore, schema changes require careful versioning).

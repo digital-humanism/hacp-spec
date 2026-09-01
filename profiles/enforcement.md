@@ -123,7 +123,8 @@ The following table defines normative HACP reason codes per `error-model.md`.
 | Token already consumed. | `TOKEN_REVOKED` |
 | Token action_hash mismatch. | `SIGNATURE_FAILURE` |
 | Request binding mismatch. | `SCOPE_EXCEEDED` |
-| Request method, path, or tool_name outside token scope. | `SCOPE_EXCEEDED` |
+| Request method or path outside token scope. | `SCOPE_EXCEEDED` |
+| Request `tool_name` outside the granted tool allowlist. | `BOUNDARY_CROSSING` |
 | Unknown scope attribute. | `UNKNOWN_ATTRIBUTE` |
 | Request crosses declared boundary. | `BOUNDARY_CROSSING` |
 | Budget exhausted. | `BUDGET_EXHAUSTED` |

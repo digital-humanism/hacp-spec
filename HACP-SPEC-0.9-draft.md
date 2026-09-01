@@ -141,16 +141,18 @@ evaluate(intent_envelope, proposed_action, context) -> AgencyDecision
 
 `evaluate()` MUST perform, in order:
 
-1. Validate envelope schema and signature. Failure → `DENY` (`INVALID_ENVELOPE` / `SIGNATURE_FAILURE`).
-2. Check envelope expiry. Expired → `DENY` (`ENVELOPE_EXPIRED`).
-3. Check revocation state for envelope, token ancestors, and signer keys. Revoked → `DENY` (`ENVELOPE_REVOKED` / `KEY_REVOKED`).
-4. Validate `ProposedAction` schema. Reject duplicate keys. Failure → `DENY` (`INVALID_ACTION`).
-5. Compute `action_hash` over canonicalized `ProposedAction`.
-6. Scope and boundary evaluation (Section 6). Exceeded → MUST NOT `ALLOW`.
-7. Unknown security-relevant attribute present → MUST NOT `ALLOW` (`UNKNOWN_ATTRIBUTE`).
-8. Autonomy budget evaluation (Section 7). Exhausted → MUST NOT `ALLOW` for `system` principals.
-9. Consequence-class evaluation: if policy marks the action's consequence class as human-required and `principal_kind != human` → `CHECKPOINT` (`HUMAN_REQUIRED`).
-10. Otherwise → `ALLOW`; issue `DecisionToken` bound to `action_hash`.
+1. Validate the envelope schema. Failure → `DENY` (`INVALID_ENVELOPE`).
+2. Resolve the envelope `signer_key_id` and check signer-key revocation. A revoked signer key → `DENY` (`KEY_REVOKED`).
+3. Verify the envelope signature. Failure → `DENY` (`SIGNATURE_FAILURE`).
+4. Check revocation state for the envelope and applicable token ancestors. A revoked envelope → `DENY` (`ENVELOPE_REVOKED`); a revoked token ancestor → `DENY` (`TOKEN_REVOKED`).
+5. Check envelope expiry. Expired → `DENY` (`ENVELOPE_EXPIRED`).
+6. Validate `ProposedAction` schema. Reject duplicate keys. Failure → `DENY` (`INVALID_ACTION`).
+7. Compute `action_hash` over canonicalized `ProposedAction`.
+8. Scope and boundary evaluation (Section 6). Exceeded → MUST NOT `ALLOW`.
+9. Unknown security-relevant attribute present → MUST NOT `ALLOW` (`UNKNOWN_ATTRIBUTE`).
+10. Autonomy budget evaluation (Section 7). Exhausted → MUST NOT `ALLOW` for `system` principals.
+11. Consequence-class evaluation: if policy marks the action's consequence class as human-required and `principal_kind != human` → `CHECKPOINT` (`HUMAN_REQUIRED`).
+12. Otherwise → `ALLOW`; issue `DecisionToken` bound to `action_hash`.
 
 `evaluate()` MUST be deterministic: identical inputs, policy, and revocation state MUST produce identical decisions. `evaluate()` MUST NOT invoke an LLM or any probabilistic model as a required step.
 
@@ -175,11 +177,14 @@ follows:
 3. **Key:** every envelope or token whose `signer_key_id` equals `target_id`
    is denied.
 
-Verification order (normative): an implementation MUST consult the
-revocation denylist **before** signature verification. A revoked artifact
-that carries a cryptographically valid signature MUST still be denied with
-the applicable reason code (`ENVELOPE_REVOKED`, `TOKEN_REVOKED`,
-`KEY_REVOKED`).
+Verification order (normative): signer-key revocation MUST be checked before
+signature verification. A revoked signer key MUST be denied with
+`KEY_REVOKED` regardless of signature validity.
+
+Envelope and token revocation MUST be checked only after successful signature
+verification. A cryptographically valid envelope or token that is revoked
+MUST be denied with the applicable reason code (`ENVELOPE_REVOKED` or
+`TOKEN_REVOKED`).
 
 Every revocation MUST emit a signed `REVOKED` provenance event referencing
 the `target_id`. Revocation records are append-only and themselves subject
@@ -200,7 +205,7 @@ MUST return deterministic `reason_codes`, the policy rule identifiers that fired
 
 `scope` (ScopeGrant) defines granted bounds per security-relevant attribute, including quantity ceilings and destination allowlists.
 
-A **meaningful boundary crossing** occurs when any security-relevant attribute of the `ProposedAction` is outside the granted scope, or is more permissive than the grant (e.g., `internal` → `external` audience, `reversible` → `irreversible`, quantity above ceiling, destination outside allowlist).
+A **meaningful boundary crossing** occurs when a security-relevant attribute classified as a boundary dimension by `boundary-matrix.md` crosses its granted boundary (e.g., `internal` → `external` audience, `reversible` → `irreversible`, or a destination outside its allowlist). Scope-containment failures classified separately by `boundary-matrix.md` (e.g., quantity above its granted ceiling) are not, solely by that fact, meaningful boundary crossings.
 
 Normative rules:
 
@@ -220,7 +225,7 @@ Normative rules:
 
 1. Canonicalization, hashing, and signing per `canonicalization.md`.
 2. Ed25519 MUST be used for production signatures. HMAC is permitted only in explicitly marked development profiles.
-3. Verifiers MUST enforce the verification order defined in `canonicalization.md` Section 7 and MUST fail closed.
+3. Verifiers MUST apply canonicalization and token-binding rules from `canonicalization.md` within the verification order defined in Section 5.1 and the cryptographic precedence rules of `wire/crypto-profile.md`, and MUST fail closed.
 4. `policy_digest` MUST be covered by token signatures, binding decisions to the exact policy version.
 
 ## 9. Provenance Requirements
@@ -264,6 +269,16 @@ Claims MUST state the exact spec version (e.g., `HACP 0.9-Core`).
 
 - `0.9.x`: draft stabilization; breaking changes permitted.
 - `1.0.0`: normative freeze, permitted only after public review, conformance suite publication, and at least one independent clean-room implementation.
+
+Specification release version and HACP wire/object version are distinct version domains.
+
+The `1.0.0` normative freeze does not, by itself, change the signed-object wire identifier. Unless a separate normative change to HACP object or protocol requirements requires a new wire/object version, HACP `1.0.0` signed objects continue to use:
+
+```text
+hacp_version = "0.9"
+```
+
+A future `hacp_version` transition requires separate normative justification.
 
 ## Appendix A. Illustrative Example (Non-Normative)
 
