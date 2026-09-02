@@ -1,7 +1,7 @@
 # HACP Decision API Contract
 
-**Version:** 0.9.3
-**Status:** Draft for public review
+**Version:** 1.0.0
+**Status:** Stable
 **License:** CC BY 4.0
 
 This document defines the language-agnostic programmatic interface for HACP-Core. Implementations in Python, Go, Rust, or any other language MUST adhere to these semantics.

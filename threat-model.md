@@ -1,7 +1,7 @@
 # HACP Threat Model and Security Assumptions
 
-**Version:** 0.9.3
-**Status:** Draft for public review
+**Version:** 1.0.0
+**Status:** Stable
 **License:** CC BY 4.0
 
 This document defines the security assumptions, trust boundaries, and threat vectors addressed by HACP. It is normative for understanding the limits of HACP-Core and the necessity of HACP-Enforcement.

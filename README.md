@@ -3,8 +3,8 @@
 [![conformance](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml/badge.svg)](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml)
 [![release](https://img.shields.io/github/v/release/digital-humanism/hacp-spec?label=release)](https://github.com/digital-humanism/hacp-spec/releases/latest)
 
-**Version:** 0.9.3
-**Status:** Phase 1–3 complete · Phase 4 Gates A–E closed  
+**Version:** 1.0.0
+**Status:** Stable
 **License:** CC BY 4.0
 
 HACP is a language-agnostic protocol for preserving human agency in AI agent systems.

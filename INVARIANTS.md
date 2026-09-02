@@ -1,7 +1,7 @@
 # HACP Invariants — Testable Statements
 
-**Version:** 0.9.3
-**Status:** Draft for public review
+**Version:** 1.0.0
+**Status:** Stable
 **License:** CC BY 4.0
 
 This document converts the normative invariants of `HACP-SPEC-0.9-draft.md` (Section 10) into testable statements and maps each to conformance tests. An implementation claims `HACP-Core Compatible` only if all tests listed here pass.

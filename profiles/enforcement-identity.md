@@ -110,7 +110,7 @@ A human-readable claim MAY render the structured identity in a compact form.
 For example:
 
 ```text
-HACP 0.9-Enforcement, revision 2
+HACP 1.0-Enforcement, revision 2
 ```
 
 is a possible presentation of the logical identity.

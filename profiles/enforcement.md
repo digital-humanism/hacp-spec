@@ -1,8 +1,7 @@
 # HACP Enforcement Profile
 
 Status: Draft
-Version: 0.9.3
-Phase: 4 Gate D
+Version: 1.0.0
 Normative references:
 - HACP-SPEC-0.9-draft.md
 - INVARIANTS.md
@@ -18,7 +17,7 @@ Normative references:
 
 This profile defines normative behavior for an enforcement point that prevents execution of an agent action unless the request carries a valid HACP ALLOW decision token.
 
-This profile applies to the Phase 4 enforcement MVP.
+This profile defines the Enforcement scope described in this document.
 
 Requires: HACP-Runtime (and therefore HACP-Core).
 
@@ -26,12 +25,12 @@ Requires: HACP-Runtime (and therefore HACP-Core).
 
 The enforcement point MUST be positioned between the agent and every enforceable tool transport.
 
-For Phase 4 MVP, enforceable transports are:
+For this profile, enforceable transports are:
 
 1. MCP tool calls carried through the sidecar.
 2. HTTP requests sent through an explicit HTTP_PROXY to the sidecar.
 
-All other transports are out of scope for Gate D and MUST be treated as non-enforced unless deployment-level isolation prevents their use.
+All other transports are out of scope for this profile and MUST be treated as non-enforced unless deployment-level isolation prevents their use.
 
 The enforcement point MUST be fail-closed.
 
@@ -91,7 +90,7 @@ The enforcement point MUST stop evaluation on first failure.
 
 | Mode | Behavior | Conformance |
 |---|---|---|
-| enforce | Fail-closed verification and forwarding. | Normative for Gate D. |
+| enforce | Fail-closed verification and forwarding. | Normative for this profile. |
 | shadow | Logs verification results but does not deny. | Non-conformant. |
 | disabled | Bypasses verification. | Non-conformant. |
 
@@ -198,7 +197,7 @@ Budget rules:
 
 The enforcement point MUST support a control channel for revocation and policy freshness.
 
-For Phase 4 MVP, the control channel MUST provide:
+For this profile, the control channel MUST provide:
 
 1. Authenticated streaming delivery (gRPC streaming recommended).
 2. Signed revocation events.
@@ -261,13 +260,13 @@ The enforcement point MUST NOT expose upstream services to the agent without a v
 
 ## 13. Deployment requirements for conformance
 
-A conformant Phase 4 deployment MUST ensure that the agent cannot bypass the enforcement point for enforceable transports.
+A conformant deployment under this profile MUST ensure that the agent cannot bypass the enforcement point for enforceable transports.
 
-Minimum MVP requirements:
+Minimum deployment requirements:
 
 1. The agent MUST be configured with an explicit HTTP_PROXY or MCP endpoint pointing to the sidecar.
 2. The agent container or process MUST NOT have unrestricted direct egress.
 3. Direct upstream access MUST be blocked by network policy, container policy, or equivalent isolation.
 4. Sidecar failure MUST result in action denial for enforceable transports.
 
-Kernel-level enforcement, such as eBPF, is planned after Gate D and is not required for Phase 4 MVP conformance.
+Kernel-level enforcement, such as eBPF, is outside the scope of this profile and is not required for conformance.

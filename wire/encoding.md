@@ -1,7 +1,7 @@
 # HACP Wire Encoding and Transport
 
-**Version:** 0.9.3
-**Status:** Draft for public review
+**Version:** 1.0.0
+**Status:** Stable
 **License:** CC BY 4.0
 
 This document defines how HACP objects are serialized for transport across network boundaries.

@@ -1,6 +1,6 @@
 # HACP Checkpoint Protocol (Runtime Profile)
 
-**Version:** 0.9.3
+**Version:** 1.0.0
 **Status:** Draft (Phase 3, does not block Core 1.0.0)
 **License:** CC BY 4.0
 

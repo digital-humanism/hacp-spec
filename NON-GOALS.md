@@ -1,7 +1,7 @@
 # HACP Non-Goals
 
-**Version:** 0.9.3
-**Status:** Draft for public review  
+**Version:** 1.0.0
+**Status:** Stable
 **License:** CC BY 4.0  
 
 This document enumerates what the Human Agency Continuity Protocol (HACP) deliberately does not attempt. Its purpose is to keep the standard focused, strictly testable, and implementable without reliance on any specific SDK or external infrastructure.

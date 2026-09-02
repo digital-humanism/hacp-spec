@@ -1,7 +1,7 @@
 # HACP Specification — Core Profile
 
-**Version:** 0.9.3
-**Status:** Draft for public review
+**Version:** 1.0.0
+**Status:** Stable
 **License:** CC BY 4.0
 **Profiles:** This document is normative for **HACP-Core**. HACP-Runtime and HACP-Enforcement are defined in separate profile documents and build upon this document.
 
@@ -263,7 +263,7 @@ An implementation MAY claim `HACP-Core Compatible` only if it:
 5. Fails closed on all validation, signature, expiry, and revocation errors.
 6. Passes the published Core conformance suite.
 
-Claims MUST state the exact spec version (e.g., `HACP 0.9-Core`).
+Claims MUST state the specification compatibility line (e.g., `HACP 1.0-Core`).
 
 ## 13. Versioning
 

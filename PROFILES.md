@@ -1,7 +1,7 @@
 # HACP Compatibility Profiles
 
-**Version:** 0.9.3
-**Status:** Draft for public review
+**Version:** 1.0.0
+**Status:** Stable
 **License:** CC BY 4.0
 
 ## 1. Purpose
@@ -26,7 +26,7 @@ Scope:
 - Fail-closed error handling.
 
 **Conformance:** `CORE-*` vectors (`INVARIANTS.md`).
-**Claim format:** `HACP 0.9-Core`.
+**Claim format:** `HACP 1.0-Core`.
 
 ## 3. HACP-Runtime
 
@@ -50,7 +50,7 @@ Runtime = Core + the following MUST:
 - Human signer assurance (minimal authentication of the approving subject).
 
 **Conformance:** `RUNTIME-*` vectors (Phase 3, in progress).
-**Claim format:** `HACP 0.9-Runtime`.
+**Claim format:** `HACP 1.0-Runtime`.
 
 ## 4. HACP-Enforcement
 
@@ -67,11 +67,11 @@ Adds external enforcement without rewriting agent business logic:
 - Revocation propagation (push + local denylist; bounded staleness policy).
 
 **Conformance:** `ENFORCEMENT-*` vectors (pending).
-**Claim format:** `HACP 0.9-Enforcement`.
+**Claim identity:** `HACP 1.0-Enforcement` plus the applicable Enforcement revision as defined by `profiles/enforcement-identity.md`.
 
 ## 5. Claim Rules
 
-1. Claims MUST state the exact spec version and profile (e.g., `HACP 0.9-Core`).
+1. Claims MUST state the specification compatibility line and profile (e.g., `HACP 1.0-Core`).
 2. Claims MUST NOT assert a profile whose conformance suite has not been passed.
 3. Before suite publication, claims MUST be labeled `self-attested, pre-conformance`.
 4. Experimental or partial implementations MUST identify themselves as draft or non-conformant.

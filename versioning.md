@@ -1,7 +1,7 @@
 # HACP Versioning and Compatibility Policy
 
-**Version:** 0.9.3
-**Status:** Draft for public review
+**Version:** 1.0.0
+**Status:** Stable
 **License:** CC BY 4.0
 
 ## 1. Specification Versioning
@@ -42,10 +42,16 @@ A future change to `hacp_version` requires its own normative basis and MUST NOT 
 
 ## 4. Conformance Suite Versioning
 
-The conformance suite is versioned independently but aligned with the spec.
+The conformance suite is versioned independently from the specification release version.
 
-- Suite version `0.9.x` tests compliance with spec `0.9.x`.
-- Passing a suite version grants the right to claim compatibility with the corresponding spec version.
+The canonical HACP-Core executable baseline retained for HACP `1.0.0` is:
+
+- specification baseline: `HACP-Core v0.9.2`;
+- vector set: `core-0.9.2`.
+
+Retention of that baseline by HACP `1.0.0` does not rename the suite, migrate its vector-set identity, or change the HACP wire/object version.
+
+A conformance claim remains governed by the applicable specification release, profile requirements, claim rules, and required executable evidence. Passing a historical or retained suite version does not, by itself, redefine the specification release version represented by the claim.
 
 ## 5. Capability Discovery
 
