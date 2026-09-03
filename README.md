@@ -287,7 +287,8 @@ A new implementation should:
 3. verify Ed25519 signatures over canonical payload bytes;
 4. expose a runner compatible with [`harness/runner_protocol.md`](harness/runner_protocol.md);
 5. execute the canonical manifest-pinned vector set;
-6. return the expected outcome and reason semantics for all 38 vectors.
+6. return the expected decision outcome for all 38 canonical vectors; reason-code
+   verification is additionally available through the Protocol v1 strict verifier.
 
 A conformant implementation must not special-case vector IDs.
 

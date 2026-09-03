@@ -4,9 +4,9 @@ All notable changes to the HACP specification, canonical conformance vectors,
 language-neutral harness, and in-repository verification tooling are documented
 in this file.
 
-This project follows a Keep a Changelog-style structure. Until a formal stable
-release policy is established, version entries record specification and
-conformance milestones rather than claiming production certification.
+This project follows a Keep a Changelog-style structure. Version entries record
+specification and conformance milestones and do not by themselves constitute
+production certification.
 
 ---
 

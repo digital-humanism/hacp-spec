@@ -171,7 +171,7 @@ python harness.py --mode http --target-url http://localhost:8080
 Tests CLI implementations:
 
 ```bash
-python harness.py --mode cli --binary-path ./hacp-go
+python harness.py --mode cli --binary-path <path-to-cli-binary>
 ```
 
 Target interface contract: [`../api/decision-api.md`](../api/decision-api.md) Section 3.

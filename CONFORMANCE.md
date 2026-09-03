@@ -26,7 +26,7 @@ and CLI modes across Python, Go, and TypeScript.
 All vectors are reproducible: golden vectors carry real `action_hash` and
 Ed25519 `signature` baked offline (`tools/bake_vector.py`), `draft_mode:
 false`, and an explicit `policy_context.clock`. The harness verifies only;
-it never signs at runtime. The harness verifies only; it never signs at runtime.
+it never signs at runtime.
 
 ### Verification Methods
 
