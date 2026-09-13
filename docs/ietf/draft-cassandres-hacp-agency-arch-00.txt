@@ -1,0 +1,448 @@
+
+
+
+
+Network Working Group                                      S. Cassandres
+Internet-Draft                               Digital Humanism Collective
+Intended status: Informational                         13 September 2026
+Expires: 17 March 2027
+
+
+          Human Agency Continuity Protocol (HACP) Architecture
+                  draft-cassandres-hacp-agency-arch-00
+
+Abstract
+
+   This document describes the architecture of the Human Agency
+   Continuity Protocol (HACP): a pre-execution authorization contract
+   for tool-using agents.  HACP separates human intent, deterministic
+   evaluation, cryptographic decision binding, and enforcement so that
+   an agent cannot silently reinterpret authorized action after a
+   decision is issued.
+
+   This document is Informational.  It is not an Internet Standard.  It
+   does not activate Enforcement revision 2 and does not claim general
+   URI-normalization conformance.
+
+   The acronym HACP in this series means Human Agency Continuity
+   Protocol.  A separately posted individual Internet-Draft, draft-
+   sunyi-hacp-protocol, uses the same four letters for a different
+   protocol (Hardware Agent Capability Protocol) by a different author.
+   The present author has no affiliation with that document.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 17 March 2027.
+
+
+
+
+
+
+
+Cassandres                Expires 17 March 2027                 [Page 1]
+
+Internet-Draft              HACP Architecture             September 2026
+
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+     1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   3
+   2.  Problem . . . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   3.  Non-Goals . . . . . . . . . . . . . . . . . . . . . . . . . .   4
+   4.  Architectural Components  . . . . . . . . . . . . . . . . . .   4
+     4.1.  IntentEnvelope  . . . . . . . . . . . . . . . . . . . . .   4
+     4.2.  ProposedAction  . . . . . . . . . . . . . . . . . . . . .   4
+     4.3.  evaluate()  . . . . . . . . . . . . . . . . . . . . . . .   5
+     4.4.  DecisionToken . . . . . . . . . . . . . . . . . . . . . .   5
+     4.5.  Provenance  . . . . . . . . . . . . . . . . . . . . . . .   5
+     4.6.  Enforcement Point . . . . . . . . . . . . . . . . . . . .   5
+   5.  Version Domains . . . . . . . . . . . . . . . . . . . . . . .   5
+   6.  Implementation Status . . . . . . . . . . . . . . . . . . . .   5
+   7.  Related Work  . . . . . . . . . . . . . . . . . . . . . . . .   6
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
+   9.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
+   10. Relationship to Implementation Licenses . . . . . . . . . . .   7
+   11. Normative References  . . . . . . . . . . . . . . . . . . . .   7
+   12. Informative References  . . . . . . . . . . . . . . . . . . .   7
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   8
+
+1.  Introduction
+
+   Agent systems can call tools, HTTP APIs, and other machine interfaces
+   faster than a human can continuously supervise each call.  Existing
+   application protocols authenticate a session or sign a message.  They
+   do not, by themselves, bind a later tool invocation to the exact
+   authorized action semantics.
+
+   HACP addresses that gap with a language-agnostic evaluate-before-
+   execute path:
+
+
+
+
+
+
+
+Cassandres                Expires 17 March 2027                 [Page 2]
+
+Internet-Draft              HACP Architecture             September 2026
+
+
+   intent envelope
+           |
+           v
+   proposed action
+           |
+           v
+   deterministic evaluate()
+           |
+           +--> ALLOW + DecisionToken
+           +--> DENY
+           `--> CHECKPOINT
+           |
+           v
+   enforcement point
+           |
+           v
+   action
+
+   The authoritative published contract is HACP Specification v1.0.0
+   Variant A [HACP-SPEC-1.0.0].  Independent implementations in Python,
+   TypeScript, and Go reproduce the same 38-vector decision-level HACP-
+   Core suite.  This draft restates the architectural boundary for
+   review.  It does not replace the published specification.
+
+1.1.  Requirements Language
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   Normative protocol detail lives in [I-D.cassandres-hacp-agency-core].
+   This document uses BCP 14 language only for architectural
+   constraints.
+
+2.  Problem
+
+   Without a pre-execution authority contract, a delegated agent can:
+
+   *  reuse a prior approval against a different action;
+
+   *  widen audience, destination, quantity, or reversibility after
+      approval;
+
+   *  continue after envelope, token, or key revocation if the
+      enforcement point is advisory;
+
+
+
+
+Cassandres                Expires 17 March 2027                 [Page 3]
+
+Internet-Draft              HACP Architecture             September 2026
+
+
+   *  treat URI-equivalent or application-equivalent spellings as
+      automatically authorization-equivalent; or
+
+   *  hide the decision path inside a probabilistic model.
+
+   HACP treats those as authorization failures, not as product UX
+   issues.
+
+3.  Non-Goals
+
+   HACP does not:
+
+   *  watermark or label generated content;
+
+   *  inspect raw prompts or act as a prompt-injection firewall;
+
+   *  define an identity mesh, SSO, or IdP;
+
+   *  perform DLP or payload content filtering;
+
+   *  provide OS/kernel sandboxing or a service mesh;
+
+   *  require global consensus (Raft/Paxos) for revocation;
+
+   *  train, align, or moderate models; or
+
+   *  certify regulatory compliance.
+
+   Anything not required by a published HACP-Core invariant is out of
+   scope until added through the specification versioning policy.
+
+4.  Architectural Components
+
+4.1.  IntentEnvelope
+
+   A signed declaration of principal, scope grant, optional autonomy
+   budget, and validity interval.  The human-readable intent_statement
+   is informational.  Scope and signatures are authoritative.
+
+4.2.  ProposedAction
+
+   A schema-constrained description of one intended act: verb, resource,
+   audience, reversibility, externality, data class, optional quantity,
+   destination, and tool name.
+
+
+
+
+
+
+
+Cassandres                Expires 17 March 2027                 [Page 4]
+
+Internet-Draft              HACP Architecture             September 2026
+
+
+4.3.  evaluate()
+
+   A deterministic function from envelope, action, policy digest,
+   revocation state, and clock to ALLOW, DENY, or CHECKPOINT.  It MUST
+   NOT require an LLM on the hot path.
+
+4.4.  DecisionToken
+
+   Issued only on ALLOW.  Bound to the SHA-256 of the canonical
+   ProposedAction.  Verification against any other action MUST fail.
+
+4.5.  Provenance
+
+   Append-only, hash-chained, signed events for evaluation, issuance,
+   denial, checkpoint, revocation, and optional execution.
+
+4.6.  Enforcement Point
+
+   An ALLOW without an enforcement point is advisory.  A compliant
+   deployment places mediation between the agent and enforceable
+   transports (for the current active profile: mediated tool calls and
+   explicit HTTP proxy).  Fail-closed is mandatory when authority or
+   control state cannot be established.
+
+5.  Version Domains
+
+   HACP 1.0.0 keeps domains separate on purpose:
+
+   Specification release     1.0.0
+   Canonical HACP-Core       0.9.2
+   Canonical vector set      core-0.9.2
+   Wire/object hacp_version  0.9
+   Runner Protocol           1
+   humanist-core package     0.5.0
+
+   Specification release 1.0.0 does not migrate wire objects to
+   hacp_version 1.0 and does not activate Enforcement revision 2.
+
+6.  Implementation Status
+
+   Published evidence at the specification tag v1.0.0:
+
+   Go, TypeScript, Python HACP-Core     38/38 decision-level PASS
+   Sidecar decision outcomes            38/38 correct
+   Sidecar exact reason codes           15/38 PASS, 23/38 classified
+   Python <-> Go external E2E           5/5 PASS
+   Clean-clone validation               PASS
+
+
+
+
+Cassandres                Expires 17 March 2027                 [Page 5]
+
+Internet-Draft              HACP Architecture             September 2026
+
+
+   Exact reason-code 38/38 is not a HACP 1.0.0 Variant A claim.
+   Successor request-binding work (HC2) exists as draft evidence and is
+   not the advertised 1.0 Enforcement contract.
+
+   Vector set digest (SHA-256):
+
+   1e167887106463cf89c81f3898e1f3ae4fd905bc807084959c787287f6575d58
+
+   The conformance Ed25519 identity derived from SHA-256("hacp-
+   conformance-v0.9-key-001") is TEST ONLY and MUST NOT be used in
+   production.
+
+7.  Related Work
+
+   This section distinguishes HACP from nearby work.  It does not rank
+   products.
+
+   *  [I-D.sunyi-hacp-protocol] (Hardware Agent Capability Protocol, Yi
+      Sun) shares only the four-letter acronym.  It is a different
+      individual Internet-Draft and is not a predecessor of this work.
+      The author of this series is not affiliated with that draft.
+
+   *  HTTP [RFC9110], HTTP Message Signatures [RFC9421], and OAuth
+      protect messages, resources, or delegated access tokens.  They do
+      not define HACP evaluate() semantics.
+
+   *  UCAN and ZCAP-LD provide capability attenuation.  HACP is an
+      evaluate-and-bind decision protocol with a published 38-vector
+      suite, not a DID capability stack.
+
+   *  MCP and similar tool buses are transports.  HACP sits in front of
+      tool execution; it is not a replacement tool protocol.
+
+   *  Other work on agent delegation, certification, or governance may
+      overlap in motivation.  HACP's testable core is IntentEnvelope /
+      ProposedAction / DecisionToken / fail-closed evaluate().
+
+   URI resource equivalence [RFC3986] is not automatic HACP
+   authorization-binding equivalence.  That distinction is architectural
+   and is not general URI normalization.
+
+8.  Security Considerations
+
+   HACP reduces silent reinterpretation of authority.  It does not
+   protect against:
+
+   *  a compromised enforcement host;
+
+
+
+
+Cassandres                Expires 17 March 2027                 [Page 6]
+
+Internet-Draft              HACP Architecture             September 2026
+
+
+   *  an operator who grants an envelope that is too wide;
+
+   *  physical access to signing keys; or
+
+   *  model quality, memory hygiene, or multi-model session confusion in
+      an agent product.
+
+   Fail-closed is the required reaction to signature failure, unknown
+   keys, expiry, revocation, scope crossing, budget exhaustion, unknown
+   security-relevant attributes, and stale distributed control state.
+
+   Confused-deputy risk at the tool name and request-target
+   representation is in scope for enforcement profiles.  Content of
+   payloads is not inspected.
+
+9.  IANA Considerations
+
+   This document has no IANA actions.
+
+10.  Relationship to Implementation Licenses
+
+   Known implementations are published under licenses distinct from the
+   IETF Trust terms that will apply to this document after posting.
+   Posting this Internet-Draft does not change the licenses of the
+   separately published specification or implementation repositories.
+
+11.  Normative References
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, May 2017,
+              <https://www.rfc-editor.org/info/rfc8174>.
+
+12.  Informative References
+
+   [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifier (URI): Generic Syntax", STD 66,
+              RFC 3986, January 2005,
+              <https://www.rfc-editor.org/info/rfc3986>.
+
+   [RFC9110]  Fielding, R., Nottingham, M., and J. Reschke, "HTTP
+              Semantics", STD 97, RFC 9110, June 2022,
+              <https://www.rfc-editor.org/info/rfc9110>.
+
+
+
+
+
+Cassandres                Expires 17 March 2027                 [Page 7]
+
+Internet-Draft              HACP Architecture             September 2026
+
+
+   [RFC9421]  Backman, A., Richer, J., and M. Sporny, "HTTP Message
+              Signatures", RFC 9421, February 2024,
+              <https://www.rfc-editor.org/info/rfc9421>.
+
+   [HACP-SPEC-1.0.0]
+              Collective, D. H., "Human Agency Continuity Protocol
+              (HACP) Specification v1.0.0, Variant A", Version 1.0.0,
+              September 2026, <https://github.com/digital-humanism/hacp-
+              spec/releases/tag/v1.0.0>.  Frozen source commit
+              c468c9bb0427448e564bcf3e7d9c8a3a004b8513.
+
+   [I-D.cassandres-hacp-agency-core]
+              Cassandres, S., "Human Agency Continuity Protocol (HACP)
+              Core", Work in Progress, Internet-Draft, draft-cassandres-
+              hacp-agency-core-00, November 2026,
+              <https://datatracker.ietf.org/doc/html/draft-cassandres-
+              hacp-agency-core-00>.
+
+   [I-D.sunyi-hacp-protocol]
+              Sun, Y., "Hardware Agent Capability Protocol", Work in
+              Progress, Internet-Draft, draft-sunyi-hacp-protocol, 2026,
+              <https://datatracker.ietf.org/doc/draft-sunyi-hacp-
+              protocol/>.
+
+Author's Address
+
+   Sergio Cassandres
+   Digital Humanism Collective
+   Email: digital.humanism.collective@protonmail.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cassandres                Expires 17 March 2027                 [Page 8]

@@ -1,0 +1,174 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="exp" ipr="trust200902" docName="draft-cassandres-hacp-agency-core-00" version="3" submissionType="independent">
+  <front>
+    <title abbrev="HACP Core">Human Agency Continuity Protocol (HACP) Core</title>
+    <seriesInfo name="Internet-Draft" value="draft-cassandres-hacp-agency-core-00"/>
+    <author fullname="Sergio Cassandres" initials="S." surname="Cassandres">
+      <organization>Digital Humanism Collective</organization>
+      <address><email>digital.humanism.collective@protonmail.com</email></address>
+    </author>
+    <abstract>
+      <t>This document specifies the HACP-Core decision contract: IntentEnvelope, ProposedAction, AgencyDecision, DecisionToken, provenance events, revocation, and the ordered evaluate() algorithm. Implementations MUST fail closed. Decisions MUST be deterministic and MUST NOT require a language model on the evaluation path.</t>
+      <t>The published executable baseline is the 38-vector HACP-Core v0.9.2 suite. Wire object field hacp_version remains "0.9". Specification release 1.0.0 does not change that field.</t>
+    </abstract>
+  </front>
+  <middle>
+    <section anchor="intro" title="Introduction">
+      <t>Companion architecture: <xref target="I-D.cassandres-hacp-agency-arch"/>. Authoritative schemas, canonicalization rules, the boundary matrix, and vectors remain in HACP Specification v1.0.0 <xref target="HACP-SPEC-1.0.0"/> at the immutable release tag and source commit identified in the reference. This draft is the IETF-facing restatement of that frozen Core contract.</t>
+      <t>This document does not upgrade the HACP v1.0.0 canonicalization profile into a new claim of general RFC 8785 conformance. The byte-level contract remains the published v1.0.0 HACP canonicalization profile; <xref target="RFC8785"/> is cited as related canonicalization work.</t>
+      <section anchor="requirements" title="Requirements Language"><t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when, they appear in all capitals, as shown here.</t></section>
+    </section>
+    <section anchor="naming" title="Naming and Unrelated HACP Draft"><t>The acronym HACP in this document means Human Agency Continuity Protocol. The separately posted <xref target="I-D.sunyi-hacp-protocol"/> uses the same acronym for Hardware Agent Capability Protocol. The two works are unrelated, and the present author has no affiliation with that document.</t></section><section anchor="terminology" title="Terminology">
+      <dl>
+        <dt>Principal</dt><dd><t>Subject of the envelope; principal_kind is human or system.</t></dd>
+        <dt>IntentEnvelope</dt><dd><t>Signed scope and optional autonomy budget.</t></dd>
+        <dt>ProposedAction</dt><dd><t>Structured description of one intended act.</t></dd>
+        <dt>AgencyDecision</dt><dd><t>ALLOW, DENY, or CHECKPOINT.</t></dd>
+        <dt>DecisionToken</dt><dd><t>Signed binding of ALLOW to action_hash.</t></dd>
+        <dt>Policy</dt><dd><t>Rule set identified by policy_digest.</t></dd>
+        <dt>Revocation</dt><dd><t>Signed invalidation of envelope, token, or key.</t></dd>
+      </dl>
+    </section>
+    <section anchor="deployment" title="Deployment Assumptions">
+      <ol>
+        <li><t>Proposed actions arrive through a schema-constrained interface. Unmediated free-form tool execution is out of scope for Core compliance.</t></li>
+        <li><t>An enforcement point MUST exist for a deployment to be more than advisory.</t></li>
+        <li><t>Verifiers MAY apply an explicit bounded clock skew to expiry checks.</t></li>
+      </ol>
+    </section>
+    <section anchor="data-model" title="Data Model">
+      <t>All objects MUST match the published JSON Schemas in HACP Specification v1.0.0. All signed objects MUST use the deterministic HACP v1.0.0 canonicalization profile before hashing or signing: sorted keys, rejected duplicate keys, rejected non-finite numbers, and no presentation whitespace in canonical bytes. The profile is described as compatible with RFC 8785 expectations; this draft does not claim additional JCS behavior beyond the frozen v1.0.0 contract.</t>
+      <section anchor="intent-envelope" title="IntentEnvelope"><t>MUST include: hacp_version "0.9", envelope_id, principal, principal_kind, intent_statement, scope, issued_at, expires_at, signer_key_id, and an Ed25519 signature over the canonical payload excluding signature.</t><t>MAY include autonomy_budget and parent_envelope_id.</t></section>
+      <section anchor="proposed-action" title="ProposedAction"><t>MUST include: hacp_version "0.9", action_id, envelope_id, verb, resource_class, resource_id, audience, reversibility, externality, data_class, and proposed_at.</t><t>MAY include quantity, destination, tool_name, and args_hash.</t><t>Security-relevant attributes are: verb, resource_class, audience, reversibility, externality, data_class, quantity, destination, and tool_name.</t></section>
+      <section anchor="decision-token" title="DecisionToken"><t>MUST include action_hash equal to SHA-256 of the canonical ProposedAction and an Ed25519 signature. Algorithm negotiation is prohibited. Tokens MUST NOT be issued for DENY or CHECKPOINT.</t></section>
+      <section anchor="agency-decision" title="AgencyDecision"><t><tt>decision</tt> is ALLOW, DENY, or CHECKPOINT. <tt>reason_codes</tt> MUST be non-empty for DENY and CHECKPOINT. <tt>token</tt> MUST be present if and only if the decision is ALLOW. <tt>checkpoint_id</tt> MUST be present if and only if the decision is CHECKPOINT. <tt>provenance_event_id</tt> MUST be present.</t></section>
+      <section anchor="provenance-event" title="ProvenanceEvent"><t>Provenance events are append-only, hash-chained, and signed. Types include EVALUATED, ISSUED, DENIED, CHECKPOINT_OPENED, CHECKPOINT_RESOLVED, REVOKED, and EXECUTED.</t></section>
+      <section anchor="revocation-record" title="RevocationRecord"><t><tt>target_kind</tt> is envelope, token, or key. Records are signed and append-only.</t></section>
+    </section>
+    <section anchor="evaluate" title="evaluate()">
+      <sourcecode type="text">evaluate(intent_envelope, proposed_action, context) -&gt; AgencyDecision</sourcecode>
+      <t>The evaluator MUST run in this order:</t>
+      <ol>
+        <li><t>Validate envelope schema. Failure -&gt; DENY INVALID_ENVELOPE.</t></li>
+        <li><t>Resolve signer_key_id; revoked key -&gt; DENY KEY_REVOKED.</t></li>
+        <li><t>Verify envelope signature. Failure -&gt; DENY SIGNATURE_FAILURE.</t></li>
+        <li><t>Check envelope and applicable ancestor token revocation. ENVELOPE_REVOKED / TOKEN_REVOKED.</t></li>
+        <li><t>Envelope expiry -&gt; DENY ENVELOPE_EXPIRED.</t></li>
+        <li><t>Validate ProposedAction; reject duplicate JSON keys -&gt; DENY INVALID_ACTION.</t></li>
+        <li><t>Compute action_hash over canonical ProposedAction.</t></li>
+        <li><t>Evaluate scope and boundaries. Exceeded authority -&gt; MUST NOT ALLOW.</t></li>
+        <li><t>Unknown security-relevant attribute -&gt; MUST NOT ALLOW UNKNOWN_ATTRIBUTE.</t></li>
+        <li><t>Evaluate autonomy budget. Exhausted for a system principal -&gt; MUST NOT ALLOW BUDGET_EXHAUSTED.</t></li>
+        <li><t>Human-required consequence class with non-human principal -&gt; CHECKPOINT HUMAN_REQUIRED, or DENY if policy forbids escalation.</t></li>
+        <li><t>Otherwise ALLOW and issue a DecisionToken bound to action_hash.</t></li>
+      </ol>
+      <t><tt>evaluate()</tt> MUST be deterministic for identical inputs, policy, and revocation state. <tt>evaluate()</tt> MUST NOT call an LLM.</t>
+      <t>Signer-key revocation MUST be checked before signature verification. Envelope and token revocation MUST be checked only after a successful signature check.</t>
+    </section>
+    <section anchor="scope" title="Scope and Boundaries">
+      <t>ScopeGrant bounds security-relevant attributes, including quantity ceilings and destination allowlists.</t>
+      <t>A meaningful boundary crossing (audience, reversibility, externality, destination allowlist, data_class, and other dimensions defined by the published boundary matrix) MUST NOT yield ALLOW. Return CHECKPOINT if policy allows escalation, otherwise DENY BOUNDARY_CROSSING.</t>
+      <t>Quantity above a granted ceiling is SCOPE_EXCEEDED and is not, solely by that fact, a meaningful boundary crossing.</t>
+      <t>Absent optional security-relevant attributes are ungranted unless the policy explicitly defaults them.</t>
+      <t>The published HACP v1.0.0 boundary matrix governs in case of conflict with this summary.</t>
+    </section>
+    <section anchor="budget" title="Autonomy Budget"><t>Budget consumption for system principals MUST be monotonically non-decreasing per envelope. Exhaustion MUST NOT ALLOW. Human checkpoint paths are not consumed by system budget exhaustion.</t></section>
+    <section anchor="crypto" title="Cryptography"><t>Production signatures MUST use Ed25519 <xref target="RFC8032"/> over HACP canonical bytes. HMAC is permitted only in explicitly marked development profiles. <tt>policy_digest</tt> MUST be covered by token signatures. SHA-256 is used where this document specifies SHA-256 <xref target="RFC6234"/>.</t></section>
+    <section anchor="provenance" title="Provenance"><t>Every <tt>evaluate()</tt> MUST emit a signed EVALUATED event. ALLOW issuance MUST emit ISSUED. Revocation MUST emit REVOKED. Chain integrity MUST be verifiable through <tt>prev_event_hash</tt>.</t></section>
+    <section anchor="invariants" title="Invariants">
+      <ul>
+        <li><t>INV-1 Human Final Decision: human-required consequence class SHALL NOT ALLOW without a human principal or explicit delegation.</t></li>
+        <li><t>INV-2 Boundary Re-Authorization: meaningful boundary crossing SHALL NOT ALLOW without re-authorization.</t></li>
+        <li><t>INV-3 Token Binding: a token is valid only for its action_hash.</t></li>
+        <li><t>INV-4 Traceability: every decision references signed provenance, policy digest, and principal.</t></li>
+        <li><t>INV-5 Cryptographic Integrity: tampered signed payloads MUST fail closed.</t></li>
+        <li><t>INV-7 Bounded Autonomy: exhausted system budget MUST NOT ALLOW.</t></li>
+      </ul>
+      <t>INV-6 is reserved and unused.</t>
+      <t>The executable mapping is the 38-vector <tt>core-0.9.2</tt> set pinned by this SHA-256 digest:</t>
+      <artwork>1e167887106463cf89c81f3898e1f3ae4fd905bc807084959c787287f6575d58</artwork>
+      <t>Implementations MUST NOT special-case vector IDs.</t>
+    </section>
+    <section anchor="revocation" title="Revocation"><ul><li><t>Token target denies that token.</t></li><li><t>Envelope target denies the envelope, descendant envelopes, and their tokens transitively.</t></li><li><t>Key target denies every envelope or token with that signer_key_id.</t></li></ul></section>
+    <section anchor="out-of-scope" title="Out of Scope for This Draft"><ul><li><t>Enforcement revision 2 / HC2 request-binding classes as active 1.0 contract.</t></li><li><t>Exact reason-code 38/38 correspondence (sidecar baseline is 15/38 exact + 23 classified, all decision-correct).</t></li><li><t>General URI normalization.</t></li><li><t>New IANA registries.</t></li><li><t>Wire encoding detail beyond the canonicalization rules above (reserved for a later wire draft).</t></li></ul></section>
+    <section anchor="security" title="Security Considerations"><t>Failures in schema, signature, key state, expiry, scope, budget, or unknown attributes MUST NOT become implicit ALLOW.</t><t>A DecisionToken replayed against a mutated action MUST DENY.</t><t>The protocol does not replace host hardening, key custody, transport security, or model-safety work. TEST ONLY conformance keys MUST NOT be deployed.</t></section>
+    <section anchor="iana" title="IANA Considerations"><t>This document has no IANA actions.</t></section>
+  </middle>
+  <back>
+    <references><name>Normative References</name>
+      <reference anchor="RFC2119" target="https://www.rfc-editor.org/info/rfc2119">
+        <front>
+          <title>Key words for use in RFCs to Indicate Requirement Levels</title>
+          <author initials="S." surname="Bradner" fullname="S. Bradner"><organization/></author>
+          <date year="1997" month="March"/>
+        </front>
+        <seriesInfo name="BCP" value="14"/>
+        <seriesInfo name="RFC" value="2119"/>
+      </reference>
+      <reference anchor="RFC8174" target="https://www.rfc-editor.org/info/rfc8174">
+        <front>
+          <title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title>
+          <author initials="B." surname="Leiba" fullname="B. Leiba"><organization/></author>
+          <date year="2017" month="May"/>
+        </front>
+        <seriesInfo name="BCP" value="14"/>
+        <seriesInfo name="RFC" value="8174"/>
+      </reference>
+      <reference anchor="RFC8032" target="https://www.rfc-editor.org/info/rfc8032">
+        <front>
+          <title>Edwards-Curve Digital Signature Algorithm (EdDSA)</title>
+          <author initials="S." surname="Josefsson" fullname="S. Josefsson"><organization/></author>
+          <author initials="I." surname="Liusvaara" fullname="I. Liusvaara"><organization/></author>
+          <date year="2017" month="January"/>
+        </front>
+        <seriesInfo name="RFC" value="8032"/>
+      </reference>
+      <reference anchor="RFC6234" target="https://www.rfc-editor.org/info/rfc6234">
+        <front>
+          <title>US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)</title>
+          <author initials="D." surname="Eastlake" fullname="D. Eastlake 3rd"><organization/></author>
+          <author initials="T." surname="Hansen" fullname="T. Hansen"><organization/></author>
+          <date year="2011" month="May"/>
+        </front>
+        <seriesInfo name="RFC" value="6234"/>
+      </reference>
+<reference anchor="HACP-SPEC-1.0.0" target="https://github.com/digital-humanism/hacp-spec/releases/tag/v1.0.0">
+  <front>
+    <title>Human Agency Continuity Protocol (HACP) Specification v1.0.0, Variant A</title>
+    <author fullname="Digital Humanism Collective"><organization>Digital Humanism Collective</organization></author>
+    <date year="2026" month="September"/>
+  </front>
+  <seriesInfo name="Version" value="1.0.0"/>
+  <annotation>Frozen source commit c468c9bb0427448e564bcf3e7d9c8a3a004b8513.</annotation>
+</reference>
+    </references>
+    <references><name>Informative References</name>
+      <reference anchor="RFC8785" target="https://www.rfc-editor.org/info/rfc8785">
+        <front>
+          <title>JSON Canonicalization Scheme (JCS)</title>
+          <author initials="A." surname="Rundgren" fullname="A. Rundgren"><organization/></author>
+          <author initials="B." surname="Jordan" fullname="B. Jordan"><organization/></author>
+          <author initials="S." surname="Erdtman" fullname="S. Erdtman"><organization/></author>
+          <date year="2020" month="June"/>
+        </front>
+        <seriesInfo name="RFC" value="8785"/>
+      </reference>
+<reference anchor="I-D.cassandres-hacp-agency-arch">
+  <front>
+    <title>Human Agency Continuity Protocol (HACP) Architecture</title>
+    <author fullname="Sergio Cassandres" initials="S." surname="Cassandres"><organization>Digital Humanism Collective</organization></author>
+    <date year="2026" month="November"/>
+  </front>
+  <seriesInfo name="Internet-Draft" value="draft-cassandres-hacp-agency-arch-00"/>
+</reference>
+<reference anchor="I-D.sunyi-hacp-protocol" target="https://datatracker.ietf.org/doc/draft-sunyi-hacp-protocol/">
+  <front>
+    <title>Hardware Agent Capability Protocol</title>
+    <author fullname="Yi Sun" initials="Y." surname="Sun"><organization/></author>
+    <date year="2026"/>
+  </front>
+  <seriesInfo name="Internet-Draft" value="draft-sunyi-hacp-protocol"/>
+</reference>
+    </references>
+  </back>
+</rfc>
