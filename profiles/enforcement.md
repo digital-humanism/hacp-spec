@@ -1,7 +1,8 @@
-# HACP Enforcement Profile
+# HACP Enforcement Profile — Revision 1
 
-Status: Draft
+Status: Superseded
 Version: 1.0.0
+Profile revision: 1
 Normative references:
 - HACP-SPEC-0.9-draft.md
 - INVARIANTS.md

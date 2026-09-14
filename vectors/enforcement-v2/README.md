@@ -1,16 +1,16 @@
-# HACP Enforcement Profile v2 Draft Conformance Vectors
+# HACP Enforcement Revision 2 Request-Binding Conformance Evidence
 
-Status: Draft — not part of the current canonical HACP-Core conformance set.
+Status: Active revision-bound evidence — not part of the canonical HACP-Core conformance set.
 
-These vectors exercise candidate normative requirements defined by
-`profiles/enforcement-v2-draft.md`.
+These vectors exercise request-binding requirements defined by
+`profiles/enforcement-v2.md`.
 
 The vectors in this directory MUST NOT be included in claims against the
 current HACP-Core canonical vector set or its published manifest.
 
 ## HC2 — HTTP Path Binding Representation
 
-This draft vector line covers the request-binding semantics of
+This vector line covers the request-binding semantics of
 `DecisionToken.constraints.path`, including path-and-query binding and
 the explicitly defined percent-encoding comparison rules.
 
@@ -325,9 +325,24 @@ Current verified results:
 Total verified request-binding cases: `55`
 
 These results demonstrate only the request-binding semantics explicitly
-defined by the current Enforcement v2 draft. They do not imply general URI
+covered by HC2-55 for HACP-Enforcement revision 2. They do not imply general URI
 normalization conformance.
 
-The Enforcement v2 profile and all vectors in this directory remain draft and
-MUST NOT be included in claims against the current HACP-Core canonical
+HC2-55 is revision-bound request-binding conformance evidence for
+HACP-Enforcement revision 2. It is not the complete mandatory Enforcement
+revision 2 conformance suite.
+
+HC2-55 MUST NOT be included in claims against the canonical HACP-Core
 conformance set or its published manifest.
+
+Evidence identity:
+
+```text
+Profile: HACP-Enforcement
+Revision: 2
+Evidence set: HC2-55
+Total vectors: 55
+Canonicalization: JCS-RFC8785
+Digest algorithm: SHA-256
+Vector-set digest: sha256:fcf2b2ee93bf2623c0e088d8b02527713f517220bb63cb0f77b08ed3d2c3ba8a
+```

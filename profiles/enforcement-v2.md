@@ -1,11 +1,10 @@
-# HACP Enforcement Profile — Version 2 Draft
+# HACP Enforcement Profile — Revision 2
 
-Status: Draft — not yet active
+Status: Active
 Specification version: 1.0.0
-Profile revision: 2-draft
+Profile revision: 2
 Based on: profiles/enforcement.md
-Release lineage: successor candidate to the enforcement profile used by the 0.5.0 release line
-Phase: HC2 normative development
+Release lineage: active successor to Enforcement revision 1
 Normative references:
 - HACP-SPEC-0.9-draft.md
 - INVARIANTS.md

@@ -10,7 +10,7 @@ This document defines the lifecycle transition from the current `HACP-Enforcemen
 
 It applies only to the current Enforcement revision lineage.
 
-It does not activate Enforcement revision 2, rename any profile document, or change production behavior.
+It records the explicit revision 2 activation transition and predecessor disposition. The transition does not change production behavior.
 
 ## 2. Normative basis
 
@@ -44,9 +44,9 @@ revision identity is independent of hacp_version,
 and materially distinct revisions must remain externally distinguishable.
 ```
 
-## 3. Current lineage
+## 3. Lineage at introduction
 
-At the time this document is introduced, the Enforcement lineage is:
+At the time this document was introduced, the Enforcement lineage was:
 
 ```text
 Revision 1
@@ -63,23 +63,25 @@ Revision 2
 → not active
 ```
 
-Revision 1 is not treated by this document as a completed active conformance target.
+This section records the pre-activation lineage state and is retained as transition provenance.
 
-Revision 2 is not active merely because its draft profile and executable draft vectors exist.
+Revision 1 was not treated as a completed active conformance target.
 
-## 4. Current revision 1 status
+Revision 2 was not activated merely because its draft profile and executable draft vectors existed.
 
-Revision 1 is the predecessor normative definition from which revision 2 evolves.
+## 4. Revision 1 disposition
+
+Revision 1 is the superseded predecessor normative definition from which revision 2 evolved.
 
 Its current role is:
 
 ```text
-historical/current predecessor definition
+superseded predecessor
 +
-normative lineage source
+historical normative lineage source
 ```
 
-This document does not require revision 1 to be activated before revision 2 may later become active.
+Revision 1 was not required to become active before revision 2 activation.
 
 A lifecycle transition of the form:
 
@@ -93,22 +95,22 @@ MUST NOT be introduced solely to create artificial lifecycle symmetry.
 
 ## 5. Current revision 2 status
 
-Revision 2 is the successor normative draft.
+Revision 2 is the active successor normative definition.
 
 Its current state is:
 
 ```text
 Revision: 2
-Status: draft
+Status: active
 ```
 
-Revision 2 remains subject to the Enforcement v2 Activation Readiness workstream.
+Revision 2 is the current preferred HACP-Enforcement conformance target.
 
-Existing draft vectors and verification evidence do not, by themselves, activate revision 2.
+Activation required explicit closure of the Enforcement revision 2 Activation Gate; executable vectors and verification evidence did not, by themselves, activate the revision.
 
-## 6. Target lifecycle transition
+## 6. Lifecycle transition model
 
-The intended lifecycle transition is:
+The revision 1 to revision 2 lifecycle transition is:
 
 ```text
 revision 1
@@ -143,7 +145,7 @@ The predecessor/successor transition MUST be recorded explicitly.
 
 ## 7. Superseded status for revision 1
 
-When revision 2 becomes active, revision 1 SHOULD become:
+With revision 2 active, revision 1 is:
 
 ```text
 superseded
@@ -342,17 +344,13 @@ Profile conformance and wire compatibility are separate dimensions.
 
 ## 20. Normative document transition
 
-The current revision 2 normative draft is:
+The revision 2 normative document is:
 
 ```text
-profiles/enforcement-v2-draft.md
+profiles/enforcement-v2.md
 ```
 
-This document does not rename it.
-
-If revision 2 later becomes active, the active normative document SHOULD use a filename and status that do not falsely imply draft lifecycle state.
-
-A likely transition is:
+The transition from the draft lifecycle document:
 
 ```text
 profiles/enforcement-v2-draft.md
@@ -360,17 +358,19 @@ profiles/enforcement-v2-draft.md
 profiles/enforcement-v2.md
 ```
 
-but the exact file operation MUST occur only when activation prerequisites are satisfied.
+was performed as part of the explicit revision 2 activation transition after the applicable activation prerequisites were satisfied.
+
+The active normative document MUST use a filename and status that do not falsely imply draft lifecycle state.
 
 ## 21. Revision 1 normative document
 
-The current predecessor document:
+The superseded predecessor document:
 
 ```text
 profiles/enforcement.md
 ```
 
-SHOULD remain available as historical revision 1 evidence when revision 2 becomes active, unless a separate archival policy establishes another location.
+SHOULD remain available as historical revision 1 evidence unless a separate archival policy establishes another location.
 
 The predecessor MUST NOT be silently overwritten in a way that destroys revision lineage.
 
@@ -442,19 +442,16 @@ no production changes without normative basis and proven RED
 
 ## 25. Explicit non-goals
 
-This document does not:
+This transition does not:
 
 ```text
-modify PROFILES.md
 modify versioning.md
-activate Enforcement revision 2
 deprecate revision 1 as legacy
-rename profiles/enforcement-v2-draft.md
 rename profiles/enforcement.md
 define final claim-string syntax
 define final capability-discovery schema
 define final conformance manifest schema
-declare the current draft vectors complete
+declare HC2-55 to be the complete mandatory Enforcement revision 2 conformance suite
 change runner protocol
 change harness code
 change sidecar code
@@ -466,59 +463,64 @@ define AuthorityRoot
 define DelegationGrant
 define Semantic Checkpoint 2.0
 ```
-
 ## 26. Current activation status
 
-At the time this document is introduced:
+The revision 2 Activation Gate is closed.
+
+Current Enforcement revision lineage:
 
 ```text
 Revision 1
-→ predecessor normative draft
+→ superseded predecessor
+→ historical normative lineage retained
+→ defined by profiles/enforcement.md
 ```
 
 ```text
 Revision 2
-→ draft successor
-→ Activation Readiness in progress
-→ not active
+→ active
+→ current preferred HACP-Enforcement conformance target
+→ defined by profiles/enforcement-v2.md
 ```
 
-The revision 2 Activation Gate is not yet closed.
-
-Known remaining Activation Readiness work includes at least:
-
-```text
-reason-code normative consistency
-verification-order correspondence
-control-state and freshness normative ownership
-conformance-suite completeness
-remaining activation blocker review
-```
-
-## 27. Final rules
-
-For the current `HACP-Enforcement` revision lineage:
+The activation transition records:
 
 ```text
 revision 1
-→ predecessor normative draft
+→ superseded
+
+revision 2
+→ active
+```
+
+Revision 1 was not retroactively treated as an active revision solely to create lifecycle symmetry.
+
+Revision 2 activation does not imply:
+
+```text
+a HACP wire/object version transition
+general URI normalization conformance
+HC2-55 completeness as the mandatory Enforcement revision 2 conformance suite
+runner protocol changes
+harness implementation changes
+production sidecar changes
+```
+
+HC2-55 remains bounded revision-2 HTTP request-binding conformance evidence.
+
+## 27. Final rules
+
+For the current HACP-Enforcement revision lineage:
+
+```text
+revision 1
+→ superseded predecessor
 ```
 
 ```text
 revision 2
-→ draft successor
-```
-
-```text
-revision 2 draft
-→ active
-ONLY after Activation Gate PASS
-```
-
-```text
-at revision 2 activation:
-revision 1
-→ superseded
+→ active successor
+→ current preferred HACP-Enforcement conformance target
 ```
 
 ```text
@@ -528,18 +530,17 @@ ONLY with separate compatibility justification
 ```
 
 ```text
-silent replacement
-→ forbidden
+silent revision replacement
+→ prohibited
 ```
 
 ```text
-revision 2 activation
-!= HACP 1.0 transition
+profile revision identity
+→ independent from HACP wire/object version
 ```
 
 ```text
-revision 2 activation
-!= general URI normalization conformance
+HC2-55
+→ bounded revision-2 HTTP request-binding conformance evidence
+→ not the complete mandatory Enforcement revision 2 conformance suite
 ```
-
-These rules preserve explicit Enforcement lineage and prevent activation from being inferred from draft maturity, filename changes, or incomplete executable evidence.

@@ -69,7 +69,7 @@ Revision:
 N
 ```
 
-For the current successor draft:
+For the current active revision:
 
 ```text
 Profile:
@@ -209,7 +209,7 @@ refer to the same normative lineage revision at different lifecycle stages.
 
 A draft revision MUST NOT be represented as an active conformance target.
 
-At the time this document is introduced:
+The following records the pre-activation revision state at the time this document was introduced:
 
 ```text
 HACP-Enforcement revision 1
@@ -389,26 +389,28 @@ The governing engineering rule remains:
 no production changes without normative basis and proven RED
 ```
 
+
 ## 20. Current Enforcement identity state
 
-At the time this document is introduced:
+The current Enforcement identity state is:
 
 ```text
 HACP-Enforcement revision 1
-→ predecessor
+→ superseded predecessor
+→ historical normative lineage
 ```
 
 and:
 
 ```text
 HACP-Enforcement revision 2
-→ draft successor
-→ not active
+→ active successor
+→ current preferred HACP-Enforcement conformance target
 ```
 
-Revision 2 may be identified in draft/support contexts.
+Revision 2 may be identified in capability, support, and conformance contexts using explicit revision identity.
 
-Revision 2 MUST NOT be presented as active conformance until its activation and conformance prerequisites are closed.
+Revision 2 MAY be presented as active only when the applicable conformance claim is supported by the required revision-bound evidence.
 
 ## 21. Final rules
 

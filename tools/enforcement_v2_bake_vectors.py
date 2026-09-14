@@ -7,9 +7,9 @@ vectors using the fixed test keypair. This tool is NOT part of the
 conformance path — it runs offline to produce reproducible vectors.
 
 Usage:
-    python tools/enforcement_v2_bake_vectors.py --vectors-dir vectors/enforcement-v2-draft
-    python tools/enforcement_v2_bake_vectors.py --check --vectors-dir vectors/enforcement-v2-draft
-    python tools/enforcement_v2_bake_vectors.py --vector vectors/enforcement-v2-draft/hc2_001_golden.json
+    python tools/enforcement_v2_bake_vectors.py --vectors-dir vectors/enforcement-v2
+    python tools/enforcement_v2_bake_vectors.py --check --vectors-dir vectors/enforcement-v2
+    python tools/enforcement_v2_bake_vectors.py --vector vectors/enforcement-v2/hc2_001_golden.json
 
 Rules:
     - Golden and negative Enforcement v2 vectors receive deterministic

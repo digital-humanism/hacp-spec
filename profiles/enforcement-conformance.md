@@ -172,41 +172,45 @@ active Enforcement conformance
 
 A draft-suite PASS MUST NOT be represented as active profile conformance.
 
-At the time this document is introduced:
+For any draft Enforcement revision:
 
 ```text
-HACP-Enforcement revision 2
-→ draft successor
+HACP-Enforcement revision N
+→ draft conformance target
 → not active
 ```
 
-Any existing revision 2 vector results remain draft-revision evidence until activation prerequisites are satisfied.
+Any vector results for a draft Enforcement revision remain draft-revision evidence until that revision's activation prerequisites are satisfied.
 
-## 10. Current Enforcement v2 draft vectors
+## 10. Current Enforcement revision 2 evidence
 
 The current:
 
 ```text
-vectors/enforcement-v2-draft/
+vectors/enforcement-v2/
 ```
 
-collection contains executable evidence for behavior defined by the Enforcement revision 2 draft.
+collection provides executable request-binding evidence for HACP-Enforcement revision 2.
 
-Its existence does not establish that the directory already constitutes the complete mandatory conformance suite for an active Enforcement revision 2.
-
-In particular:
+Its revision-bound evidence identity is:
 
 ```text
-verified request-binding cases
+Profile: HACP-Enforcement
+Revision: 2
+Evidence set: HC2-55
+Total vectors: 55
+Canonicalization: JCS-RFC8785
+Digest algorithm: SHA-256
+Vector-set digest: sha256:fcf2b2ee93bf2623c0e088d8b02527713f517220bb63cb0f77b08ed3d2c3ba8a
 ```
 
-do not imply:
+HC2-55 demonstrates the explicitly defined HTTP request-binding semantics covered by those 55 cases.
 
-```text
-complete Enforcement revision 2 conformance coverage
-```
+HC2-55 MUST NOT be interpreted as the complete mandatory Enforcement revision 2 conformance suite merely because all 55 cases pass.
 
-The current draft vector collection MUST NOT be interpreted as complete active-profile conformance merely because all currently defined vectors pass.
+HC2-55 does not establish general URI normalization conformance.
+
+HC2-55 does not modify, extend, or replace the canonical HACP-Core vector set or its published manifest.
 
 ## 11. Verification evidence
 
@@ -342,7 +346,7 @@ Run result: PASS
 means:
 
 ```text
-the implementation passed the executed revision 2 draft vector set
+the implementation passed the executed HC2-55 revision 2 evidence set
 ```
 
 It does not mean:
@@ -466,7 +470,7 @@ define revision negotiation
 define preferred revision selection
 activate Enforcement revision 2
 deprecate Enforcement revision 1
-declare current enforcement-v2-draft vectors complete
+declare HC2-55 to be the complete mandatory Enforcement revision 2 conformance suite
 change signed HACP object schemas
 change hacp_version
 define new request-target semantics
@@ -476,23 +480,25 @@ define DelegationGrant
 define Semantic Checkpoint 2.0
 ```
 
+
 ## 26. Current Enforcement conformance state
 
-At the time this document is introduced:
+The current Enforcement conformance state is:
 
 ```text
 HACP-Enforcement revision 1
-→ current normative predecessor
+→ superseded predecessor
+→ historical normative lineage
 ```
 
 ```text
 HACP-Enforcement revision 2
-→ draft successor
-→ executable draft vector evidence exists
-→ not active
+→ active successor
+→ HC2-55 revision-bound request-binding evidence exists
+→ current preferred Enforcement conformance target
 ```
 
-The existing revision 2 draft vector collection provides bounded evidence for explicitly defined draft semantics only.
+HC2-55 provides bounded revision-2 evidence for the explicitly defined HTTP request-binding semantics covered by those 55 cases.
 
 It is not automatically the complete active revision 2 conformance suite.
 

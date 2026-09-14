@@ -55,7 +55,7 @@ Runtime = Core + the following MUST:
 ## 4. HACP-Enforcement
 
 **Requires:** HACP-Runtime (and therefore HACP-Core).
-**Normative document:** `profiles/enforcement.md`.
+**Normative document:** `profiles/enforcement-v2.md` (`HACP-Enforcement` revision 2, Active). Revision 1 remains available in `profiles/enforcement.md` as superseded historical normative lineage.
 
 Adds external enforcement without rewriting agent business logic:
 
@@ -66,7 +66,7 @@ Adds external enforcement without rewriting agent business logic:
 - Fail modes: fail-closed for high-risk actions; explicit degraded-mode behavior.
 - Revocation propagation (push + local denylist; bounded staleness policy).
 
-**Conformance:** `ENFORCEMENT-*` vectors (pending).
+**Conformance evidence:** `HC2-55` provides revision-2 HTTP request-binding conformance evidence. It is not the complete mandatory Enforcement revision 2 conformance suite.
 **Claim identity:** `HACP 1.0-Enforcement` plus the applicable Enforcement revision as defined by `profiles/enforcement-identity.md`.
 
 ## 5. Claim Rules

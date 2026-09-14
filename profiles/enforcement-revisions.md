@@ -76,6 +76,9 @@ The current Enforcement revision lineage is:
 
 ```text
 Revision 1
+Status:
+superseded
+
 Normative document:
 profiles/enforcement.md
 ```
@@ -85,15 +88,15 @@ and:
 ```text
 Revision 2
 Status:
-draft
+active
 
-Normative draft:
-profiles/enforcement-v2-draft.md
+Normative document:
+profiles/enforcement-v2.md
 ```
 
-Revision 2 is the successor candidate to revision 1.
+Revision 2 is the active successor to revision 1.
 
-Revision 2 is not active merely because its normative draft exists.
+Revision 1 remains available as superseded historical normative lineage.
 
 ## 5. Relationship to HACP versioning
 
@@ -316,22 +319,23 @@ no production changes without normative basis and proven RED
 
 ## 17. Current Enforcement lifecycle
 
-At the time this document is introduced:
+The current Enforcement lifecycle is:
 
 ```text
 HACP-Enforcement revision 1
-→ current normative predecessor
+→ superseded predecessor
+→ historical normative lineage
 → defined by profiles/enforcement.md
 ```
 
 ```text
 HACP-Enforcement revision 2
-→ draft successor
-→ defined by profiles/enforcement-v2-draft.md
-→ not active
+→ active successor
+→ current preferred conformance target
+→ defined by profiles/enforcement-v2.md
 ```
 
-Revision 2 activation remains subject to the Enforcement v2 Activation Readiness workstream and its remaining blockers.
+Revision 2 activation prerequisites have been explicitly satisfied through the HACP 1.1 activation process.
 
 ## 18. Normative basis
 
@@ -352,4 +356,4 @@ Enforcement profile revision is independent of HACP wire/object versioning.
 
 Materially distinct revisions MUST remain externally distinguishable in conformance and lifecycle evidence.
 
-Revision 2 remains a draft successor until its activation prerequisites are explicitly satisfied.
+Revision 2 is active because its activation prerequisites were explicitly satisfied and the activation transition was recorded.
