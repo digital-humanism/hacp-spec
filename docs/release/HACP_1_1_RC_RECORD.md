@@ -303,3 +303,62 @@ R9 ENTRY:
 AUTHORIZED ONLY AFTER THIS R8 RECORD IS COMMITTED,
 SIGNED, PUBLISHED, AND THE hacp-spec WORKING TREE IS CLEAN
 ```
+
+## 9. Publication closure
+
+The substantive R8 release-candidate record was committed as:
+
+```text
+da258e57e1d12a8deea1afd08e557e59e808b1e9
+docs: record HACP 1.1 release candidate
+```
+
+The commit was verified with a Good ED25519 signature.
+
+Publication was completed to `origin/main`.
+
+Fresh remote verification established:
+
+```text
+HEAD:
+da258e57e1d12a8deea1afd08e557e59e808b1e9
+
+origin/main:
+da258e57e1d12a8deea1afd08e557e59e808b1e9
+
+HEAD == origin/main:
+YES
+
+substantive commit signature:
+Good ED25519
+
+working tree after publication verification:
+clean
+```
+
+No production, profile, wire, canonical-vector, HC2, or historical changes were introduced by publication.
+
+The R8 candidate source commit set remains unchanged:
+
+```text
+hacp-spec:
+328c50cecc0fefdae4fc481b08b83f743b6e239a
+
+hacp-sidecar:
+1bc10acbe79620a165cee573c5b260cd8639280f
+
+humanist-core:
+6d9ae82ed7fefe47b395e4ef68d0a18807866473
+```
+
+The publication-closure commit that contains this section is release-lineage evidence only and does not replace any of the candidate source revisions above.
+
+Therefore:
+
+```text
+R8:
+CLOSED / PASS / COMMITTED / SIGNED / PUBLISHED / CLEAN
+
+R9 ENTRY:
+AUTHORIZED
+```
