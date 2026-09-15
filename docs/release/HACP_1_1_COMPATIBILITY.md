@@ -1,6 +1,6 @@
 # HACP 1.1.0 — 1.0 Compatibility Assessment
 
-**Status:** R5 compatibility assessment — compatibility model established; fresh R5 Core regression verified 38/38 PASS; publication closure pending
+**Status:** CLOSED / PASS / COMMITTED / SIGNED / PUBLISHED / CLEAN
 **Stage:** R5 — 1.0 compatibility
 **Release line:** HACP 1.1.0
 **Contract boundary:** HACP 1.0.0 Variant A inherited floor + HACP-Enforcement revision 2 Active + HC2-55 advertised under explicit revision-2 identity
@@ -724,9 +724,9 @@ R5 may be formally closed when all of the following are true:
 [x] fresh R5 HACP-Core decision-level 38/38 verification recorded
 [x] canonical artifact reviewed
 [x] git diff --check PASS
-[ ] signed commit verified
-[ ] publication verified
-[ ] working tree clean
+[x] signed commit verified
+[x] publication verified
+[x] working tree clean
 ```
 
 R6 MUST NOT begin before all R5 exit criteria are satisfied.
@@ -788,52 +788,63 @@ Current disposition:
 R5 compatibility model:
 ESTABLISHED
 
-production defect:
-NOT ESTABLISHED
-
-production RED:
-NOT ESTABLISHED
-
-required production change:
-NONE
-
-required wire/object change:
-NONE
-
-required profile semantic change:
-NONE
-
-required canonical vector change:
-NONE
-
-required compatibility artifact:
-THIS DOCUMENT
-
 fresh R5 Core regression:
 38/38 PASS / GREEN
+
+canonical artifact:
+REVIEWED
+
+git diff --check:
+PASS
+
+commit:
+b3614389aa47bf59f48d0d4ce657127152a32bab
+
+signature:
+Good
+
+publication:
+VERIFIED
+
+HEAD == origin/main:
+VERIFIED
+
+working tree:
+CLEAN
+
+R5:
+CLOSED / PASS / COMMITTED / SIGNED / PUBLISHED / CLEAN
 ```
 
-Formal R5 closure remains blocked only by the remaining exit evidence and repository publication steps.
+R5 closure is complete. This document records the verified publication and clean repository state.
 
 ---
 
-## 21. Next controlled action
+## 21. Final R5 closure record
 
-The compatibility assessment, fresh Core regression, artifact review, and
-working-tree diff check are complete.
+R5 was formally closed after:
 
-Remaining R5 publication steps:
+1. fresh HACP-Core decision-level verification: 38/38 PASS;
+2. canonical compatibility artifact review;
+3. git diff --check PASS;
+4. signed commit creation and signature verification;
+5. publication to origin/main;
+6. remote identity verification;
+7. clean working-tree verification.
 
-1. stage only `docs/release/HACP_1_1_COMPATIBILITY.md`;
-2. run `git diff --cached --check`;
-3. review the staged file set;
-4. create a signed commit;
-5. verify `Good "git" signature`;
-6. publish `main`;
-7. verify `origin/main`;
-8. confirm a clean working tree.
+The initial R5 compatibility artifact was published in:
 
-Only then may R5 be recorded as:
+b3614389aa47bf59f48d0d4ce657127152a32bab
+
+The present document revision synchronizes the canonical artifact with the
+already verified R5 publication closure state.
+
+At publication closure:
+
+HEAD == origin/main
+working tree == clean
+
+Final R5 status:
 
 ```text
 CLOSED / PASS / COMMITTED / SIGNED / PUBLISHED / CLEAN
