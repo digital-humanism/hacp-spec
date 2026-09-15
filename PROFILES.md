@@ -72,7 +72,7 @@ Adds external enforcement without rewriting agent business logic:
 ## 5. Claim Rules
 
 1. Claims MUST state the specification compatibility line and profile (e.g., `HACP 1.0-Core`).
-2. Claims MUST NOT assert a profile whose conformance suite has not been passed.
+2. Claims MUST NOT assert a profile or profile revision unless the applicable conformance requirements and required evidence for that claim have been satisfied.
 3. Before suite publication, claims MUST be labeled `self-attested, pre-conformance`.
 4. Experimental or partial implementations MUST identify themselves as draft or non-conformant.
 5. Compatibility marks are governed by the trademark and conformance policy (`A5.7`–`A5.9` artifacts, pending).

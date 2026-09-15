@@ -55,6 +55,6 @@ A conformance claim remains governed by the applicable specification release, pr
 
 ## 5. Capability Discovery
 
-Implementations SHOULD expose their supported `hacp_version` and active profiles (`Core`, `Runtime`, `Enforcement`) via service metadata, API headers, or protocol handshakes. 
+Implementations SHOULD expose their supported `hacp_version` and active profiles (`Core`, `Runtime`, `Enforcement`) via service metadata, API headers, or protocol handshakes. When materially distinct `HACP-Enforcement` revisions are supported, the supported revision or revisions MUST remain unambiguous according to `profiles/enforcement-identity.md`.
 
-Absence of explicit discovery MUST NOT be interpreted as absence of support; verifiers MUST default to strict validation based on the `hacp_version` present in the payload.
+Absence of generic profile discovery MUST NOT be interpreted as absence of support. Verifiers MUST strictly validate the `hacp_version` present in the payload. `hacp_version` alone MUST NOT be used to infer an applicable `HACP-Enforcement` revision.
