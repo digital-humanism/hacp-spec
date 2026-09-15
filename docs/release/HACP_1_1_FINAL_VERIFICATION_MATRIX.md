@@ -912,3 +912,54 @@ R8 — Release Candidate Record may begin only after the R7 artifact has been
 committed with a verified signature, published to `origin/main`, repository
 cleanliness has been re-established, and the R7 publication closure has been
 recorded.
+
+## 21. R7 publication closure
+
+The R7 Final Verification Matrix was committed and published after completion
+of the verification recorded above.
+
+Published artifact identity:
+
+```text
+repository:
+hacp-spec
+
+commit:
+e0cf58077baafbf822c3d4be90f7f4af05729364
+
+commit message:
+docs: record HACP 1.1 final verification matrix
+
+signature:
+Good
+
+origin/main:
+e0cf58077baafbf822c3d4be90f7f4af05729364
+
+working tree after publication:
+clean
+```
+
+Publication result:
+
+```text
+R7 ARTIFACT:
+COMMITTED / SIGNED / PUBLISHED / CLEAN
+
+R7 PUBLICATION CLOSURE:
+COMPLETE
+
+R7:
+CLOSED / PASS
+
+R8 ENTRY:
+AUTHORIZED
+```
+
+The next release stage is:
+
+```text
+R8 — Release Candidate Record
+```
+
+R8 must preserve the candidate identities and claim boundaries verified by R7.
