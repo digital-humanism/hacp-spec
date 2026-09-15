@@ -1,9 +1,11 @@
 # HACP 1.1.0 — Claim Audit
 
-**Release line:** HACP 1.1.0
+**Status:** CLOSED / PASS / COMMITTED / SIGNED / PUBLISHED / CLEAN
 **Stage:** R6 — Claim audit
+**Release line:** HACP 1.1.0
 **Contract boundary:** HACP 1.0.0 Variant A inherited floor + HACP-Enforcement revision 2 Active + HC2-55 advertised under explicit revision-2 identity
-**Status:** R6 claim-surface assessment
+**Repository:** `hacp-spec`
+**Canonical artifact:** `docs/release/HACP_1_1_CLAIM_AUDIT.md`
 
 ## 1. Purpose
 
@@ -274,7 +276,7 @@ Those items remain outside the HACP 1.1.0 release contract unless separately est
 **Surface:** `versioning.md` §5 Capability Discovery
 **Classification:** `AMBIGUOUS CLAIM`
 
-The generic capability-discovery wording states that, in the absence of explicit discovery, verifiers default to strict validation based on the `hacp_version` present in the payload.
+At the start of R6, the generic capability-discovery wording stated that, in the absence of explicit discovery, verifiers defaulted to strict validation based on the `hacp_version` present in the payload.
 
 For generic HACP wire/object validation, strict validation of `hacp_version` remains correct.
 
@@ -317,7 +319,7 @@ Required clarification:
 **Surface:** `PROFILES.md` §5 Claim Rules
 **Classification:** `AMBIGUOUS CLAIM`
 
-The generic rule currently states:
+At the start of R6, the generic rule stated:
 
 ```text
 Claims MUST NOT assert a profile whose conformance suite has not been passed.
@@ -386,7 +388,9 @@ The audit established:
 ```text
 current correct / bounded claims:        established
 historical claims requiring rewrite:    0
-ambiguous current claims:                2
+ambiguous current claims identified:     2
+ambiguous current claims resolved:       2
+unresolved ambiguous current claims:     0
 overclaims:                              0
 normative contradictions:               0
 production defects:                     0
@@ -480,3 +484,156 @@ VECTOR CHANGES AUTHORIZED:
 DOCS-ONLY CLARIFICATIONS AUTHORIZED:
 2
 ```
+
+## 17. R6 publication closure
+
+The R6 claim-audit artifact and its two authorized documentation clarifications were committed in:
+
+```text
+60ac551f0c6e66f61f3d21635c70322f34b80aab
+```
+
+Commit:
+
+```text
+docs: complete HACP 1.1 claim audit
+```
+
+The commit signature was verified as:
+
+```text
+Good
+```
+
+Publication to `origin/main` was verified.
+
+At publication closure:
+
+```text
+HEAD:
+60ac551f0c6e66f61f3d21635c70322f34b80aab
+
+origin/main:
+60ac551f0c6e66f61f3d21635c70322f34b80aab
+
+HEAD == origin/main:
+VERIFIED
+
+working tree:
+CLEAN
+```
+
+The published R6 change set consists only of:
+
+```text
+docs/release/HACP_1_1_CLAIM_AUDIT.md
+PROFILES.md
+versioning.md
+```
+
+The two claim-surface ambiguities identified by R6 were resolved through documentation-only clarification.
+
+No production, profile-semantic, wire/object, schema, runner, vector, or historical-release change was performed.
+
+Current disposition:
+
+```text
+R6 claim audit:
+PASS
+
+ambiguous current claims found:
+2
+
+ambiguous current claims resolved:
+2
+
+unresolved ambiguous current claims:
+0
+
+overclaims:
+0
+
+normative contradictions:
+0
+
+production defects:
+0
+
+production REDs:
+0
+
+historical documents requiring rewrite:
+0
+
+production changes:
+0
+
+profile semantic changes:
+0
+
+wire/object changes:
+0
+
+vector changes:
+0
+
+publication:
+VERIFIED
+
+HEAD == origin/main:
+VERIFIED
+
+working tree:
+CLEAN
+
+R6:
+CLOSED / PASS / COMMITTED / SIGNED / PUBLISHED / CLEAN
+```
+
+R6 closure is complete. The published claim surface remains bounded by established evidence.
+
+---
+
+## 18. Final R6 closure record
+
+R6 was formally closed after:
+
+1. read-only audit of the current and historical public claim surface;
+2. classification of historical claims in their original release or stage context;
+3. identification of two current documentation ambiguities;
+4. confirmation that no overclaim, normative contradiction, production defect, or production RED was established;
+5. narrow clarification of `versioning.md` capability-discovery wording;
+6. narrow clarification of the generic `PROFILES.md` conformance-claim rule;
+7. creation and review of the canonical R6 claim-audit artifact;
+8. `git diff --check` PASS;
+9. signed commit creation and signature verification;
+10. publication to `origin/main`;
+11. remote identity verification;
+12. clean working-tree verification.
+
+The substantive R6 artifact and authorized documentation clarifications were published in:
+
+```text
+60ac551f0c6e66f61f3d21635c70322f34b80aab
+```
+
+At publication closure:
+
+```text
+HEAD == origin/main
+working tree == clean
+```
+
+Final R6 status:
+
+```text
+CLOSED / PASS / COMMITTED / SIGNED / PUBLISHED / CLEAN
+```
+
+The R6 exit condition is satisfied:
+
+```text
+claims <= evidence
+```
+
+R7 — Final Verification Matrix may begin only from this closed R6 baseline.
