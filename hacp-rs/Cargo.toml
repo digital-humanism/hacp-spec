@@ -1,0 +1,55 @@
+[package]
+name = "hacp-rs"
+version = "0.1.0"
+edition = "2021"
+description = "HACP clean-room implementation — Ed25519/SHA-256/JCS canonical profile"
+license = "CC-BY-4.0"
+build = "build.rs"
+
+[[bin]]
+name = "hacp-rs-runner"
+path = "src/bin/hacp-rs-runner.rs"
+
+[[bin]]
+name = "hacp-rs-proxy"
+path = "src/bin/hacp-rs-proxy.rs"
+
+[[bin]]
+name = "hacp-rs-mcp"
+path = "src/bin/hacp-rs-mcp.rs"
+
+[[bin]]
+name = "hacp-rs-mcp-v2"
+path = "src/bin/hacp-rs-mcp-v2.rs"
+
+[[bin]]
+name = "hacp-rs-controlplane"
+path = "src/bin/hacp-rs-controlplane.rs"
+
+[[bin]]
+name = "hacp-rs-grpc-server"
+path = "src/bin/hacp-rs-grpc-server.rs"
+
+[[bin]]
+name = "hacp-rs-grpc-subscriber"
+path = "src/bin/hacp-rs-grpc-subscriber.rs"
+
+[dependencies]
+ed25519-dalek = { version = "2", features = ["alloc"] }
+sha2 = "0.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+hex = "0.4"
+ryu = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "net", "macros", "io-util", "sync", "time"] }
+hyper = { version = "1", features = ["server", "client"] }
+hyper-util = { version = "0.1", features = ["tokio", "server-auto", "server-graceful"] }
+http-body-util = "0.1"
+bytes = "1"
+tonic = "0.12"
+prost = "0.13"
+tokio-stream = { version = "0.1", features = ["net"] }
+
+[build-dependencies]
+tonic-build = "0.12"
