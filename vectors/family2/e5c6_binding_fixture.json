@@ -1,0 +1,12 @@
+{
+  "hacp_version": "0.9",
+  "token_id": "33333333-3333-3333-3333-333333333333",
+  "envelope_id": "22222222-2222-2222-2222-222222222222",
+  "action_hash": "5dd0154322d58283f02c6c623e29b66c77b74ea659d1b6a43aaf064d3555a69e",
+  "policy_digest": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+  "principal": "human_admin_01",
+  "signer_key_id": "key-ed25519-test-001",
+  "issued_at": 1786000000,
+  "expires_at": 1786003600,
+  "decision": "ALLOW"
+}
