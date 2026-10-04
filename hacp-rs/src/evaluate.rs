@@ -141,6 +141,83 @@ pub fn evaluate(inputs: &Value, context: &Value, pubkey_hex: &str) -> EvalResult
     };
 
     // ============================================================
+    // Authorization-v2 envelope trust and authentication
+    // ============================================================
+    // Key revocation precedes signature verification.
+    if let Some(rk) = context.get("revoked_keys").and_then(|v| v.as_array()) {
+        let env_key = get_str(envelope, "signer_key_id");
+        if rk.iter().any(|r| r.as_str() == Some(env_key)) {
+            return EvalResult {
+                decision: "DENY".into(),
+                reason_codes: vec!["KEY_REVOKED".into()],
+                action_hash,
+            };
+        }
+    }
+
+    // Reject unsupported HMAC-style envelope signer profiles.
+    let env_key_lower = get_str(envelope, "signer_key_id").to_lowercase();
+    if env_key_lower.contains("hmac") {
+        return EvalResult {
+            decision: "DENY".into(),
+            reason_codes: vec!["SIGNATURE_FAILURE".into()],
+            action_hash,
+        };
+    }
+
+    // Enforce the configured trusted-key boundary before consuming
+    // authenticated envelope claims.
+    if let Some(trusted) = context.get("trusted_keys").and_then(|v| v.as_array()) {
+        let env_key = get_str(envelope, "signer_key_id");
+        if !trusted.iter().any(|r| r.as_str() == Some(env_key)) {
+            return EvalResult {
+                decision: "DENY".into(),
+                reason_codes: vec!["SIGNATURE_FAILURE".into()],
+                action_hash,
+            };
+        }
+    }
+
+    // Claims carried by IntentEnvelope become authoritative only
+    // after successful signature verification.
+    let envelope_no_sig = copy_without(envelope, "signature");
+    let envelope_payload = match canonicalize(&envelope_no_sig) {
+        Ok(b) => b,
+        Err(_) => {
+            return EvalResult {
+                decision: "DENY".into(),
+                reason_codes: vec!["SIGNATURE_FAILURE".into()],
+                action_hash,
+            }
+        }
+    };
+    if !verify_signature(&pubkey, &envelope_payload, get_str(envelope, "signature")) {
+        return EvalResult {
+            decision: "DENY".into(),
+            reason_codes: vec!["SIGNATURE_FAILURE".into()],
+            action_hash,
+        };
+    }
+    // Authorization-v2 envelope revocation
+    if let Some(rev) = context.get("revoked_envelopes").and_then(|v| v.as_array()) {
+        let eid = get_str(envelope, "envelope_id");
+        if rev.iter().any(|r| r.as_str() == Some(eid)) {
+            return EvalResult {
+                decision: "DENY".into(),
+                reason_codes: vec!["ENVELOPE_REVOKED".into()],
+                action_hash,
+            };
+        }
+        let parent = get_str(envelope, "parent_envelope_id");
+        if !parent.is_empty() && rev.iter().any(|r| r.as_str() == Some(parent)) {
+            return EvalResult {
+                decision: "DENY".into(),
+                reason_codes: vec!["ENVELOPE_REVOKED".into()],
+                action_hash,
+            };
+        }
+    }
+    // ============================================================
     // Step 1: Checkpoint pre-evaluation
     // ============================================================
     if let Some(cp) = checkpoint {
@@ -276,41 +353,12 @@ pub fn evaluate(inputs: &Value, context: &Value, pubkey_hex: &str) -> EvalResult
         }
     }
 
-    // ============================================================
-    // Step 3: Envelope revocation
-    // ============================================================
-    if let Some(rev) = context.get("revoked_envelopes").and_then(|v| v.as_array()) {
-        let eid = get_str(envelope, "envelope_id");
-        if rev.iter().any(|r| r.as_str() == Some(eid)) {
-            return EvalResult {
-                decision: "DENY".into(),
-                reason_codes: vec!["ENVELOPE_REVOKED".into()],
-                action_hash,
-            };
-        }
-        let parent = get_str(envelope, "parent_envelope_id");
-        if !parent.is_empty() && rev.iter().any(|r| r.as_str() == Some(parent)) {
-            return EvalResult {
-                decision: "DENY".into(),
-                reason_codes: vec!["ENVELOPE_REVOKED".into()],
-                action_hash,
-            };
-        }
-    }
 
     // ============================================================
-    // Step 4: Key revocation
+    // Step 4: Token key revocation
     // ============================================================
-    if let Some(rk) = context.get("revoked_keys").and_then(|v| v.as_array()) {
-        let env_key = get_str(envelope, "signer_key_id");
-        if rk.iter().any(|r| r.as_str() == Some(env_key)) {
-            return EvalResult {
-                decision: "DENY".into(),
-                reason_codes: vec!["KEY_REVOKED".into()],
-                action_hash,
-            };
-        }
-        if has_token {
+    if has_token {
+        if let Some(rk) = context.get("revoked_keys").and_then(|v| v.as_array()) {
             let tok_key = get_str(token, "signer_key_id");
             if rk.iter().any(|r| r.as_str() == Some(tok_key)) {
                 return EvalResult {
@@ -323,16 +371,8 @@ pub fn evaluate(inputs: &Value, context: &Value, pubkey_hex: &str) -> EvalResult
     }
 
     // ============================================================
-    // Step 5: HMAC rejection
+    // Step 5: Token HMAC rejection
     // ============================================================
-    let env_key_lower = get_str(envelope, "signer_key_id").to_lowercase();
-    if env_key_lower.contains("hmac") {
-        return EvalResult {
-            decision: "DENY".into(),
-            reason_codes: vec!["SIGNATURE_FAILURE".into()],
-            action_hash,
-        };
-    }
     if has_token {
         let tok_key_lower = get_str(token, "signer_key_id").to_lowercase();
         if tok_key_lower.contains("hmac") {
@@ -361,18 +401,10 @@ pub fn evaluate(inputs: &Value, context: &Value, pubkey_hex: &str) -> EvalResult
     }
 
     // ============================================================
-    // Step 7: Trusted keys
+    // Step 7: Token trusted keys
     // ============================================================
-    if let Some(trusted) = context.get("trusted_keys").and_then(|v| v.as_array()) {
-        let env_key = get_str(envelope, "signer_key_id");
-        if !trusted.iter().any(|r| r.as_str() == Some(env_key)) {
-            return EvalResult {
-                decision: "DENY".into(),
-                reason_codes: vec!["SIGNATURE_FAILURE".into()],
-                action_hash,
-            };
-        }
-        if has_token {
+    if has_token {
+        if let Some(trusted) = context.get("trusted_keys").and_then(|v| v.as_array()) {
             let tok_key = get_str(token, "signer_key_id");
             if !trusted.iter().any(|r| r.as_str() == Some(tok_key)) {
                 return EvalResult {
@@ -550,7 +582,7 @@ pub fn evaluate(inputs: &Value, context: &Value, pubkey_hex: &str) -> EvalResult
         if get_str(token, "action_hash") != computed {
             return EvalResult {
                 decision: "DENY".into(),
-                reason_codes: vec!["HASH_MISMATCH".into()],
+                reason_codes: vec!["SIGNATURE_FAILURE".into()],
                 action_hash: computed,
             };
         }
@@ -641,6 +673,18 @@ pub fn evaluate(inputs: &Value, context: &Value, pubkey_hex: &str) -> EvalResult
         }
     }
 
+    // ============================================================
+    // Authorization-v2 authenticated DecisionToken authority
+    // ============================================================
+    // At this point the token has passed the existing binding,
+    // signature, and request-applicability checks.
+    if has_token && get_str(token, "decision") == "DENY" {
+        return EvalResult {
+            decision: "DENY".into(),
+            reason_codes: vec!["POLICY_DENIED".into()],
+            action_hash,
+        };
+    }
     // ============================================================
     // Final: ALLOW
     // ============================================================

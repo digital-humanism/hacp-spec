@@ -1,6 +1,6 @@
 [package]
 name = "hacp-rs"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "HACP clean-room implementation — Ed25519/SHA-256/JCS canonical profile"
 license = "CC-BY-4.0"
