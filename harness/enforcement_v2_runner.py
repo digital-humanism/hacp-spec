@@ -209,8 +209,9 @@ class RunnerTarget:
         response = {"decision": decision}
 
         # If ALLOW and decision_token was in request, include it in response
-        if decision == "ALLOW" and request["input"]["decision_token"]:
-            response["decision_token"] = request["input"]["decision_token"]
+        decision_token = request["input"].get("decision_token")
+        if decision == "ALLOW" and decision_token:
+            response["decision_token"] = decision_token
 
         # Include action_hash if present
         if "action_hash" in response_data:
