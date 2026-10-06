@@ -19,6 +19,34 @@ function verifyProvenance(event: any, prior: any, pub: KeyObject): boolean {
   return verifySignature(pub, canonicalBytes(evNoSig), signature);
 }
 
+function hc2NormalizeRequestTarget(target: string): string {
+  let result = "";
+  for (let i = 0; i < target.length; i++) {
+    if (
+      target[i] === "%" &&
+      i + 2 < target.length &&
+      isHexDigit(target.charCodeAt(i + 1)) &&
+      isHexDigit(target.charCodeAt(i + 2))
+    ) {
+      result += "%";
+      result += target[i + 1].toUpperCase();
+      result += target[i + 2].toUpperCase();
+      i += 2;
+    } else {
+      result += target[i];
+    }
+  }
+  return result;
+}
+
+function isHexDigit(code: number): boolean {
+  return (
+    (code >= 0x30 && code <= 0x39) || // 0-9
+    (code >= 0x41 && code <= 0x46) || // A-F
+    (code >= 0x61 && code <= 0x66) // a-f
+  );
+}
+
 function main(): void {
   const args = process.argv.slice(2);
   if (args[0] !== "evaluate") {
@@ -122,8 +150,35 @@ function runEvaluate(vectorPath: string, pubKeyPath: string): number {
       decision = "DENY";
     }
   }
- 
+
+  // HC2-55 request-binding (Enforcement Rev2, Step 14)
+  let hc2Mismatch = false;
+  if (decision === "ALLOW") {
+    const httpReq = inputs.http_request;
+    if (httpReq && typeof httpReq === "object") {
+      const requestTarget: string =
+        typeof httpReq.request_target === "string" ? httpReq.request_target : "";
+      if (token && typeof token === "object") {
+        const constraints = token.constraints;
+        if (constraints && typeof constraints === "object") {
+          if (typeof constraints.path === "string") {
+            if (
+              hc2NormalizeRequestTarget(requestTarget) !==
+              hc2NormalizeRequestTarget(constraints.path)
+            ) {
+              decision = "DENY";
+              hc2Mismatch = true;
+            }
+          }
+        }
+      }
+    }
+  }
+
   const resp: any = { decision };
+  if (hc2Mismatch) {
+    resp.reason_codes = ["SCOPE_EXCEEDED"];
+  }
   if (decision === "ALLOW" && token) {
     resp.decision_token = token;
   }

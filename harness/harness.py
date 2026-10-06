@@ -105,6 +105,35 @@ def compute_sha256(data: bytes) -> str:
 GENESIS_HASH = "0" * 64
 
 
+def hc2_normalize_request_target(target: str) -> str:
+    """Normalize percent-encoded triplets by uppercasing hex digits.
+
+    Only valid %XX triplets (where both chars after % are hex digits) are
+    normalized. Invalid/incomplete percent sequences are left as-is.
+    """
+    result = []
+    i = 0
+    while i < len(target):
+        if (
+            target[i] == "%"
+            and i + 2 < len(target)
+            and _is_hex_digit(target[i + 1])
+            and _is_hex_digit(target[i + 2])
+        ):
+            result.append("%")
+            result.append(target[i + 1].upper())
+            result.append(target[i + 2].upper())
+            i += 3
+        else:
+            result.append(target[i])
+            i += 1
+    return "".join(result)
+
+
+def _is_hex_digit(c: str) -> bool:
+    return c in "0123456789abcdefABCDEF"
+
+
 class DuplicateKeyError(ValueError):
     pass
 
@@ -238,6 +267,19 @@ class ResponseVerifier:
             }
         else:
             details["outcome_correct"] = True
+
+        # Check reason_codes when vector expects them and response includes them
+        expected_reasons = vector.get("expected", {}).get("reason_codes")
+        actual_reasons = response.get("reason_codes")
+        if expected_reasons is not None and actual_reasons is not None:
+            if actual_reasons != expected_reasons:
+                passed = False
+                details["reason_codes_mismatch"] = {
+                    "expected": expected_reasons,
+                    "actual": actual_reasons
+                }
+            else:
+                details["reason_codes_correct"] = True
 
         if actual_outcome == "ALLOW" and vector["inputs"].get("provenance_event") is not None:
             if response.get("provenance_event_id") != vector["expected"].get("provenance_event_id"):
@@ -496,8 +538,25 @@ class LocalTarget:
                 ):
                     decision = "DENY"  # TRACEABILITY_FAILURE
 
+        # Step 4: HC2-55 request-binding (Enforcement Rev2)
+        hc2_mismatch = False
+        if decision == "ALLOW":
+            http_req = vector["inputs"].get("http_request")
+            if http_req is not None and isinstance(http_req, dict):
+                request_target = http_req.get("request_target", "")
+                if token is not None and isinstance(token, dict):
+                    constraints = token.get("constraints")
+                    if constraints is not None and isinstance(constraints, dict):
+                        constraint_path = constraints.get("path")
+                        if isinstance(constraint_path, str):
+                            if hc2_normalize_request_target(request_target) != hc2_normalize_request_target(constraint_path):
+                                decision = "DENY"
+                                hc2_mismatch = True
+
         # Build response
         response = {"decision": decision}
+        if hc2_mismatch:
+            response["reason_codes"] = ["SCOPE_EXCEEDED"]
         if decision == "ALLOW" and token:
             response["decision_token"] = token
         if decision == "ALLOW" and provenance is not None and not omit:

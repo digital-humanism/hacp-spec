@@ -120,8 +120,29 @@ func runEvaluate(vectorPath, pubKeyPath string) int {
 		}
 	}
 
+	// HC2-55 request-binding (Enforcement Rev2, Step 14)
+	var hc2Mismatch bool
+	if decision == "ALLOW" {
+		if httpReq, ok := inputs["http_request"].(map[string]interface{}); ok && httpReq != nil {
+			requestTarget, _ := httpReq["request_target"].(string)
+			if token != nil {
+				if constraints, ok := token["constraints"].(map[string]interface{}); ok && constraints != nil {
+					if constraintPath, ok := constraints["path"].(string); ok {
+						if hc2NormalizeRequestTarget(requestTarget) != hc2NormalizeRequestTarget(constraintPath) {
+							decision = "DENY"
+							hc2Mismatch = true
+						}
+					}
+				}
+			}
+		}
+	}
+
 	// Build AgencyDecision response
 	resp := map[string]interface{}{"decision": decision}
+	if hc2Mismatch {
+		resp["reason_codes"] = []string{"SCOPE_EXCEEDED"}
+	}
 	if decision == "ALLOW" && token != nil {
 		resp["decision_token"] = token
 	}
@@ -147,4 +168,49 @@ func copyWithout(m map[string]interface{}, key string) map[string]interface{} {
 func errJSON(code, msg string) string {
 	b, _ := json.Marshal(map[string]string{"error": code, "message": msg})
 	return string(b)
+}
+
+// hc2NormalizeRequestTarget normalizes percent-encoded triplets by uppercasing
+// the hex digits. Only valid %XX triplets (where both chars are hex digits) are
+// normalized. Invalid/incomplete percent sequences are left as-is.
+func hc2NormalizeRequestTarget(target string) string {
+	var buf []byte
+	t := []byte(target)
+	i := 0
+	for i < len(t) {
+		if t[i] == '%' && i+2 < len(t) {
+			hi := t[i+1]
+			lo := t[i+2]
+			if isHexDigit(hi) && isHexDigit(lo) {
+				if buf == nil {
+					buf = make([]byte, 0, len(t))
+					buf = append(buf, t[:i]...)
+				}
+				buf = append(buf, '%')
+				buf = append(buf, toUpperHex(hi))
+				buf = append(buf, toUpperHex(lo))
+				i += 3
+				continue
+			}
+		}
+		if buf != nil {
+			buf = append(buf, t[i])
+		}
+		i++
+	}
+	if buf == nil {
+		return target
+	}
+	return string(buf)
+}
+
+func isHexDigit(c byte) bool {
+	return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')
+}
+
+func toUpperHex(c byte) byte {
+	if c >= 'a' && c <= 'f' {
+		return c - 32
+	}
+	return c
 }
