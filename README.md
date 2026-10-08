@@ -3,9 +3,14 @@
 [![conformance](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml/badge.svg)](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml)
 [![release](https://img.shields.io/github/v/release/digital-humanism/hacp-spec?label=release)](https://github.com/digital-humanism/hacp-spec/releases/latest)
 
-**Version:** 1.0.0
-**Status:** Stable
 **License:** CC BY 4.0
+**Current HACP release line:** 1.1.1 — pre-release candidate
+**Approved stable release:** HACP 1.1.0
+**Inherited stable baseline:** HACP 1.0.0 Variant A
+**Wire/object version:** 0.9
+**HACP-Core conformance baseline:** 0.9.2
+**Active Enforcement profile:** HACP-Enforcement revision 2
+**Enforcement evidence set:** HC2-55
 
 HACP is a language-agnostic protocol for preserving human agency in AI agent systems.
 
@@ -156,6 +161,10 @@ Python ↔ Go real sidecar E2E:           5/5 PASS
 
 This is a reproducible interoperability and regression milestone. It is **not** presented as a formal security proof.
 
+The results above document the historical HACP-Core v0.9.2 baseline for the named implementations. They do not establish independent direct conformance for every subsequently added implementation.
+
+Rust Core revalidation records 36/38 direct PASS and two adjudicated CHECKPOINT-versus-DENY conflicts. See `docs/release/HACP_RUST_CORE_ADJUDICATED_CONFLICTS_ENGINEERING_NOTE.md`.
+
 ---
 
 # Reproducibility Guarantees
@@ -265,7 +274,7 @@ See:
 
 ---
 
-# Verified Implementations
+# Implementation Inventory and Recorded Conformance
 
 | Implementation | Role | Language | HACP-Core v0.9.2 |
 |---|---|---|---:|
@@ -273,6 +282,7 @@ See:
 | `hacp-ts` | Clean-room implementation | TypeScript | ✅ 38/38 |
 | [`humanist-core`](https://github.com/digital-humanism/humanist-core) | Reference SDK | Python | ✅ 38/38 |
 | [`hacp-sidecar`](https://github.com/digital-humanism/hacp-sidecar) | Enforcement proxy | Go | ✅ 38/38 |
+| [`hacp-rs`](hacp-rs/) | Clean-room/reference implementation | Rust | 36/38 direct PASS; 2 adjudicated conflicts |
 
 Any implementation can be tested through the language-neutral runner protocol without embedding the implementation into the harness.
 
@@ -516,6 +526,11 @@ hacp-spec/
 │   ├── crypto.go
 │   └── evaluate.go
 │
+├── hacp-rs/
+│   ├── Cargo.toml
+│   ├── README.md
+│   └── src/
+│
 └── hacp-ts/
     ├── package.json
     ├── package-lock.json
@@ -586,6 +601,18 @@ TypeScript additional suite:
 
 ---
 
+## Rust clean-room implementation
+
+The `hacp-rs/` directory contains the Rust reference/conformance implementation, including runner, HTTP proxy, MCP, control-plane, and gRPC targets.
+
+The documented Rust Core result is 36/38 direct PASS with two adjudicated CHECKPOINT-versus-DENY conflicts: `CORE-INV1-002` and `CORE-RUNTIME-004`.
+
+These are not direct passes. Independent Rust HC2-55 55/55 conformance is not established by the cited HACP 1.1.0 release evidence.
+
+The Rust targets do not establish production readiness or replacement of the Go enforcement sidecar.
+
+---
+
 ## Enforcement sidecar
 
 Repository:
@@ -641,7 +668,7 @@ Gate E completion establishes the distributed revocation/control-state layer req
 - [x] TypeScript implementation
 - [x] cross-language canonical convergence
 - [x] runner-based black-box verification
-- [ ] Rust implementation — optional future work
+- [x] Rust reference/conformance implementation added; current Core conflicts documented separately
 
 ## Phase 3 — Runtime / Production Foundation ✅
 
@@ -674,7 +701,7 @@ Candidate areas:
 - additional SDK integrations;
 - public conformance registry;
 - certification and interoperability program;
-- optional Rust implementation.
+- further Rust conformance reconciliation and integration evidence.
 
 ---
 

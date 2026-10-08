@@ -1,8 +1,11 @@
 # hacp-rs — HACP Clean-Room Implementation (Rust)
 
-**Language:** Rust (stable)  
-**Profile:** Ed25519 + SHA-256 + JCS RFC 8785 (canonical 1.0.0/1.1.0)  
-**Conformance:** Core 38/38 + HC2-55 55/55
+**Language:** Rust (stable)
+**Cargo package version:** 0.1.1
+**Crypto profile:** Ed25519 + SHA-256 + JCS RFC 8785
+**HACP release context:** 1.1.1 pre-release candidate
+**Core conformance:** 36/38 direct PASS; 2 adjudicated conflicts
+**HC2-55:** Independent Rust 55/55 conformance is not established by the cited release evidence
 
 ## Prerequisites
 
@@ -21,7 +24,7 @@ cargo build --release --bin hacp-rs-runner
 cargo test
 ```
 
-## Harness Runner — Core 38/38
+## Harness Runner — Core revalidation
 
 ```bash
 cd ..
@@ -34,13 +37,22 @@ python harness/harness_runner.py \
   --output console
 ```
 
-Expected:
+Documented Rust Core revalidation:
 
 ```text
-RESULTS: 38/38 passed
+36/38 direct PASS
+2 adjudicated conflicts
+0 tooling errors
+0 new regressions
 ```
 
-## Harness Runner — HC2-55 55/55
+The adjudicated conflicts are `CORE-INV1-002` and `CORE-RUNTIME-004`.
+Both expect CHECKPOINT but currently produce DENY. They remain direct
+conformance differences; fail-closed behavior does not make them direct passes.
+
+See `../docs/release/HACP_RUST_CORE_ADJUDICATED_CONFLICTS_ENGINEERING_NOTE.md`.
+
+## Enforcement revision 2 — HC2-55 harness invocation
 
 ```bash
 python harness/enforcement_v2_runner.py \
@@ -51,11 +63,15 @@ python harness/enforcement_v2_runner.py \
   --output console
 ```
 
-Expected:
+This command illustrates an Enforcement revision 2 harness invocation
+against the Rust runner. It is not a record of independently verified
+Rust HC2-55 55/55 conformance.
 
-```text
-RESULTS: 55/55 passed
-```
+The HACP 1.1.0 HC2-55 release evidence must not be automatically
+attributed to Rust.
+
+The `--implementation-version` argument is a harness reporting label,
+not the Cargo package version. The Cargo package version is `0.1.1`.
 
 ## Crypto Profile
 
@@ -79,7 +95,7 @@ See [`wire/crypto-profile.md`](../wire/crypto-profile.md) for the full profile s
 - Not a replacement for the Go enforcement sidecar
 - Not a GOST/SM2 crypto suite implementation
 - Not a general URI normalization library
-- Not Gate E / gRPC distributed control plane
+- Not a claim of production-ready Gate E deployment or replacement of the Go enforcement sidecar
 - Not claiming "exact-reason 38/38" beyond decision + reason_codes
 
 ## HTTP Proxy (B1)
@@ -118,7 +134,25 @@ Components:
 - **ControlState** — freshness tracker (`is_fresh`, `mark_snapshot/event/heartbeat/unsafe`)
 - **RevocationStore** — bridges control plane with evaluate (`inject_into_context`)
 
-No tonic/protoc required. Same evaluate function — revocations injected via policy_context.
+The B3 stdio control-plane invocation above does not itself require a gRPC
+transport. This statement does not establish that building all Cargo targets
+is independent of tonic/protoc. The same evaluate function is used, with
+revocations injected via policy_context.
+
+## Additional runtime targets
+
+The Cargo manifest declares these binary targets:
+
+- `hacp-rs-runner`
+- `hacp-rs-proxy`
+- `hacp-rs-mcp`
+- `hacp-rs-mcp-v2`
+- `hacp-rs-controlplane`
+- `hacp-rs-grpc-server`
+- `hacp-rs-grpc-subscriber`
+
+Their presence establishes the source inventory, not successful deployment,
+operational certification, or production readiness.
 
 ## Dependencies
 
