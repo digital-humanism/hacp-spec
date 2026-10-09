@@ -777,7 +777,8 @@ Production deployments should still use normal security engineering practices, i
 
 **Specification:** [CC BY 4.0](LICENSE)
 
-Reference and enforcement implementations may use their own repository-specific licenses.
+Reference and enforcement implementations may use separate software licenses.
+See the [Implementation Licensing Policy](LICENSE) for the current licensing boundary and links to the cross-language policy documents.
 
 ---
 
