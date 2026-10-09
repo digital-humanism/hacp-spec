@@ -11,3 +11,16 @@ The reference implementation of this protocol (`humanist-core`) is NOT part of t
 The reference implementation is licensed separately under the GNU Affero General Public License v3.0 (AGPLv3), with Commercial Dual Licensing available for enterprise deployments and closed-source embedding.
 
 This deliberate separation ensures the protocol remains a vendor-neutral open standard, while the reference tooling, support, and enterprise integrations maintain a sustainable commercial model.
+
+## Implementation Licensing Policy
+
+The HACP project maintains a separate licensing policy for project-owned software implementations in Go, TypeScript, Python, and Rust.
+
+The architectural policy and proposed licensing amendment are documented in:
+
+- [Cross-Language Licensing Policy Decision](https://github.com/digital-humanism/hacp-spec/blob/docs/cross-language-licensing-policy/docs/licensing/HACP_CROSS_LANGUAGE_LICENSING_POLICY_DECISION_2026-10-09.md)
+- [Cross-Language Licensing Amendment Package](https://github.com/digital-humanism/hacp-spec/blob/docs/cross-language-licensing-policy/docs/licensing/HACP_PHASE_B_LICENSING_AMENDMENT_PACKAGE_EN_2026-10-09.md)
+
+These documents record an accepted policy and a proposed amendment, respectively. They do not themselves constitute an effective license grant.
+
+The HACP specification and its normative materials remain licensed under CC BY 4.0. Existing license grants and applicable IETF rights remain unaffected.
