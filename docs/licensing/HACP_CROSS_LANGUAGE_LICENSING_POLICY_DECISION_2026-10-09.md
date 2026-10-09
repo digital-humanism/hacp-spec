@@ -74,3 +74,28 @@ RELEASE=NO
 ```
 
 This record is a project policy decision, not a legal opinion or a substitute for an executable license grant.
+
+## Rust Cargo Licensing Implementation — 2026-10-09
+
+The historical Rust licensing baseline recorded in this document
+identified `hacp-rs/Cargo.toml` as declaring `CC-BY-4.0`.
+
+That baseline has since been superseded for current Cargo package
+metadata by the following signed implementation commit:
+
+`d738d893d1413f2dc7c701422c5df85b0c0a4415`
+
+The exact metadata change was:
+
+```diff
+-license = "CC-BY-4.0"
++license = "AGPL-3.0-only"
+```
+
+This aligns the Rust package's declared AGPL version with the existing AGPLv3 licensing model of the Go enforcement sidecar.
+
+The `hacp-rs` package version remains `0.1.1`. Rust source code, `Cargo.lock`, cryptographic behavior, and enforcement semantics were not modified by this commit.
+
+Previously granted CC BY 4.0 rights are not revoked. Separate commercial licensing remains subject to applicable agreements and grants.
+
+Historical SHA-256 values and original decision records in this document remain evidence of their respective earlier states, rather than hashes of the updated Cargo manifest.
