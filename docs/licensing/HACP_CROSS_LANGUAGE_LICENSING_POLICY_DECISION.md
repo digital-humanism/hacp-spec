@@ -9,7 +9,7 @@
 
 HACP retains a vendor-neutral open specification. The intended licensing model for **project-owned executable implementations** in Python, TypeScript, Go, and Rust is **AGPLv3 plus a separately negotiated commercial license**, aligned with the established `hacp-sidecar` model. Go and Rust are recognized as peer **target** enforcement-runtime options; equivalent runtime capability, conformance, and deployment readiness remain subject to independent verification.
 
-This is an **implementation licensing policy**, not evidence that every file is already AGPL-licensed. The public AGPL SPDX variant (`AGPL-3.0-only` vs `AGPL-3.0-or-later`) and commercial grantor authority have not yet been finalized.
+This is an **implementation licensing policy**, not evidence that every file is already AGPL-licensed. Rust Cargo metadata is already resolved as `AGPL-3.0-only`; public license identity and commercial grantor authority remain unresolved only for implementation surfaces where they have not yet been established.
 
 ## 2. Scope and boundaries
 
@@ -19,7 +19,7 @@ This is an **implementation licensing policy**, not evidence that every file is 
 | `hacp-go/` | No separate explicit Go implementation license identified | AGPLv3 + separately contracted commercial license **target**, subject to rights/scope clearance |
 | `hacp-ts/` | `package.json` has no `license` field; `private: true` does not constitute a license | Same implementation licensing target |
 | Python executable sources within `harness/` and `tools/` | Mixed conformance, tooling, and implementation surface; no comprehensive explicit code-level AGPL grant established | Same target **only for explicitly identified, cleared code files**; preserve conformance/normative content |
-| `hacp-rs/` | `Cargo.toml` currently states `license = "CC-BY-4.0"` (`0.1.1`) | Same implementation licensing target; retain historical CC BY 4.0 grants |
+| `hacp-rs/` | Current `Cargo.toml` states `license = "AGPL-3.0-only"` (`0.1.1`); the earlier `CC-BY-4.0` Cargo entry was erroneous metadata | Rust Cargo license metadata correction is complete; no further Rust Cargo license change is required by this policy |
 | `hacp-sidecar` original Go runtime | `LICENSE.md` states AGPLv3 and commercial dual licensing | **Preserve existing licensing**, without assuming `-only` or `-or-later` variant |
 | Generated Go/Rust bindings | Two generated Go protobuf files traced to shared `control_plane.proto`; Rust build uses that schema | Separate generated-source, upstream attribution, and distribution obligations |
 | `humanist-core` Python SDK | Existing separately licensed, frozen historical baseline | **No changes** here; later additive, version-pinned composition metadata only |
@@ -29,7 +29,7 @@ The mapping above is a **target model** for implementation code. It does not aut
 ## 3. Standards and historical-rights preservation
 
 1. Do not modify the normative standard, its open CC BY 4.0 licensing, or IETF contribution/submission rights as part of implementation licensing work.
-2. No retroactive cancellation of existing CC BY 4.0 grants. Any prospective additional licensing must be supported by the rights held by the actual licensor.
+2. Preserve existing CC BY 4.0 grants on the normative HACP specification and other explicitly identified normative surfaces. The earlier `CC-BY-4.0` value in Rust Cargo metadata was erroneous package metadata and is not treated by this record as the current Rust license declaration. Any prospective additional licensing must be supported by the rights held by the actual licensor.
 3. No exclusivity claims over third-party crates, packages, generated tool output, shared protobuf material, or independent HACP implementations.
 4. Commercial contracts may cover only the rights actually controlled by the licensor; they do not waive third-party obligations.
 5. No runtime behavior change, semantic version change, release, or deployment is implied by this decision.
@@ -50,8 +50,8 @@ The accepted policy is **not an authorization to apply licensing changes**. Befo
 
 1. Adjudicate an exact file-by-file implementation-only allowlist, especially Python harness/tests, and exclude normative/conformance assets as appropriate.
 2. Verify copyright ownership, contributor authority, AI-assisted/copied-source concerns, and rights to grant **both** public and commercial licenses.
-3. Decide the exact AGPL SPDX variant consistently and identify the commercial licensor/contract terms.
-4. Preserve historical CC BY rights and IETF-related notices without suggesting withdrawal of previous grants.
+3. Resolve the exact public license identity for implementation surfaces where it remains open and identify the commercial licensor/contract terms. Rust Cargo is already resolved as `AGPL-3.0-only` and is not reopened by this gate.
+4. Preserve the normative CC BY 4.0 boundary and applicable IETF-related notices without suggesting withdrawal of valid existing grants; do not reinterpret the earlier erroneous Rust Cargo `CC-BY-4.0` metadata as the current Rust package license.
 5. Reconcile third-party license and attribution notices for the actual distribution artifact, including Cargo crates, other language dependencies, shared proto, and generated outputs.
 6. Produce and review an exact **CURRENT → PROPOSED** file-scoped diff, establish normative basis and proven RED where a production change is in scope, and obtain explicit approval of the patch.
 7. Verify branch/HEAD/clean tree before change; explicitly stage files; sign commits; verify signature and working-tree state; **no push or release without separate authorization**.
@@ -64,7 +64,8 @@ STANDARD_NORMATIVE_CC_BY_4_0=PRESERVE
 CROSS_LANGUAGE_IMPLEMENTATION_MODEL=AGPLv3_PLUS_COMMERCIAL_TARGET
 GO_RUST_ENFORCEMENT_PEER_MODEL=ACCEPTED_TARGET
 GO_RUST_RUNTIME_PARITY=NOT_ESTABLISHED_BY_THIS_RECORD
-EXACT_AGPL_SPDX=OPEN
+RUST_CARGO_SPDX=AGPL-3.0-only
+OTHER_IMPLEMENTATION_LICENSE_DETAILS=OPEN
 FILE_LEVEL_RIGHTS=OPEN
 DISTRIBUTION_GATE=OPEN
 LICENSE_CHANGE=NOT_AUTHORIZED_BY_THIS_RECORD
@@ -75,10 +76,11 @@ RELEASE=NO
 
 This record is a project policy decision, not a legal opinion or a substitute for an executable license grant.
 
-## Rust Cargo Licensing Implementation — 2026-10-09
+## Rust Cargo License Metadata Correction — Current Record
 
-The historical Rust licensing baseline recorded in this document
-identified `hacp-rs/Cargo.toml` as declaring `CC-BY-4.0`.
+The earlier captured Rust Cargo metadata recorded in this document
+declared `CC-BY-4.0`. That Cargo license declaration was subsequently
+identified as erroneous metadata and corrected.
 
 That baseline has since been superseded for current Cargo package
 metadata by the following signed implementation commit:
@@ -96,6 +98,6 @@ This aligns the Rust package's declared AGPL version with the existing AGPLv3 li
 
 The `hacp-rs` package version remains `0.1.1`. Rust source code, `Cargo.lock`, cryptographic behavior, and enforcement semantics were not modified by this commit.
 
-Previously granted CC BY 4.0 rights are not revoked. Separate commercial licensing remains subject to applicable agreements and grants.
+The earlier erroneous Cargo `CC-BY-4.0` metadata is not the current Rust package license declaration. Current `hacp-rs` Cargo metadata is `AGPL-3.0-only`. Separate commercial licensing remains subject to applicable agreements and grants.
 
 Historical SHA-256 values and original decision records in this document remain evidence of their respective earlier states, rather than hashes of the updated Cargo manifest.

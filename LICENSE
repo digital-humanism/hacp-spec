@@ -18,8 +18,8 @@ The HACP project maintains a separate licensing policy for project-owned softwar
 
 The architectural policy and proposed licensing amendment are documented in:
 
-- [Cross-Language Licensing Policy Decision](https://github.com/digital-humanism/hacp-spec/blob/docs/cross-language-licensing-policy/docs/licensing/HACP_CROSS_LANGUAGE_LICENSING_POLICY_DECISION_2026-10-09.md)
-- [Cross-Language Licensing Amendment Package](https://github.com/digital-humanism/hacp-spec/blob/docs/cross-language-licensing-policy/docs/licensing/HACP_PHASE_B_LICENSING_AMENDMENT_PACKAGE_EN_2026-10-09.md)
+- [Cross-Language Licensing Policy Decision](docs/licensing/HACP_CROSS_LANGUAGE_LICENSING_POLICY_DECISION.md)
+- [Cross-Language Licensing Amendment Package](docs/licensing/HACP_PHASE_B_LICENSING_AMENDMENT_PACKAGE.md)
 
 These documents record an accepted policy and a proposed amendment, respectively. They do not themselves constitute an effective license grant.
 
