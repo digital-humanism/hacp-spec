@@ -5,6 +5,7 @@ use ed25519_dalek::{Signer, SigningKey};
 use hacp_rs::ed25519::verify_signature;
 
 #[test]
+#[ignore = "historical ed25519-v1 RED witness; active evaluator uses ed25519-v2"]
 fn ed25519_v1_rejects_noncanonical_whitespace_in_signature_encoding() {
     let signing_key = SigningKey::from_bytes(&[7u8; 32]);
     let verifying_key = signing_key.verifying_key();

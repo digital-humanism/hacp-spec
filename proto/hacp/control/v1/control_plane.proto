@@ -66,10 +66,7 @@ message RevocationSnapshot {
 message WatchRevocationsRequest {
   string sidecar_id = 1;
 
-  // Server MUST deliver only events where:
-  //
-  //     event.revision > after_revision
-  //
+  // Server MUST deliver only events where `event.revision > after_revision`.
   // This is the durable recovery cursor.
   uint64 after_revision = 2;
 }

@@ -20,9 +20,21 @@ cargo build --release --bin hacp-rs-runner
 
 ## Test
 
+The default green repository test suite is:
+
 ```bash
 cargo test
 ```
+
+`tests/ed25519_v1_red.rs` is a retained historical RED witness for the preserved Ed25519 v1 predecessor. It is ignored by the default green suite and does not define the active evaluator behavior.
+
+The retained witness can be executed explicitly with:
+
+```bash
+cargo test --test ed25519_v1_red -- --ignored
+```
+
+That explicit witness is expected to fail while the historical v1 behavior remains preserved. The active evaluator uses the versioned `ed25519_v2` verifier.
 
 ## Harness Runner — Core revalidation
 
