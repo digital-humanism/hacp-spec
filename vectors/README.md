@@ -642,3 +642,38 @@ while additional assurance mechanisms are added.
 ---
 
 **Contact:** [digital.humanism.collective@protonmail.com](mailto:digital.humanism.collective@protonmail.com)
+
+---
+
+## E13 Family 1 shared corpus
+
+The shared E13 Family 1 canonical-v2 numeric-convergence corpus is owned by
+this public repository at:
+
+```text
+vectors/family1/E13_R01_R24_NORMALIZED_CORPUS.json
+```
+
+Immutable identity:
+
+```text
+rows: 24 (R01-R24)
+byte length: 1642
+SHA-256:
+45c486b9ad1cb7a7a958f9876eb41c474cb62f144ee2ef947872c13a4ea91bb7
+```
+
+The corpus is a shared conformance input for the Go, TypeScript, Python, and
+Rust E13 canonical-v2 tests.
+
+Tests consuming this artifact require `HACP_E13_CORPUS` to contain the
+absolute filesystem path to this exact public-repository file. Consumers
+fail closed if the pinned byte length, SHA-256, row count, or row identifiers
+do not match.
+
+The corpus must not be replaced by a private fixture, historical workspace
+copy, manually reconstructed file, or external release-verification
+assembly.
+
+E13 Family 1 and Family 2 are independent evidence families and must not be
+combined into a synthetic score.

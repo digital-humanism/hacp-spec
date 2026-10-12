@@ -227,3 +227,70 @@ python harness/harness_runner.py \
 ```
 
 Expected output: `RESULTS: 38/38 passed`
+
+---
+
+## E13 public-repository reproducibility
+
+The current E13 shared-input verification surface is self-contained in the
+public `hacp-spec` repository.
+
+Family 1 shared corpus:
+
+```text
+vectors/family1/E13_R01_R24_NORMALIZED_CORPUS.json
+```
+
+Pinned identity:
+
+```text
+24 rows: R01-R24
+1642 bytes
+SHA-256:
+45c486b9ad1cb7a7a958f9876eb41c474cb62f144ee2ef947872c13a4ea91bb7
+```
+
+Additional repository-owned E13 inputs:
+
+```text
+vectors/family2/e5c6_binding_fixture.json
+harness/keys/test-ed25519-001.pub
+```
+
+Before repository-wide tests, set the corresponding absolute paths:
+
+```text
+HACP_E13_CORPUS
+HACP_E13_FAMILY2_FIXTURE
+HACP_E13_FAMILY2_PUBLIC_KEY
+```
+
+The E13 corpus identity is verified independently by the Go, TypeScript,
+Python, and Rust test surfaces. A missing input or identity mismatch is a
+reproducibility failure and must not be bypassed with a private or
+historical workspace path.
+
+Representative repository verification includes:
+
+```text
+Python:
+python -m pytest \
+  harness/canonical_v2_tests/test_e13_canonical_v2_manifest.py \
+  harness/canonical_v2_tests/test_e13_family2_binding.py
+
+Go:
+cd hacp-go
+go test ./... -count=1
+
+TypeScript:
+cd hacp-ts
+npm test
+
+Rust:
+cargo test --manifest-path hacp-rs/Cargo.toml --locked \
+  --test e13_canonical_v2_manifest \
+  --test e13_family2_binding
+```
+
+Core and HC2 evidence remain separately reported. E13 evidence families are
+also kept separate; no cross-family synthetic total is defined.

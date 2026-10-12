@@ -347,3 +347,57 @@ release gate while additional assurance layers are added.
 ---
 
 **Contact:** [digital.humanism.collective@protonmail.com](mailto:digital.humanism.collective@protonmail.com)
+
+---
+
+## E13 shared-input environment
+
+Repository-wide E13 tests use public inputs owned by this repository.
+
+Required environment variables:
+
+```text
+HACP_E13_CORPUS
+HACP_E13_FAMILY2_FIXTURE
+HACP_E13_FAMILY2_PUBLIC_KEY
+```
+
+Canonical repository locations:
+
+```text
+HACP_E13_CORPUS
+→ vectors/family1/E13_R01_R24_NORMALIZED_CORPUS.json
+
+HACP_E13_FAMILY2_FIXTURE
+→ vectors/family2/e5c6_binding_fixture.json
+
+HACP_E13_FAMILY2_PUBLIC_KEY
+→ harness/keys/test-ed25519-001.pub
+```
+
+`HACP_E13_CORPUS` must reference the exact E13 Family 1 corpus with:
+
+```text
+byte length: 1642
+SHA-256:
+45c486b9ad1cb7a7a958f9876eb41c474cb62f144ee2ef947872c13a4ea91bb7
+```
+
+On PowerShell from the repository root:
+
+```powershell
+$env:HACP_E13_CORPUS =
+    (Resolve-Path '.\vectors\family1\E13_R01_R24_NORMALIZED_CORPUS.json').Path
+
+$env:HACP_E13_FAMILY2_FIXTURE =
+    (Resolve-Path '.\vectors\family2\e5c6_binding_fixture.json').Path
+
+$env:HACP_E13_FAMILY2_PUBLIC_KEY =
+    (Resolve-Path '.\harness\keys\test-ed25519-001.pub').Path
+
+$env:HACP_SPEC_REPO = (Get-Location).Path
+```
+
+These paths are repository inputs. No private workspace, historical GitCheck
+assembly, manually copied fixture directory, or other external file is
+required.
