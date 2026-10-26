@@ -18,7 +18,8 @@ production certification.
 
 ### Changed
 
-- None yet.
+- Recorded the current HACP release composition as `1.1.1` — **pre-release candidate**, with HACP `1.1.0` remaining the approved stable release.
+- This documentary alignment does not change the HACP-Core `0.9.2` baseline, wire/object family `0.9`, active HACP-Enforcement revision `2`, HC2-55 evidence boundary, or production-activation status.
 
 ### Fixed
 
