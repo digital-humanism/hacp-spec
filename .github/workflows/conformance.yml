@@ -88,6 +88,10 @@ jobs:
 
       - name: Run TypeScript test suite
         working-directory: hacp-ts
+        env:
+          HACP_E13_CORPUS: ${{ github.workspace }}/vectors/family1/E13_R01_R24_NORMALIZED_CORPUS.json
+          HACP_E13_FAMILY2_FIXTURE: ${{ github.workspace }}/vectors/family2/e5c6_binding_fixture.json
+          HACP_E13_FAMILY2_PUBLIC_KEY: ${{ github.workspace }}/harness/keys/test-ed25519-001.pub
         run: npm test
 
       - name: Run TypeScript CLI conformance
