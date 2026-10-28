@@ -4,13 +4,31 @@
 [![release](https://img.shields.io/github/v/release/digital-humanism/hacp-spec?label=release)](https://github.com/digital-humanism/hacp-spec/releases/latest)
 
 **License:** CC BY 4.0
-**Current HACP release line:** 1.1.1 — pre-release candidate
+**Current HACP release line:** 1.1.1-rc.1 — verified pre-release candidate
 **Approved stable release:** HACP 1.1.0
 **Inherited stable baseline:** HACP 1.0.0 Variant A
 **Wire/object version:** 0.9
 **HACP-Core conformance baseline:** 0.9.2
 **Active Enforcement profile:** HACP-Enforcement revision 2
 **Enforcement evidence set:** HC2-55
+
+Current HACP 1.1.1-rc.1 release verification:
+
+```text
+HACP-Core                         38/38 PASS
+HC2                              55/55 PASS
+Go implementation                PASS
+TypeScript implementation        PASS
+Rust Core                        36 direct + 2 adjudicated / 38
+Rust HC2                         55/55 PASS
+Rust package active tests        48 passed
+three-repository clean clone     PASS
+functional RED                   0
+technical release blockers       0
+```
+
+HACP 1.1.1-rc.1 remains a pre-release candidate until the separate
+human release-acceptance and publication boundary.
 
 HACP is a language-agnostic protocol for preserving human agency in AI agent systems.
 
@@ -132,9 +150,12 @@ This verifies the canonical vector hashes and baked signatures.
 
 ---
 
-# Cross-Language Conformance Baseline
+# Historical Cross-Language HACP-Core Baseline
 
-HACP-Core v0.9.2 has converged across the independent Python, TypeScript, Go, and enforcement-sidecar implementations.
+The historical HACP-Core v0.9.2 baseline records convergence across the
+independent Python, TypeScript, Go, and enforcement-sidecar implementations.
+These results remain reproducibility history and are distinct from the current
+HACP 1.1.1-rc.1 release-verification composition summarized above.
 
 ```text
 Canonical vectors: 38
@@ -458,96 +479,84 @@ The tested system converges on both:
 
 # Repository Structure
 
+The `RELEASE/1.1.1` branch contains the following major tracked surfaces:
+
 ```text
 hacp-spec/
-├── LICENSE
-├── README.md
-├── requirements.txt
+├── .github/
+│   └── workflows/
 │
-├── HACP-SPEC-0.9-draft.md
-├── INVARIANTS.md
-├── PROFILES.md
-├── NON-GOALS.md
-├── canonicalization.md
-├── threat-model.md
-├── versioning.md
-├── error-model.md
-│
-├── schemas/
-│   ├── intent_envelope.json
-│   ├── proposed_action.json
-│   ├── decision_token.json
-│   ├── agency_decision.json
-│   ├── provenance_event.json
-│   └── revocation_record.json
-│
+├── adr/
 ├── api/
-│   └── decision-api.md
 │
-├── wire/
-│   ├── encoding.md
-│   └── crypto-profile.md
-│
-├── proto/
-│   └── hacp/
-│       └── control/
-│           └── v1/
-│               └── control_plane.proto
-│
-├── vectors/
-│   ├── core_inv1_*.json
-│   ├── core_inv2_*.json
-│   ├── core_inv3_*.json
-│   ├── core_inv4_*.json
-│   ├── core_inv5_*.json
-│   └── core_inv7_*.json
-│
-├── harness/
-│   ├── harness.py
-│   ├── harness_runner.py
-│   ├── runner_protocol.md
-│   ├── conformance_manifest.json
-│   ├── generate_manifest.py
-│   ├── requirements.txt
-│   ├── keys/
-│   │   ├── KEYS.md
-│   │   ├── test-ed25519-001.pub
-│   │   └── test-ed25519-001.seed
-│   └── README.md
-│
-├── tools/
-│   ├── gen_test_keys.py
-│   └── bake_vector.py
+├── docs/
+│   ├── conformance/
+│   ├── history-artifacts/
+│   ├── ietf/
+│   ├── licensing/
+│   │   ├── HACP_CROSS_LANGUAGE_LICENSING_POLICY_DECISION.md
+│   │   └── HACP_PHASE_B_LICENSING_AMENDMENT_PACKAGE.md
+│   └── release/
 │
 ├── hacp-go/
-│   ├── go.mod
-│   ├── main.go
-│   ├── canonical.go
-│   ├── crypto.go
-│   └── evaluate.go
 │
 ├── hacp-rs/
-│   ├── Cargo.toml
-│   ├── README.md
-│   └── src/
+│   ├── src/
+│   │   ├── bin/
+│   │   └── controlplane/
+│   └── tests/
 │
-└── hacp-ts/
-    ├── package.json
-    ├── package-lock.json
-    ├── tsconfig.json
-    ├── src/
-    │   ├── cli.ts
-    │   ├── canonical.ts
-    │   ├── crypto.ts
-    │   ├── evaluate.ts
-    │   └── conformance.ts
-    └── tests/
-        ├── action-hash.test.ts
-        └── conformance.test.ts
+├── hacp-ts/
+│   ├── src/
+│   └── tests/
+│
+├── harness/
+│   ├── canonical_v2_tests/
+│   ├── enforcement_v2_tests/
+│   ├── protocol_v1_tests/
+│   └── keys/
+│
+├── manifests/
+│   └── HACP_1_1_1_COMPOSITION.md
+│
+├── profiles/
+│
+├── proto/
+│   └── hacp/control/v1/
+│
+├── schemas/
+│
+├── tools/
+│   └── enforcement_v2_tests/
+│
+├── vectors/
+│   ├── enforcement-v2/
+│   ├── family1/
+│   ├── family2/
+│   └── HACP-Core vectors
+│
+├── wire/
+│
+├── CHANGELOG.md
+├── CONFORMANCE.md
+├── SECURITY.md
+├── INVARIANTS.md
+├── PROFILES.md
+├── README.md
+└── versioning.md
 ```
 
----
+The repository intentionally combines normative specification material,
+canonical vectors, language-neutral harnesses, and independent Go,
+TypeScript, and Rust reference/conformance implementations.
 
+Release-specific composition and verification records are maintained under
+`manifests/`, `docs/conformance/`, and `docs/release/`.
+
+Cross-language and Phase B licensing boundaries are documented under
+`docs/licensing/`.
+
+---
 # API Contract
 
 See [`api/decision-api.md`](api/decision-api.md) for the language-neutral interface.
@@ -572,7 +581,7 @@ Repository:
 
 [`humanist-core`](https://github.com/digital-humanism/humanist-core)
 
-Current verified baseline:
+Historical recorded baseline:
 
 ```text
 HACP-Core vectors:       38/38 PASS
@@ -581,6 +590,10 @@ Statement coverage:         100%
 Branch coverage:            100%
 Python ↔ Go sidecar E2E:    5/5 PASS
 ```
+
+The current HACP 1.1.1-rc.1 three-repository clean-clone verification
+recorded the repository-owned `humanist-core` suite as 382 passed with
+5 repository-defined skips and 100% statement and branch coverage.
 
 ---
 
@@ -603,14 +616,28 @@ TypeScript additional suite:
 
 ## Rust clean-room implementation
 
-The `hacp-rs/` directory contains the Rust reference/conformance implementation, including runner, HTTP proxy, MCP, control-plane, and gRPC targets.
+The `hacp-rs/` directory contains the Rust reference/conformance
+implementation, including runner, HTTP proxy, MCP, control-plane, gRPC,
+successor canonicalization, JSON-ingress, and Ed25519 v2 surfaces.
 
-The documented Rust Core result is 36/38 direct PASS with two adjudicated CHECKPOINT-versus-DENY conflicts: `CORE-INV1-002` and `CORE-RUNTIME-004`.
+Current HACP 1.1.1-rc.1 verified results:
 
-These are not direct passes. Independent Rust HC2-55 55/55 conformance is not established by the cited HACP 1.1.0 release evidence.
+```text
+Rust Core:                     36 direct + 2 adjudicated / 38
+Rust HC2:                      55/55 PASS
+Rust package active tests:     48 passed
+Historical Ed25519 v1 witness: 1 intentionally ignored
+```
 
-The Rust targets do not establish production readiness or replacement of the Go enforcement sidecar.
+The two adjudicated Core cases are `CORE-INV1-002` and
+`CORE-RUNTIME-004`; they are not direct passes.
 
+The historical Ed25519 v1 RED witness remains intentionally preserved for
+reproducibility while the active evaluator uses the successor path.
+
+The Rust implementation is part of the versioned HACP reference/conformance
+surface. This does not by itself redefine the production runtime role of the
+Go enforcement sidecar.
 ---
 
 ## Enforcement sidecar
@@ -701,7 +728,6 @@ Candidate areas:
 - additional SDK integrations;
 - public conformance registry;
 - certification and interoperability program;
-- further Rust conformance reconciliation and integration evidence.
 
 ---
 
