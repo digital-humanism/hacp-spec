@@ -1,21 +1,20 @@
 # HACP — Human Agency Continuity Protocol
 
 [![conformance](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml/badge.svg)](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml)
-![release](https://img.shields.io/badge/release-1.1.1--rc.1-orange)
+![release](https://img.shields.io/badge/release-1.1.1-brightgreen)
 
 **Specification:** [CC BY 4.0](LICENSE)  
 Reference and enforcement implementations may use separate software licenses.  
 See the [Implementation Licensing Policy](LICENSE) for the current licensing boundary and links to the cross-language policy documents.
 
-**Current HACP release line:** 1.1.1-rc.1 — verified pre-release candidate  
-**Approved stable release:** HACP 1.1.0  
+**Current HACP release:** 1.1.1 — stable  
 **Inherited stable baseline:** HACP 1.0.0 Variant A  
 **Wire/object version:** 0.9  
 **HACP-Core conformance baseline:** 0.9.2  
 **Active Enforcement profile:** HACP-Enforcement revision 2  
 **Enforcement evidence set:** HC2-55
 
-Current HACP 1.1.1-rc.1 release verification:
+Current HACP 1.1.1 release verification:
 
 ```text
 HACP-Core                        38/38 PASS
@@ -30,8 +29,7 @@ functional RED                   0
 technical release blockers       0
 ```
 
-HACP 1.1.1-rc.1 remains a pre-release candidate until the separate
-human release-acceptance and publication boundary.
+HACP 1.1.1 is the current stable release, promoted from the verified `1.1.1-rc.1` composition without introducing a new semantic composition generation.
 
 HACP is a language-agnostic protocol for preserving human agency in AI agent systems.
 
