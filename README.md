@@ -1,21 +1,24 @@
 # HACP — Human Agency Continuity Protocol
 
 [![conformance](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml/badge.svg)](https://github.com/digital-humanism/hacp-spec/actions/workflows/conformance.yml)
-[![release](https://img.shields.io/github/v/release/digital-humanism/hacp-spec?label=release)](https://github.com/digital-humanism/hacp-spec/releases/latest)
+![release](https://img.shields.io/badge/release-1.1.1--rc.1-orange)
 
-**License:** CC BY 4.0
-**Current HACP release line:** 1.1.1-rc.1 — verified pre-release candidate
-**Approved stable release:** HACP 1.1.0
-**Inherited stable baseline:** HACP 1.0.0 Variant A
-**Wire/object version:** 0.9
-**HACP-Core conformance baseline:** 0.9.2
-**Active Enforcement profile:** HACP-Enforcement revision 2
+**Specification:** [CC BY 4.0](LICENSE)  
+Reference and enforcement implementations may use separate software licenses.  
+See the [Implementation Licensing Policy](LICENSE) for the current licensing boundary and links to the cross-language policy documents.
+
+**Current HACP release line:** 1.1.1-rc.1 — verified pre-release candidate  
+**Approved stable release:** HACP 1.1.0  
+**Inherited stable baseline:** HACP 1.0.0 Variant A  
+**Wire/object version:** 0.9  
+**HACP-Core conformance baseline:** 0.9.2  
+**Active Enforcement profile:** HACP-Enforcement revision 2  
 **Enforcement evidence set:** HC2-55
 
 Current HACP 1.1.1-rc.1 release verification:
 
 ```text
-HACP-Core                         38/38 PASS
+HACP-Core                        38/38 PASS
 HC2                              55/55 PASS
 Go implementation                PASS
 TypeScript implementation        PASS
